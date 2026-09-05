@@ -17,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim((string)$_POST['jmeno']);
     $sex = ($_POST['pohlavi'] === 'z') ? 'z' : 'm';
     $born = trim((string)$_POST['narozeni']);
-    $father = rust_input_number($_POST['otec']);
-    $mother = rust_input_number($_POST['matka']);
+    $father = rust_parse_length_input($_POST['otec']);
+    $mother = rust_parse_length_input($_POST['matka']);
     $breastfed = !empty($_POST['kojeno']);
 
     if ($name === '' || !rust_valid_date($born)) {
@@ -62,13 +62,13 @@ rust_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
     <input type="date" name="narozeni" required max="<?php echo date('Y-m-d'); ?>"
            value="<?php echo rust_h($child['datum_narozeni']); ?>">
   </label>
-  <label><?php echo th('label_father_height'); ?>
-    <input type="text" inputmode="decimal" name="otec"
-           value="<?php echo rust_h(rust_num($child['vyska_otce_cm'])); ?>">
+  <label><?php echo th('label_father_height'); ?> (<?php echo rust_length_unit(); ?>)
+    <input type="text" inputmode="text" name="otec"
+           value="<?php echo rust_h(rust_num(rust_display_length($child['vyska_otce_cm']))); ?>">
   </label>
-  <label><?php echo th('label_mother_height'); ?>
-    <input type="text" inputmode="decimal" name="matka"
-           value="<?php echo rust_h(rust_num($child['vyska_matky_cm'])); ?>">
+  <label><?php echo th('label_mother_height'); ?> (<?php echo rust_length_unit(); ?>)
+    <input type="text" inputmode="text" name="matka"
+           value="<?php echo rust_h(rust_num(rust_display_length($child['vyska_matky_cm']))); ?>">
   </label>
   <label class="rust-zaskrtnuti">
     <input type="checkbox" name="kojeno" value="1"<?php echo !empty($child['kojeno']) ? ' checked' : ''; ?>>

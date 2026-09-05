@@ -11,6 +11,7 @@
  */
 
 require_once __DIR__ . '/i18n.inc';
+require_once __DIR__ . '/units.inc';
 
 /* ---------------------------------------------------------------- metrics */
 
@@ -48,7 +49,7 @@ function rust_metrics()
         ),
         'wfh' => array(
             'label' => t('metric_wfh'), 'unit' => 'kg', 'decimals' => 2,
-            'index' => 'height', 'index_label' => t('index_height'), 'noise' => 0.3,
+            'index' => 'height', 'index_label' => t('index_height', array('unit' => rust_length_unit())), 'noise' => 0.3,
         ),
     );
 }

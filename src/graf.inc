@@ -39,6 +39,37 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
         return '<p class="rust-nodata">' . th('nodata_reference_missing') . '</p>';
     }
 
+    /* Unit conversion, once, here: everything below operates on whatever
+       unit $rows and $points come out in, exactly as it always did for
+       metric - a linear conversion changes no geometry, only the numbers
+       printed on it. See units.inc's docblocks for why this is exact rather
+       than approximate. */
+    $indexKind = rust_metric_index_kind($metric);
+    $valueKind = rust_metric_value_kind($metric);
+    $rows = rust_display_chart_rows($rows, $indexKind, $valueKind);
+    $points = rust_display_chart_points($points, $indexKind, $valueKind);
+    if (rust_units() === 'imperial') {
+        foreach (array('target', 'projection') as $band) {
+            if (!empty($options[$band])) {
+                foreach (array('mid', 'low', 'high') as $field) {
+                    $options[$band][$field] = rust_display_chart_scalar($options[$band][$field], $valueKind);
+                }
+            }
+        }
+        if (!empty($options['smooth'])) {
+            if (!empty($options['smooth']['curve'])) {
+                $converted = array();
+                foreach ($options['smooth']['curve'] as $pair) {
+                    $converted[] = array(
+                        ($indexKind === 'length') ? rust_display_length($pair[0]) : $pair[0],
+                        rust_display_chart_scalar($pair[1], $valueKind),
+                    );
+                }
+                $options['smooth']['curve'] = $converted;
+            }
+        }
+    }
+
     $refMin = $rows[0][0];
     $refMax = $rows[count($rows) - 1][0];
 
@@ -135,7 +166,8 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
         return $top + $plotH * (1.0 - (($value - $yMin) / ($yMax - $yMin)));
     };
 
-    $unit = $meta['unit'];
+    $unit = rust_display_metric_unit($metric) ?: $meta['unit'];
+    $decimals = ($valueKind === 'weight') ? rust_weight_decimals() : $meta['decimals'];
     $title = t('chart_title_growth', array('label' => $meta['label']));
 
     $svg = array();
@@ -218,6 +250,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                 'high' => rust_num($projection['high']),
                 'z' => rust_num($projection['z'], 2),
                 'n' => (int)$projection['based_on'],
+                'unit' => $unit,
             ));
             $svg[] = sprintf(
                 '<line class="rust-projection rust-ukazatel" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"'
@@ -248,6 +281,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                 'mid' => rust_num($target['mid']),
                 'low' => rust_num($target['low']),
                 'high' => rust_num($target['high']),
+                'unit' => $unit,
             ));
             $svg[] = sprintf(
                 '<line class="rust-target rust-ukazatel" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"'
@@ -311,13 +345,13 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                stays on the PHP side where the rest of it lives. */
             $parts = array(
                 rust_date_cz($point['date']),
-                rust_num($point['value'], $meta['decimals']) . ' ' . $unit,
+                rust_num($point['value'], $decimals) . ' ' . $unit,
             );
             /* M is the median by definition, so the gap to it needs no extra
                lookup - and it is the part of the readout a parent can act on
                without first translating a percentile in their head. */
             if ($lms) {
-                $diff = rust_median_diff_cz($point['value'], $lms['m'], $meta['decimals'], $unit);
+                $diff = rust_median_diff_cz($point['value'], $lms['m'], $decimals, $unit);
                 if ($diff !== '') {
                     $parts[] = $diff;
                 }
@@ -333,7 +367,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
             /* what the point is plotted against: an age, or a height */
             $parts[] = ($meta['index'] === 'age')
                 ? t('tooltip_age', array('age' => rust_age_cz($point['age'])))
-                : t('tooltip_height', array('height' => rust_num($point['age'], 1)));
+                : t('tooltip_height', array('height' => rust_num($point['age'], 1), 'unit' => rust_length_unit()));
 
             /* A measurement the smoother could not reconcile with its
                neighbours. Flagged rather than dropped: only the person who
@@ -347,7 +381,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                    by hand instead. */
                 $parts[] = t('tooltip_suspect', array(
                     'deviation' => (($point['suspect'] >= 0) ? '+' : '')
-                        . rust_num($point['suspect'], $meta['decimals']),
+                        . rust_num($point['suspect'], $decimals),
                     'unit' => $unit,
                 ));
             }
@@ -513,15 +547,19 @@ function rust_sds_chart_svg($seriesByMetric, $options = array())
                 $svg[] = sprintf('<path class="rust-sds-smooth rust-sds-%d" d="%s"/>', $n, $smoothPath);
             }
         }
+        $sdsKind = rust_metric_value_kind($metricId);
+        $sdsUnit = rust_display_metric_unit($metricId) ?: $meta['unit'];
+        $sdsDecimals = ($sdsKind === 'weight') ? rust_weight_decimals() : $meta['decimals'];
         foreach ($points as $point) {
+            $displayValue = rust_display_chart_scalar($point['value'], $sdsKind);
             $bits = array(
                 $meta['label'],
                 rust_date_cz($point['date']),
-                rust_num($point['value'], $meta['decimals']) . ' ' . $meta['unit'],
+                rust_num($displayValue, $sdsDecimals) . ' ' . $sdsUnit,
             );
             if (isset($point['median'])) {
-                $diff = rust_median_diff_cz($point['value'], $point['median'],
-                    $meta['decimals'], $meta['unit']);
+                $diff = rust_median_diff_cz($displayValue, rust_display_chart_scalar($point['median'], $sdsKind),
+                    $sdsDecimals, $sdsUnit);
                 if ($diff !== '') { $bits[] = $diff; }
             }
             $bits[] = rust_num($point['z'], 2) . ' SD';
@@ -583,6 +621,21 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
     if (!$rows) {
         return '';
     }
+
+    /* Same one-time unit conversion as rust_chart_svg(): height's M is a
+       length, so it converts, and its difference over a year (the median
+       pace below) is then correctly expressed in the display unit too. */
+    $rows = rust_display_chart_rows($rows, null, 'length');
+    $velocities = array_map(function ($v) {
+        $v['cm_per_year'] = rust_display_velocity($v['cm_per_year']);
+        return $v;
+    }, $velocities);
+    if (!empty($options['smooth']['curve'])) {
+        $options['smooth']['curve'] = array_map(function ($pair) {
+            return array($pair[0], rust_display_length($pair[1]));
+        }, $options['smooth']['curve']);
+    }
+
     $refMin = $rows[0][0];
     $refMax = $rows[count($rows) - 1][0];
 
@@ -719,8 +772,8 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
         $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
             $x, $top + $plotH + 20, rust_h(rust_tick_label($tick)));
     }
-    $svg[] = sprintf('<text class="rust-axis rust-axis-unit" x="%.1f" y="%.1f">cm/%s</text>',
-        4, $top + 4, th('unit_year_short'));
+    $svg[] = sprintf('<text class="rust-axis rust-axis-unit" x="%.1f" y="%.1f">%s</text>',
+        4, $top + 4, rust_h(rust_velocity_unit()));
     $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
         $left + $plotW, $top + $plotH + 32, th('index_age'));
 
@@ -753,7 +806,7 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
             continue;
         }
         $pace = $medianPace($v['age']);
-        $cmPerYear = th('unit_cm_per_year');
+        $cmPerYear = rust_h(rust_velocity_unit());
         $parts = array(
             rust_date_cz($v['date']),
             rust_num($v['cm_per_year']) . ' ' . $cmPerYear,

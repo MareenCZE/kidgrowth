@@ -50,6 +50,7 @@ function rust_head($title, $childId = null)
         echo '</nav>';
     }
     rust_language_switcher();
+    rust_units_switcher();
   ?>
 </header>
 <main class="rust-obsah">
@@ -73,6 +74,28 @@ function rust_language_switcher()
             $locale === rust_locale() ? ' rust-aktivni' : '',
             rust_h(http_build_query($params)),
             rust_h(strtoupper($locale))
+        );
+    }
+    echo '</nav>';
+}
+
+/**
+ * A metric/imperial switcher, same mechanics as the language switcher - a
+ * per-visitor preference independent of it (plenty of people in the US want
+ * metric and vice versa), so it gets its own cookie and its own pair of
+ * links rather than being folded into the language choice.
+ */
+function rust_units_switcher()
+{
+    $params = $_GET;
+    echo '<nav class="rust-jednotky">';
+    foreach (array('metric' => 'cm/kg', 'imperial' => 'in/lb') as $value => $label) {
+        $params['units'] = $value;
+        printf(
+            '<a class="rust-volba-jednotek%s" href="?%s">%s</a>',
+            $value === rust_units() ? ' rust-aktivni' : '',
+            rust_h(http_build_query($params)),
+            rust_h($label)
         );
     }
     echo '</nav>';

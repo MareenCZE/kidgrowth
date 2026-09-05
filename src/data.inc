@@ -16,6 +16,7 @@
 
 require_once __DIR__ . '/auth.inc';
 require_once __DIR__ . '/csrf.inc';
+require_once __DIR__ . '/units.inc';
 require_once __DIR__ . '/storage.inc';
 require_once __DIR__ . '/rust.inc';
 

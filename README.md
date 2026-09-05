@@ -34,6 +34,10 @@ so it is useful well outside the Czech Republic.
 - English and Czech, with locale-aware number, date and plural formatting
   (`src/i18n.inc`, `src/lang/`). English is the default; a link in the header
   switches and remembers the choice for the visit.
+- Metric or imperial units (`src/units.inc`), switchable independently of
+  language. Height accepts feet-and-inches (`4'3"`, `4 ft 3 in`) as well as a
+  plain number of inches; everything is still stored in cm/kg regardless of
+  which unit you type in or view.
 - Soft delete: deleting a child or a measurement moves it to `kos.php` (the
   "Koš" / trash view) rather than removing it, and it can be restored from
   there. Deleting a child asks you to retype their name first - it takes

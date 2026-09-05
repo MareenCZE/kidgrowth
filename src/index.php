@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['akce']) && $_POST['ak
     $name = trim((string)$_POST['jmeno']);
     $sex = ($_POST['pohlavi'] === 'z') ? 'z' : 'm';
     $born = trim((string)$_POST['narozeni']);
-    $father = rust_input_number($_POST['otec']);
-    $mother = rust_input_number($_POST['matka']);
+    $father = rust_parse_length_input($_POST['otec']);
+    $mother = rust_parse_length_input($_POST['matka']);
     $breastfed = !empty($_POST['kojeno']);
 
     if ($name === '' || !rust_valid_date($born)) {
@@ -74,10 +74,10 @@ rust_head('');
           <span class="rust-posledni">
             <?php echo rust_h(rust_date_cz($last['datum'])); ?>:
             <?php if ($last['vyska_cm'] !== null): ?>
-              <?php echo rust_h(rust_num($last['vyska_cm'])); ?> cm<?php endif; ?>
+              <?php echo rust_h(rust_num(rust_display_length($last['vyska_cm']))); ?> <?php echo rust_length_unit(); ?><?php endif; ?>
             <?php if ($last['vyska_cm'] !== null && $last['hmotnost_kg'] !== null): ?>,<?php endif; ?>
             <?php if ($last['hmotnost_kg'] !== null): ?>
-              <?php echo rust_h(rust_num($last['hmotnost_kg'], 2)); ?> kg<?php endif; ?>
+              <?php echo rust_h(rust_num(rust_display_weight($last['hmotnost_kg']), rust_weight_decimals())); ?> <?php echo rust_weight_unit(); ?><?php endif; ?>
             <span class="rust-pocet"><?php echo th('count_measurements', array('n' => count($measurements))); ?></span>
           </span>
         <?php else: ?>
@@ -105,11 +105,12 @@ rust_head('');
     <label><?php echo th('label_birth_date'); ?>
       <input type="date" name="narozeni" required max="<?php echo date('Y-m-d'); ?>">
     </label>
-    <label><?php echo th('label_father_height'); ?>
-      <input type="text" inputmode="decimal" name="otec" placeholder="<?php echo th('placeholder_optional'); ?>">
+    <?php $heightPlaceholder = (rust_units() === 'imperial') ? th('placeholder_optional_height_imperial') : th('placeholder_optional'); ?>
+    <label><?php echo th('label_father_height'); ?> (<?php echo rust_length_unit(); ?>)
+      <input type="text" inputmode="text" name="otec" placeholder="<?php echo $heightPlaceholder; ?>">
     </label>
-    <label><?php echo th('label_mother_height'); ?>
-      <input type="text" inputmode="decimal" name="matka" placeholder="<?php echo th('placeholder_optional'); ?>">
+    <label><?php echo th('label_mother_height'); ?> (<?php echo rust_length_unit(); ?>)
+      <input type="text" inputmode="text" name="matka" placeholder="<?php echo $heightPlaceholder; ?>">
     </label>
     <label class="rust-zaskrtnuti">
       <input type="checkbox" name="kojeno" value="1">

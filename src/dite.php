@@ -154,9 +154,9 @@ foreach (rust_metrics() as $metric => $meta):
           <?php echo t('nodata_no_measurements_in_span', array(
               'reference' => rust_h($reference['label']),
               'index' => $indexWord,
-              'min' => rust_h(rust_num($span[0])),
-              'max' => rust_h(rust_num($span[1])),
-              'unit' => ($meta['index'] === 'age') ? th('unit_years_word') : 'cm',
+              'min' => rust_h(rust_num(rust_display_metric_index_value($metric, $span[0]))),
+              'max' => rust_h(rust_num(rust_display_metric_index_value($metric, $span[1]))),
+              'unit' => rust_display_metric_index_unit($metric) ?: th('unit_years_word'),
           )); ?>
         </p>
       <?php else: ?>
@@ -171,9 +171,13 @@ foreach (rust_metrics() as $metric => $meta):
         <?php if (isset($smooth[$metric])): ?>
           <?php $fit = $smooth[$metric]; ?>
           <p class="rust-poznamka">
+            <?php
+              $scatterDecimals = (rust_metric_value_kind($metric) === 'weight')
+                  ? rust_weight_decimals() : $meta['decimals'];
+            ?>
             <?php echo t('note_scatter', array(
-                'scatter' => '<strong>&plusmn;' . rust_h(rust_num($fit['scatter'], $meta['decimals']))
-                    . ' ' . rust_h($meta['unit']) . '</strong>',
+                'scatter' => '<strong>&plusmn;' . rust_h(rust_num(rust_display_metric_value($metric, $fit['scatter']), $scatterDecimals))
+                    . ' ' . rust_h(rust_display_metric_unit($metric) ?: $meta['unit']) . '</strong>',
             )); ?>
             <?php if ($fit['suspect']): ?>
               <?php echo t('note_scatter_suspect', array('n' => count($fit['suspect']))); ?>
@@ -208,9 +212,9 @@ foreach (rust_metrics() as $metric => $meta):
             <?php echo t('note_hidden_measurements', array(
                 'reference' => rust_h($reference['label']),
                 'index' => $indexWord,
-                'min' => rust_h(rust_num($span[0])),
-                'max' => rust_h(rust_num($span[1])),
-                'unit' => ($meta['index'] === 'age') ? th('unit_years_word') : 'cm',
+                'min' => rust_h(rust_num(rust_display_metric_index_value($metric, $span[0]))),
+                'max' => rust_h(rust_num(rust_display_metric_index_value($metric, $span[1]))),
+                'unit' => rust_display_metric_index_unit($metric) ?: th('unit_years_word'),
                 'n' => (int)$hidden,
             )); ?>
           </p>
@@ -280,11 +284,12 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
     <div class="rust-karta rust-karta-hlavni">
       <h3><?php echo th('heading_measured_prediction'); ?></h3>
       <?php if ($projection): ?>
-        <p class="rust-cislo"><?php echo rust_h(rust_num($projection['mid'])); ?> cm</p>
+        <p class="rust-cislo"><?php echo rust_h(rust_num(rust_display_length($projection['mid']))); ?> <?php echo rust_length_unit(); ?></p>
         <p class="rust-rozptyl">
           <?php echo t('range_cm', array(
-              'low' => rust_h(rust_num($projection['low'])),
-              'high' => rust_h(rust_num($projection['high'])),
+              'low' => rust_h(rust_num(rust_display_length($projection['low']))),
+              'high' => rust_h(rust_num(rust_display_length($projection['high']))),
+              'unit' => rust_length_unit(),
           )); ?>
         </p>
         <p class="rust-poznamka">
@@ -317,17 +322,20 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
     <div class="rust-karta">
       <h3><?php echo th('heading_target_height'); ?></h3>
       <?php if ($target): ?>
-        <p class="rust-cislo"><?php echo rust_h(rust_num($target['mid'])); ?> cm</p>
+        <p class="rust-cislo"><?php echo rust_h(rust_num(rust_display_length($target['mid']))); ?> <?php echo rust_length_unit(); ?></p>
         <p class="rust-rozptyl">
           <?php echo t('range_cm', array(
-              'low' => rust_h(rust_num($target['low'])),
-              'high' => rust_h(rust_num($target['high'])),
+              'low' => rust_h(rust_num(rust_display_length($target['low']))),
+              'high' => rust_h(rust_num(rust_display_length($target['high']))),
+              'unit' => rust_length_unit(),
           )); ?>
         </p>
         <p class="rust-poznamka">
           <?php echo t('note_target_height', array(
-              'father' => rust_h(rust_num($child['vyska_otce_cm'])),
-              'mother' => rust_h(rust_num($child['vyska_matky_cm'])),
+              'father' => rust_h(rust_num(rust_display_length($child['vyska_otce_cm']))),
+              'mother' => rust_h(rust_num(rust_display_length($child['vyska_matky_cm']))),
+              'band' => rust_h(rust_num(rust_display_length($target['high'] - $target['low']))),
+              'unit' => rust_length_unit(),
           )); ?>
         </p>
       <?php else: ?>
@@ -362,11 +370,14 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
       <input type="date" name="datum" value="<?php echo date('Y-m-d'); ?>" required
              max="<?php echo date('Y-m-d'); ?>">
     </label>
-    <label><?php echo th('label_height_cm'); ?>
-      <input type="text" inputmode="decimal" name="vyska" placeholder="<?php echo th('placeholder_example_height'); ?>">
+    <?php $imperial = rust_units() === 'imperial'; ?>
+    <label><?php echo th('label_height_cm'); ?> (<?php echo rust_length_unit(); ?>)
+      <input type="text" inputmode="<?php echo $imperial ? 'text' : 'decimal'; ?>" name="vyska"
+             placeholder="<?php echo $imperial ? th('placeholder_example_height_imperial') : th('placeholder_example_height'); ?>">
     </label>
-    <label><?php echo th('label_weight_kg'); ?>
-      <input type="text" inputmode="decimal" name="hmotnost" placeholder="<?php echo th('placeholder_example_weight'); ?>">
+    <label><?php echo th('label_weight_kg'); ?> (<?php echo rust_weight_unit(); ?>)
+      <input type="text" inputmode="decimal" name="hmotnost"
+             placeholder="<?php echo $imperial ? th('placeholder_example_weight_imperial') : th('placeholder_example_weight'); ?>">
     </label>
     <button type="submit"><?php echo th('button_save'); ?></button>
   </form>
@@ -406,11 +417,11 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
           <td><?php echo rust_h(rust_date_cz($row['datum'])); ?></td>
           <td class="rust-slabe"><?php echo rust_h(rust_age_cz($age)); ?></td>
 
-          <td><?php echo $row['vyska_cm'] === null ? '' : rust_h(rust_num($row['vyska_cm'])) . '&nbsp;cm'; ?></td>
+          <td><?php echo $row['vyska_cm'] === null ? '' : rust_h(rust_num(rust_display_length($row['vyska_cm']))) . '&nbsp;' . rust_length_unit(); ?></td>
           <td><?php echo $row['vyska_cm'] === null ? '' : rust_percentile_cz($h['percentile'], $h['z'], $referenceId, 'height'); ?></td>
           <td class="rust-slabe"><?php echo $h['z'] === null ? '' : rust_h(rust_num($h['z'], 2)); ?></td>
 
-          <td><?php echo $row['hmotnost_kg'] === null ? '' : rust_h(rust_num($row['hmotnost_kg'], 2)) . '&nbsp;kg'; ?></td>
+          <td><?php echo $row['hmotnost_kg'] === null ? '' : rust_h(rust_num(rust_display_weight($row['hmotnost_kg']), rust_weight_decimals())) . '&nbsp;' . rust_weight_unit(); ?></td>
           <td><?php echo $row['hmotnost_kg'] === null ? '' : rust_percentile_cz($w['percentile'], $w['z'], $referenceId, 'weight'); ?></td>
           <td class="rust-slabe"><?php echo $w['z'] === null ? '' : rust_h(rust_num($w['z'], 2)); ?></td>
 
@@ -423,7 +434,7 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
                   'date' => rust_h(rust_date_cz($v['from_date'])),
                   'span' => rust_h(rust_years_span_cz($v['years'])),
               )); ?>">
-                <?php echo rust_h(rust_num($v['cm_per_year'])); ?>&nbsp;cm/<?php echo th('unit_year_short'); ?>
+                <?php echo rust_h(rust_num(rust_display_velocity($v['cm_per_year']))); ?>&nbsp;<?php echo rust_velocity_unit(); ?>
               </span>
             <?php endif; ?>
           </td>
@@ -436,7 +447,12 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
       </tbody>
     </table>
     </div>
-    <p class="rust-poznamka"><?php echo t('note_velocity_table'); ?></p>
+    <p class="rust-poznamka"><?php echo t('note_velocity_table', array(
+        'small' => rust_h(rust_num(rust_display_length(0.5), 2)),
+        'unit' => rust_length_unit(),
+        'large' => rust_h(rust_num(rust_display_velocity(1.5))),
+        'velocity_unit' => rust_velocity_unit(),
+    )); ?></p>
   <?php endif; ?>
 </section>
 

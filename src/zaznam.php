@@ -37,8 +37,8 @@ if ($action === 'smazat') {
 }
 
 $date = isset($_POST['datum']) ? trim((string)$_POST['datum']) : '';
-$height = rust_input_number(isset($_POST['vyska']) ? $_POST['vyska'] : '');
-$weight = rust_input_number(isset($_POST['hmotnost']) ? $_POST['hmotnost'] : '');
+$height = rust_parse_length_input(isset($_POST['vyska']) ? $_POST['vyska'] : '');
+$weight = rust_parse_weight_input(isset($_POST['hmotnost']) ? $_POST['hmotnost'] : '');
 $note = isset($_POST['poznamka']) ? trim((string)$_POST['poznamka']) : '';
 
 $valid = rust_valid_date($date)

@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Allow: POST');
     exit;
 }
+rust_csrf_check();
 
 $childId = isset($_POST['dite_id']) ? (int)$_POST['dite_id'] : 0;
 $child = rust_child($childId);
@@ -40,7 +41,7 @@ $height = rust_input_number(isset($_POST['vyska']) ? $_POST['vyska'] : '');
 $weight = rust_input_number(isset($_POST['hmotnost']) ? $_POST['hmotnost'] : '');
 $note = isset($_POST['poznamka']) ? trim((string)$_POST['poznamka']) : '';
 
-$valid = preg_match('~^\d{4}-\d{2}-\d{2}$~', $date)
+$valid = rust_valid_date($date)
     && $date >= $child['datum_narozeni']
     && $date <= date('Y-m-d')
     && ($height !== null || $weight !== null);

@@ -11,6 +11,7 @@ $error = '';
 $reference = rust_selected_reference();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['akce']) && $_POST['akce'] === 'nove_dite') {
+    rust_csrf_check();
     $name = trim((string)$_POST['jmeno']);
     $sex = ($_POST['pohlavi'] === 'z') ? 'z' : 'm';
     $born = trim((string)$_POST['narozeni']);
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['akce']) && $_POST['ak
     $mother = rust_input_number($_POST['matka']);
     $breastfed = !empty($_POST['kojeno']);
 
-    if ($name === '' || !preg_match('~^\d{4}-\d{2}-\d{2}$~', $born)) {
+    if ($name === '' || !rust_valid_date($born)) {
         $error = 'Vyplňte jméno a datum narození.';
     } elseif (strtotime($born) > time()) {
         $error = 'Datum narození nemůže být v budoucnosti.';
@@ -35,6 +36,13 @@ rust_head('');
 ?>
 
 <h1>Růst dětí</h1>
+
+<?php if (isset($_GET['smazano'])): ?>
+  <p class="rust-poznamka">
+    <?php echo rust_h((string)$_GET['smazano']); ?> přesunuto do
+    <a href="kos.php">koše</a>, odkud jde obnovit.
+  </p>
+<?php endif; ?>
 
 <?php if ($error !== ''): ?>
   <p class="rust-chyba"><?php echo rust_h($error); ?></p>
@@ -85,6 +93,7 @@ rust_head('');
 <details class="rust-panel"<?php echo $children ? '' : ' open'; ?>>
   <summary>Přidat dítě</summary>
   <form method="post" class="rust-formular">
+    <?php echo rust_csrf_field(); ?>
     <input type="hidden" name="akce" value="nove_dite">
     <label>Jméno
       <input type="text" name="jmeno" required maxlength="60">
@@ -118,6 +127,8 @@ rust_head('');
 
 <p class="rust-odkazy">
   <a href="import.php">Import CSV</a>
+  &middot;
+  <a href="kos.php">Koš</a>
 </p>
 
 <?php rust_foot(); ?>

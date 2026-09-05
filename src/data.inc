@@ -1,14 +1,43 @@
 <?php
 
 /**
- * Data access and small view helpers for the growth tracker.
+ * Small view helpers for the growth tracker.
  *
- * Uses db_connect.php's db() connection and mysqli prepared statements - no
- * PDO, no ORM, no framework.
+ * Children/measurement storage itself lives behind storage.inc - see that
+ * file for the backend contract (JSON files by default, SQLite or MySQL
+ * where configured).
+ *
+ * Every page includes this file before producing any output, directly or via
+ * shell.inc, which is what makes it the right place for the checks and
+ * headers that belong on every single request: the fail-closed auth guard
+ * (auth.inc), starting the session CSRF protection needs (csrf.inc), and a
+ * couple of headers cheap enough to just always send.
  */
 
-require_once __DIR__ . '/db_connect.php';
+require_once __DIR__ . '/auth.inc';
+require_once __DIR__ . '/csrf.inc';
+require_once __DIR__ . '/storage.inc';
 require_once __DIR__ . '/rust.inc';
+
+rust_require_auth();
+
+/* Started here, unconditionally, before any page has echoed a single byte -
+ * not lazily on first use inside a form far down the page. session_start()
+ * only sends its Set-Cookie header if nothing has been sent yet; a page with
+ * enough HTML before its first form (dite.php easily clears the 4 KB default
+ * output_buffering threshold on PHP's built-in server, and plenty of real
+ * php.ini configs set the same default) would otherwise cross that threshold,
+ * silently lose the cookie, and hand every visitor a fresh session - and
+ * therefore a fresh CSRF token - on every single request. Caught by actually
+ * running the app against PHP's built-in server, not by the test suite.
+ */
+rust_session_start();
+
+/* This application is never meant to be framed by another site, and never
+   serves anything a browser should try to sniff into a different content
+   type than what Content-Type already says. */
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
 
 /* ------------------------------------------------------------- view helpers */
 
@@ -183,137 +212,6 @@ function rust_percentile_cz($percentile, $z, $referenceId, $metric = 'height')
     return $text;
 }
 
-/* --------------------------------------------------------------- children */
-
-function rust_children()
-{
-    $link = db();
-    $result = mysqli_query($link,
-        'SELECT id, jmeno, pohlavi, datum_narozeni, vyska_otce_cm, vyska_matky_cm, kojeno
-         FROM rust_deti ORDER BY poradi, datum_narozeni');
-    $children = array();
-    while ($result && ($row = mysqli_fetch_assoc($result))) {
-        $children[] = $row;
-    }
-    return $children;
-}
-
-function rust_child($id)
-{
-    $link = db();
-    $stmt = mysqli_prepare($link,
-        'SELECT id, jmeno, pohlavi, datum_narozeni, vyska_otce_cm, vyska_matky_cm, kojeno
-         FROM rust_deti WHERE id = ?');
-    if (!$stmt) {
-        return null;
-    }
-    mysqli_stmt_bind_param($stmt, 'i', $id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $row = $result ? mysqli_fetch_assoc($result) : null;
-    mysqli_stmt_close($stmt);
-    return $row ?: null;
-}
-
-/** Creates the child if the name is new; returns the id either way. */
-function rust_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $breastfed = 0)
-{
-    $link = db();
-    $stmt = mysqli_prepare($link, 'SELECT id FROM rust_deti WHERE jmeno = ?');
-    mysqli_stmt_bind_param($stmt, 's', $name);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $existing = $result ? mysqli_fetch_assoc($result) : null;
-    mysqli_stmt_close($stmt);
-
-    if ($existing) {
-        return (int)$existing['id'];
-    }
-
-    $stmt = mysqli_prepare($link,
-        'INSERT INTO rust_deti (jmeno, pohlavi, datum_narozeni, vyska_otce_cm, vyska_matky_cm, kojeno)
-         VALUES (?, ?, ?, ?, ?, ?)');
-    $breastfedFlag = $breastfed ? 1 : 0;
-    mysqli_stmt_bind_param($stmt, 'sssddi', $name, $sex, $born, $fatherCm, $motherCm, $breastfedFlag);
-    mysqli_stmt_execute($stmt);
-    $id = mysqli_insert_id($link);
-    mysqli_stmt_close($stmt);
-    return (int)$id;
-}
-
-function rust_child_update($id, $name, $sex, $born, $fatherCm, $motherCm, $breastfed = 0)
-{
-    $link = db();
-    $stmt = mysqli_prepare($link,
-        'UPDATE rust_deti SET jmeno = ?, pohlavi = ?, datum_narozeni = ?,
-         vyska_otce_cm = ?, vyska_matky_cm = ?, kojeno = ? WHERE id = ?');
-    $breastfed = $breastfed ? 1 : 0;
-    mysqli_stmt_bind_param($stmt, 'sssddii', $name, $sex, $born, $fatherCm, $motherCm, $breastfed, $id);
-    $ok = mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
-    return $ok;
-}
-
-/* ----------------------------------------------------------- measurements */
-
-function rust_measurements($childId)
-{
-    $link = db();
-    $stmt = mysqli_prepare($link,
-        'SELECT id, datum, vyska_cm, hmotnost_kg, poznamka
-         FROM rust_mereni WHERE dite_id = ? ORDER BY datum');
-    mysqli_stmt_bind_param($stmt, 'i', $childId);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    $rows = array();
-    while ($result && ($row = mysqli_fetch_assoc($result))) {
-        /* Keep NULL as NULL rather than letting it become 0.0 through a cast.
-           A missing height is not a height of zero, and every chart, velocity
-           and projection downstream depends on being able to tell them apart. */
-        $row['vyska_cm'] = ($row['vyska_cm'] === null) ? null : (float)$row['vyska_cm'];
-        $row['hmotnost_kg'] = ($row['hmotnost_kg'] === null) ? null : (float)$row['hmotnost_kg'];
-        $rows[] = $row;
-    }
-    mysqli_stmt_close($stmt);
-    return $rows;
-}
-
-/**
- * Inserts or updates the measurement for one child on one date.
- *
- * Keyed on (dite_id, datum) so that saving the same day twice corrects the
- * earlier entry instead of creating a duplicate - which also makes re-running
- * the importer safe.
- */
-function rust_measurement_save($childId, $date, $heightCm, $weightKg, $note)
-{
-    $link = db();
-    $stmt = mysqli_prepare($link,
-        'INSERT INTO rust_mereni (dite_id, datum, vyska_cm, hmotnost_kg, poznamka)
-         VALUES (?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE vyska_cm = VALUES(vyska_cm),
-                                 hmotnost_kg = VALUES(hmotnost_kg),
-                                 poznamka = VALUES(poznamka)');
-    if (!$stmt) {
-        return false;
-    }
-    mysqli_stmt_bind_param($stmt, 'isdds', $childId, $date, $heightCm, $weightKg, $note);
-    $ok = mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
-    return $ok;
-}
-
-function rust_measurement_delete($childId, $id)
-{
-    $link = db();
-    $stmt = mysqli_prepare($link, 'DELETE FROM rust_mereni WHERE id = ? AND dite_id = ?');
-    mysqli_stmt_bind_param($stmt, 'ii', $id, $childId);
-    $ok = mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
-    return $ok;
-}
-
 /* ---------------------------------------------------------------- request */
 
 /**
@@ -327,6 +225,23 @@ function rust_selected_reference()
     $default = in_array('cav', $installed, true) ? 'cav' : (reset($installed) ?: 'cdc');
     $id = isset($_GET['ref']) ? (string)$_GET['ref'] : $default;
     return in_array($id, $installed, true) ? $id : $default;
+}
+
+/**
+ * True only for a real calendar date in RRRR-MM-DD form.
+ *
+ * The regex this replaced (^\d{4}-\d{2}-\d{2}$) matches the shape of a date
+ * without checking it is one - "2026-13-45" and "0000-00-00" both pass it,
+ * and would then reach strtotime(), which is lenient enough to silently roll
+ * an invalid date into a real but wrong one rather than reject it.
+ * checkdate() actually validates the calendar.
+ */
+function rust_valid_date($value)
+{
+    if (!preg_match('~^(\d{4})-(\d{2})-(\d{2})$~', (string)$value, $m)) {
+        return false;
+    }
+    return checkdate((int)$m[2], (int)$m[3], (int)$m[1]);
 }
 
 /**

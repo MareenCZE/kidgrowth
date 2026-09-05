@@ -7,12 +7,16 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ["8.1", "8.3", "8.4"]
     steps:
       - uses: actions/checkout@v4
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.1"
+          php-version: ${{ matrix.php-version }}
+          extensions: pdo_sqlite
 
       - name: Lint every PHP file
         run: |
@@ -20,5 +24,5 @@ jobs:
           find . -name '*.php' -not -path './.git/*' -print0 \
             | xargs -0 -n1 php -l
 
-      - name: No personal data
-        run: php tests/no_personal_data_test.php
+      - name: Test suite (includes the no-personal-data guard)
+        run: php tests/run.php

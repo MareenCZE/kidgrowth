@@ -1,5 +1,6 @@
-# Real DB credentials - copy db_config.sample.php to this and fill it in
-src/db_config.php
+# Real configuration (storage backend choice, DB credentials) - copy
+# config.sample.php to this and fill it in
+src/config.php
 
 # Generated reference data that is not public domain (see DATA-LICENCES.md).
 # tools/build_reference_data.php fetches and writes these locally; only
@@ -8,6 +9,11 @@ src/data/cav.php
 src/data/koj.php
 src/data/pol.php
 src/data/who.php
+
+# The JSON/SQLite storage backends' actual data: real children's real
+# measurements. Never committed, regardless of where it's pointed.
+storage/rust.json
+storage/rust.sqlite
 
 # Basic Auth credentials for local/deployed instances
 .htpasswd*

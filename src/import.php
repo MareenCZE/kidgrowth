@@ -8,21 +8,41 @@
  */
 require_once __DIR__ . '/shell.inc';
 
+const RUST_IMPORT_MAX_BYTES = 2 * 1024 * 1024; /* generous for a file this narrow - even 10 000 rows is a fraction of this */
+const RUST_IMPORT_MAX_ROWS = 10000;
+
 $report = null;
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    rust_csrf_check();
     if (!isset($_FILES['soubor']) || $_FILES['soubor']['error'] !== UPLOAD_ERR_OK) {
         $error = 'Nepodařilo se nahrát soubor.';
+    } elseif ($_FILES['soubor']['size'] > RUST_IMPORT_MAX_BYTES) {
+        $error = 'Soubor je příliš velký (limit ' . (RUST_IMPORT_MAX_BYTES / 1024 / 1024) . ' MB).';
     } else {
         $handle = fopen($_FILES['soubor']['tmp_name'], 'r');
         if (!$handle) {
             $error = 'Soubor nelze otevřít.';
+        } elseif (!rust_looks_like_text($_FILES['soubor']['tmp_name'])) {
+            $error = 'Soubor nevypadá jako text (CSV) - je to opravdu ta správná příloha?';
         } else {
             $report = rust_import_csv($handle);
             fclose($handle);
         }
     }
+}
+
+/**
+ * A cheap, dependency-free "is this actually text" check: a genuine text
+ * file - CSV included - has no null bytes anywhere in it, which every binary
+ * format (images, the old .rcz format, a mistakenly attached spreadsheet
+ * file) does within the first few bytes almost without exception.
+ */
+function rust_looks_like_text($path)
+{
+    $sample = @file_get_contents($path, false, null, 0, 8192);
+    return $sample !== false && strpos($sample, "\0") === false;
 }
 
 /**
@@ -60,6 +80,11 @@ function rust_import_csv($handle)
     $line = 1;
     while (($row = fgetcsv($handle)) !== false) {
         $line++;
+        if ($line - 1 > RUST_IMPORT_MAX_ROWS) {
+            $report['errors'][] = 'Soubor má víc než ' . RUST_IMPORT_MAX_ROWS
+                . ' řádků, zbytek nebyl zpracován.';
+            break;
+        }
         if (count($row) === 1 && trim((string)$row[0]) === '') {
             continue;
         }
@@ -74,7 +99,7 @@ function rust_import_csv($handle)
 
         $name = trim((string)$data['dite']);
         $date = trim((string)$data['datum']);
-        if ($name === '' || !preg_match('~^\d{4}-\d{2}-\d{2}$~', $date)) {
+        if ($name === '' || !rust_valid_date($date)) {
             $report['skipped']++;
             continue;
         }
@@ -82,7 +107,7 @@ function rust_import_csv($handle)
         if (!isset($childIds[$name])) {
             $sex = (trim((string)$data['pohlavi']) === 'z') ? 'z' : 'm';
             $born = trim((string)$data['narozeni']);
-            if (!preg_match('~^\d{4}-\d{2}-\d{2}$~', $born)) {
+            if (!rust_valid_date($born)) {
                 $report['errors'][] = 'Řádek ' . $line . ': neplatné datum narození.';
                 continue;
             }
@@ -139,6 +164,7 @@ rust_head('Import');
 <?php endif; ?>
 
 <form method="post" enctype="multipart/form-data" class="rust-formular">
+  <?php echo rust_csrf_field(); ?>
   <label>Soubor CSV
     <input type="file" name="soubor" accept=".csv,text/csv" required>
   </label>

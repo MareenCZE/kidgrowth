@@ -31,21 +31,20 @@ so it is useful well outside the Czech Republic.
 - CSV import/export, including a converter for RůstCZ's own database format
   (`tools/import_rustcz.php`).
 - Installable as a PWA (works from a phone's home screen).
+- Soft delete: deleting a child or a measurement moves it to `kos.php` (the
+  "Koš" / trash view) rather than removing it, and it can be restored from
+  there. Deleting a child asks you to retype their name first - it takes
+  every one of their measurements with it.
 
 ## Install
 
-Requirements: **PHP 8.0+** and a **MySQL** (or MariaDB) database. (A
-zero-setup, file-based storage backend that needs neither is planned, but is
-not implemented yet; MySQL is the only backend today.)
+Requirements: **PHP 8.0+**, and a **writable directory** - nothing else. By
+default, Růst stores its data as a single JSON file (`storage/rust.json`);
+SQLite and MySQL are also available, see below.
 
 1. Clone the repository and point your web server's document root at `src/`.
-2. Create the database and load the schema:
-   ```
-   mysql -u root -p your_database < db/schema.sql
-   ```
-3. Copy `src/db_config.sample.php` to `src/db_config.php` and fill in your
-   database credentials.
-4. Build the reference data your installation will use:
+   That's it for storage - the default JSON backend needs no further setup.
+2. Build the reference data your installation will use:
    ```
    php tools/build_reference_data.php
    ```
@@ -53,14 +52,35 @@ not implemented yet; MySQL is the only backend today.)
    locally. Only `src/data/cdc.php` (public domain) ships in the repository -
    see `DATA-LICENCES.md` for why the rest do not, and for what each source's
    licence actually permits. Run this again any time you want to refresh the
-   data; nothing else in the application depends on network access.
-5. **Put Basic Auth (or an equivalent) in front of it.** Růst has no
-   authentication of its own - it relies entirely on your web server. A copy
-   of `src/.htaccess` is provided as a starting point for Apache; edit the
-   `AuthUserFile` path before using it, and point it somewhere outside your
-   document root. Publishing this application without an authentication layer
-   in front of it means publishing your children's health records to the open
-   internet.
+   data; nothing else in the application depends on network access. Until you
+   run it, the app works with CDC's reference alone.
+3. **Put Basic Auth (or an equivalent) in front of it.** Růst has no
+   authentication of its own - it relies entirely on your web server, and
+   refuses to render anything at all if it cannot see that one is configured
+   (`src/auth.inc`). A copy of `src/.htaccess` is provided as a starting point
+   for Apache; edit the `AuthUserFile` path before using it, and point it
+   somewhere outside your document root. Publishing this application without
+   an authentication layer in front of it means publishing your children's
+   health records to the open internet.
+
+### Switching storage backend
+
+Copy `src/config.sample.php` to `src/config.php` and set `$STORAGE_BACKEND`:
+
+- **`'json'`** (default) - one file, `storage/rust.json`. No setup. Fine for
+  a family's own data: a handful of writes a month, a dataset that stays
+  comfortably under a megabyte for years.
+- **`'sqlite'`** - one file, `storage/rust.sqlite`, created automatically.
+  Needs the `pdo_sqlite` PHP extension. Preferred over MySQL where available,
+  for the same "one file" simplicity with proper concurrent-write handling.
+- **`'mysql'`** - for a deployment that already runs one. Load `db/schema.sql`
+  first, then set `$DB_HOST` / `$DB_USER` / `$DB_PASS` / `$DB_NAME` in
+  `config.php`.
+
+Either way, keep `storage/` (or your database) reachable only by the
+application - `storage/.htaccess` denies web access to it as a second layer,
+but the real protection is that it sits outside your document root by
+default.
 
 ## Accuracy
 
@@ -80,6 +100,17 @@ attribution. In short: the code here is MIT, the reference data is not, and
 combining every available reference means the installation as a whole
 inherits a non-commercial restriction from two of the sources (Poland's
 school-age tables and WHO).
+
+## Testing
+
+```
+php tests/run.php
+```
+
+Zero-dependency: no Composer, no PHPUnit, just `tests/*_test.php` files of
+plain functions and a runner that calls the ones starting with `test_`. CI
+(`.github/workflows/ci.yml`) runs this plus `php -l` on every file, across
+PHP 8.1/8.3/8.4.
 
 ## Disclaimer
 

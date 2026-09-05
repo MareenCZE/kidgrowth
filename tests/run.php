@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * Zero-dependency test runner: walks tests/*_test.php and calls every
+ * function it defines whose name starts with test_.
+ *
+ * No Composer dependency for tests alone: `git clone && php tests/run.php`
+ * should be the whole story.
+ *
+ * Usage:  php tests/run.php
+ * Exit status is non-zero if any test failed, so this gates CI.
+ */
+
+require_once __DIR__ . '/asserts.php';
+
+$totalPass = 0;
+$totalFail = 0;
+
+$files = glob(__DIR__ . '/*_test.php');
+sort($files);
+
+foreach ($files as $file) {
+    if (basename($file) === 'no_personal_data_test.php') {
+        /* A standalone script with its own exit code, not test_*() functions -
+           run it as a subprocess so it still gates the suite. */
+        $out = array();
+        $code = 0;
+        exec('php ' . escapeshellarg($file) . ' 2>&1', $out, $code);
+        if ($code === 0) {
+            $totalPass++;
+        } else {
+            $totalFail++;
+            echo "FAIL " . basename($file) . "\n";
+            foreach ($out as $line) {
+                echo "  $line\n";
+            }
+        }
+        continue;
+    }
+
+    $before = get_defined_functions();
+    require $file;
+    $after = get_defined_functions();
+    $new = array_diff($after['user'], $before['user']);
+
+    foreach ($new as $fn) {
+        if (strpos($fn, 'test_') !== 0) {
+            continue;
+        }
+        rust_test_reset_failures();
+        $fn();
+        $failures = rust_test_failures();
+        if ($failures) {
+            $totalFail++;
+            echo "FAIL $fn\n";
+            foreach ($failures as $f) {
+                echo "  $f\n";
+            }
+        } else {
+            $totalPass++;
+        }
+    }
+}
+
+echo "\n$totalPass passed, $totalFail failed\n";
+exit($totalFail > 0 ? 1 : 0);

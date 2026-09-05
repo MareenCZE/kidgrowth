@@ -13,6 +13,7 @@ if (!$child) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    rust_csrf_check();
     $name = trim((string)$_POST['jmeno']);
     $sex = ($_POST['pohlavi'] === 'z') ? 'z' : 'm';
     $born = trim((string)$_POST['narozeni']);
@@ -20,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mother = rust_input_number($_POST['matka']);
     $breastfed = !empty($_POST['kojeno']);
 
-    if ($name === '' || !preg_match('~^\d{4}-\d{2}-\d{2}$~', $born)) {
+    if ($name === '' || !rust_valid_date($born)) {
         $error = 'Vyplňte jméno a datum narození.';
     } elseif (strtotime($born) > time()) {
         $error = 'Datum narození nemůže být v budoucnosti.';
@@ -45,6 +46,7 @@ rust_head('Úprava – ' . $child['jmeno'], $childId);
 <?php endif; ?>
 
 <form method="post" class="rust-formular">
+  <?php echo rust_csrf_field(); ?>
   <input type="hidden" name="id" value="<?php echo (int)$childId; ?>">
   <label>Jméno
     <input type="text" name="jmeno" required maxlength="60"
@@ -81,6 +83,8 @@ rust_head('Úprava – ' . $child['jmeno'], $childId);
 
 <p class="rust-odkazy">
   <a href="dite.php?id=<?php echo (int)$childId; ?>">Zpět</a>
+  &middot;
+  <a href="smazat-dite.php?id=<?php echo (int)$childId; ?>">Smazat dítě</a>
 </p>
 
 <?php rust_foot(); ?>

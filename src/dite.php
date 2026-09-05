@@ -407,6 +407,7 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
   <h2>Měření</h2>
 
   <form method="post" action="zaznam.php" class="rust-formular rust-radek">
+    <?php echo rust_csrf_field(); ?>
     <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
     <input type="hidden" name="ref" value="<?php echo rust_h($referenceId); ?>">
     <label>Datum
@@ -476,14 +477,8 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
             <?php endif; ?>
           </td>
           <td>
-            <form method="post" action="zaznam.php" class="rust-smazat"
-                  onsubmit="return confirm('Smazat měření z <?php echo rust_h(rust_date_cz($row['datum'])); ?>?');">
-              <input type="hidden" name="akce" value="smazat">
-              <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
-              <input type="hidden" name="id" value="<?php echo (int)$row['id']; ?>">
-              <input type="hidden" name="ref" value="<?php echo rust_h($referenceId); ?>">
-              <button type="submit" title="Smazat">&times;</button>
-            </form>
+            <a href="smazat-mereni.php?dite_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo rust_h($referenceId); ?>"
+               class="rust-smazat" title="Smazat">&times;</a>
           </td>
         </tr>
       <?php endforeach; ?>

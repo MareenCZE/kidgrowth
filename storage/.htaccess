@@ -1,0 +1,5 @@
+# Defense in depth. This directory should already be outside your web
+# server's document root if you followed the README (document root = src/) -
+# this file only matters if a document root is ever pointed higher than that
+# by mistake. Either way, nothing in here should ever be served to a browser.
+Require all denied

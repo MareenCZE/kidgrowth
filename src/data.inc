@@ -47,27 +47,40 @@ function rust_h($value)
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
-/** A number in Czech notation, trailing zeros trimmed. */
+/**
+ * A number in the active locale's notation, trailing zeros trimmed.
+ *
+ * Czech uses a comma for the decimal separator; English a point. Neither
+ * needs a thousands separator here - nothing this application displays
+ * (a height, a weight, a percentile, an SD) ever reaches four digits.
+ */
 function rust_num($value, $decimals = 1)
 {
     if ($value === null || $value === '') {
         return '';
     }
-    $text = number_format((float)$value, $decimals, ',', ' ');
-    if (strpos($text, ',') !== false) {
-        $text = rtrim(rtrim($text, '0'), ',');
+    $point = (rust_locale() === 'cs') ? ',' : '.';
+    $text = number_format((float)$value, $decimals, $point, '');
+    if (strpos($text, $point) !== false) {
+        $text = rtrim(rtrim($text, '0'), $point);
     }
     return $text;
 }
 
-/** 2026-01-19 -> 19. 1. 2026 */
+/** 2026-01-19 -> "19. 1. 2026" (cs) or "19 Jan 2026" (en). */
 function rust_date_cz($date)
 {
     $parts = explode('-', (string)$date);
     if (count($parts) !== 3) {
         return (string)$date;
     }
-    return (int)$parts[2] . '. ' . (int)$parts[1] . '. ' . $parts[0];
+    list($year, $month, $day) = $parts;
+    if (rust_locale() === 'cs') {
+        return (int)$day . '. ' . (int)$month . '. ' . $year;
+    }
+    $months = array('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+    return (int)$day . ' ' . $months[(int)$month] . ' ' . $year;
 }
 
 /**
@@ -93,21 +106,32 @@ function rust_median_diff_cz($value, $median, $decimals, $unit)
     /* Below the precision shown, "+0,0" would be noise dressed as information. */
     $step = pow(10, -$decimals) / 2.0;
     if (abs($diff) < $step) {
-        return 'přesně medián';
+        return t('median_diff_exact');
     }
     $sign = ($diff > 0) ? '+' : '-';
-    return $sign . rust_num(abs($diff), $decimals) . ' ' . $unit . ' oproti mediánu';
+    return t('median_diff', array(
+        'sign' => $sign,
+        'value' => rust_num(abs($diff), $decimals),
+        'unit' => $unit,
+    ));
 }
 
 /**
- * A number of years after the preposition "za", which takes the accusative:
- * "za 1 rok", "za 2 roky", "za 5 let". A fraction takes the genitive singular,
- * "za 0,97 roku", which is why this cannot simply reuse rust_years_cz().
+ * A number of years after the preposition "za" ("over"/"in"), which in
+ * Czech takes the accusative: "za 1 rok", "za 2 roky", "za 5 let". A
+ * fraction takes the genitive singular, "za 0,97 roku", which is why this
+ * cannot simply reuse rust_years_cz(). English needs none of that - a
+ * fractional year is just "0.97 years", the same plural as any other count
+ * that isn't exactly one.
  */
 function rust_years_span_cz($years)
 {
     $rounded = round((float)$years, 2);
     $text = rust_num($rounded, 2);
+
+    if (rust_locale() !== 'cs') {
+        return $text . ' ' . t(abs($rounded - 1.0) < 0.001 ? 'unit_year' : 'unit_years');
+    }
 
     if (abs($rounded - round($rounded)) > 0.001) {
         return $text . ' roku';          /* 0,97 roku */
@@ -123,23 +147,26 @@ function rust_years_span_cz($years)
 }
 
 /**
- * A number of years with the right Czech word after it, in the genitive the
- * surrounding phrases need: "ve věku 1 roku", "ve věku 10 let".
- *
- * Czech inflects on the number, so "1 let" reads as plainly wrong to a native
+ * A number of years with the right word after it, in the case Czech's
+ * surrounding phrases need: "ve věku 1 roku", "ve věku 10 let". Czech
+ * inflects on the number, so "1 let" reads as plainly wrong to a native
  * speaker in the way "1 years" would in English.
  */
 function rust_years_cz($years)
 {
     $rounded = round((float)$years, 1);
     $text = rust_num($rounded);
+
+    if (rust_locale() !== 'cs') {
+        return $text . ' ' . t(abs($rounded - 1.0) < 0.001 ? 'unit_year' : 'unit_years');
+    }
     if (abs($rounded - 1.0) < 0.001) {
         return $text . ' roku';
     }
     return $text . ' let';
 }
 
-/** "8 let 4 měsíce", for reading an age at a glance. */
+/** "8 let 4 měsíce" / "8 years 4 months", for reading an age at a glance. */
 function rust_age_cz($years)
 {
     if ($years === null) {
@@ -147,6 +174,18 @@ function rust_age_cz($years)
     }
     $wholeYears = (int)floor($years);
     $months = (int)floor(($years - $wholeYears) * 12);
+
+    if (rust_locale() !== 'cs') {
+        $yearWord = t($wholeYears === 1 ? 'unit_year' : 'unit_years');
+        $monthWord = t($months === 1 ? 'unit_month' : 'unit_months');
+        if ($wholeYears === 0) {
+            return $months . ' ' . $monthWord;
+        }
+        if ($months === 0) {
+            return $wholeYears . ' ' . $yearWord;
+        }
+        return $wholeYears . ' ' . $yearWord . ' ' . $months . ' ' . $monthWord;
+    }
 
     $yearWord = ($wholeYears === 1) ? 'rok' : (($wholeYears < 5) ? 'roky' : 'let');
     $monthWord = ($months === 1) ? 'měsíc' : (($months < 5) ? 'měsíce' : 'měsíců');
@@ -206,8 +245,8 @@ function rust_percentile_cz($percentile, $z, $referenceId, $metric = 'height')
         && (abs($z) > 1.8807936);
 
     if ($extrapolated) {
-        return '<span class="rust-odhad" title="Mimo rozsah publikovaný SZÚ '
-            . '(3.–97. percentil), hodnota je extrapolovaná">~' . $text . '</span>';
+        return '<span class="rust-odhad" title="' . th('percentile_extrapolated_title')
+            . '">~' . $text . '</span>';
     }
     return $text;
 }

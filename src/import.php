@@ -17,15 +17,15 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     rust_csrf_check();
     if (!isset($_FILES['soubor']) || $_FILES['soubor']['error'] !== UPLOAD_ERR_OK) {
-        $error = 'Nepodařilo se nahrát soubor.';
+        $error = t('import_error_upload_failed');
     } elseif ($_FILES['soubor']['size'] > RUST_IMPORT_MAX_BYTES) {
-        $error = 'Soubor je příliš velký (limit ' . (RUST_IMPORT_MAX_BYTES / 1024 / 1024) . ' MB).';
+        $error = t('import_error_too_large', array('mb' => RUST_IMPORT_MAX_BYTES / 1024 / 1024));
     } else {
         $handle = fopen($_FILES['soubor']['tmp_name'], 'r');
         if (!$handle) {
-            $error = 'Soubor nelze otevřít.';
+            $error = t('import_error_cannot_open');
         } elseif (!rust_looks_like_text($_FILES['soubor']['tmp_name'])) {
-            $error = 'Soubor nevypadá jako text (CSV) - je to opravdu ta správná příloha?';
+            $error = t('import_error_not_text');
         } else {
             $report = rust_import_csv($handle);
             fclose($handle);
@@ -59,7 +59,7 @@ function rust_import_csv($handle)
 
     $header = fgetcsv($handle);
     if (!$header) {
-        $report['errors'][] = 'Prázdný soubor.';
+        $report['errors'][] = t('import_error_empty_file');
         return $report;
     }
     /* strip a UTF-8 BOM off the first column name if the file has one */
@@ -71,7 +71,7 @@ function rust_import_csv($handle)
     $required = array('dite', 'pohlavi', 'narozeni', 'datum');
     foreach ($required as $column) {
         if (!in_array($column, $header, true)) {
-            $report['errors'][] = 'Chybí sloupec "' . $column . '".';
+            $report['errors'][] = t('import_error_missing_column', array('column' => $column));
             return $report;
         }
     }
@@ -81,8 +81,7 @@ function rust_import_csv($handle)
     while (($row = fgetcsv($handle)) !== false) {
         $line++;
         if ($line - 1 > RUST_IMPORT_MAX_ROWS) {
-            $report['errors'][] = 'Soubor má víc než ' . RUST_IMPORT_MAX_ROWS
-                . ' řádků, zbytek nebyl zpracován.';
+            $report['errors'][] = t('import_error_too_many_rows', array('max' => RUST_IMPORT_MAX_ROWS));
             break;
         }
         if (count($row) === 1 && trim((string)$row[0]) === '') {
@@ -93,7 +92,7 @@ function rust_import_csv($handle)
             array_slice($row, 0, count($header))
         );
         if (!$data) {
-            $report['errors'][] = 'Řádek ' . $line . ': nesedí počet sloupců.';
+            $report['errors'][] = t('import_error_column_count', array('line' => $line));
             continue;
         }
 
@@ -108,7 +107,7 @@ function rust_import_csv($handle)
             $sex = (trim((string)$data['pohlavi']) === 'z') ? 'z' : 'm';
             $born = trim((string)$data['narozeni']);
             if (!rust_valid_date($born)) {
-                $report['errors'][] = 'Řádek ' . $line . ': neplatné datum narození.';
+                $report['errors'][] = t('import_error_invalid_birth', array('line' => $line));
                 continue;
             }
             $childIds[$name] = rust_child_upsert(
@@ -134,10 +133,10 @@ function rust_import_csv($handle)
     return $report;
 }
 
-rust_head('Import');
+rust_head(t('page_title_import'));
 ?>
 
-<h1>Import CSV</h1>
+<h1><?php echo th('heading_import'); ?></h1>
 
 <?php if ($error !== ''): ?>
   <p class="rust-chyba"><?php echo rust_h($error); ?></p>
@@ -145,49 +144,45 @@ rust_head('Import');
 
 <?php if ($report !== null): ?>
   <div class="rust-panel">
-    <p><strong>Naimportováno <?php echo (int)$report['rows']; ?> měření.</strong></p>
+    <p><strong><?php echo th('import_summary', array('n' => (int)$report['rows'])); ?></strong></p>
     <ul>
       <?php foreach ($report['children'] as $name => $count): ?>
-        <li><?php echo rust_h($name); ?>: <?php echo (int)$count; ?> měření</li>
+        <li><?php echo rust_h($name); ?>: <?php echo th('count_measurements', array('n' => (int)$count)); ?></li>
       <?php endforeach; ?>
     </ul>
     <?php if ($report['skipped']): ?>
       <p class="rust-poznamka">
-        Přeskočeno <?php echo (int)$report['skipped']; ?> řádků bez výšky i hmotnosti.
+        <?php echo th('import_skipped', array('n' => (int)$report['skipped'])); ?>
       </p>
     <?php endif; ?>
     <?php foreach ($report['errors'] as $message): ?>
       <p class="rust-chyba"><?php echo rust_h($message); ?></p>
     <?php endforeach; ?>
-    <p><a href="index.php">Zpět na seznam dětí</a></p>
+    <p><a href="index.php"><?php echo th('nav_back_to_children'); ?></a></p>
   </div>
 <?php endif; ?>
 
 <form method="post" enctype="multipart/form-data" class="rust-formular">
   <?php echo rust_csrf_field(); ?>
-  <label>Soubor CSV
+  <label><?php echo th('label_csv_file'); ?>
     <input type="file" name="soubor" accept=".csv,text/csv" required>
   </label>
-  <button type="submit">Importovat</button>
+  <button type="submit"><?php echo th('button_import'); ?></button>
 </form>
 
 <div class="rust-panel">
-  <h2>Formát</h2>
-  <p>První řádek je hlavička, oddělovač je čárka:</p>
+  <h2><?php echo th('import_format_heading'); ?></h2>
+  <p><?php echo th('import_format_intro'); ?></p>
   <pre>dite,pohlavi,narozeni,otec_cm,matka_cm,datum,vyska_cm,hmotnost_kg
 "Novak Jan",m,2018-03-14,180,165,2018-05-20,58,4.2</pre>
   <p class="rust-poznamka">
-    Povinné jsou <code>dite</code>, <code>pohlavi</code> (m/z),
-    <code>narozeni</code> a <code>datum</code>, obojí ve tvaru RRRR-MM-DD.
-    Výška i hmotnost mohou být prázdné &ndash; prázdná buňka znamená
-    &bdquo;neměřeno&ldquo;, ne nulu. Opakovaný import stejného data zápis
-    přepíše, neduplikuje.
+    <?php echo t('import_format_note'); ?>
   </p>
-  <h2>Z RůstCZ</h2>
-  <p>Převod staré databáze na toto CSV:</p>
+  <h2><?php echo th('import_from_rustcz_heading'); ?></h2>
+  <p><?php echo th('import_from_rustcz_intro'); ?></p>
   <pre>php tools/import_rustcz.php meda.rcz export-child1.txt export-child2.txt &gt; rust.csv</pre>
 </div>
 
-<p class="rust-odkazy"><a href="index.php">Zpět</a></p>
+<p class="rust-odkazy"><a href="index.php"><?php echo th('nav_back'); ?></a></p>
 
 <?php rust_foot(); ?>

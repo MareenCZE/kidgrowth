@@ -18,7 +18,7 @@ function rust_head($title, $childId = null)
     $full = $title === '' ? 'Růst' : ($title . ' – Růst');
     ?>
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="<?php echo rust_h(rust_locale()); ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -49,10 +49,33 @@ function rust_head($title, $childId = null)
         }
         echo '</nav>';
     }
+    rust_language_switcher();
   ?>
 </header>
 <main class="rust-obsah">
     <?php
+}
+
+/**
+ * A plain-link language switcher, in the same no-JavaScript-required spirit
+ * as rust_reference_picker(): every state is a real, bookmarkable URL.
+ * Switching sets the rust_lang cookie (see i18n.inc) so it sticks for the
+ * rest of the visit without repeating ?lang= on every link.
+ */
+function rust_language_switcher()
+{
+    $params = $_GET;
+    echo '<nav class="rust-jazyk">';
+    foreach (RUST_LOCALES as $locale) {
+        $params['lang'] = $locale;
+        printf(
+            '<a class="rust-volba-jazyka%s" href="?%s">%s</a>',
+            $locale === rust_locale() ? ' rust-aktivni' : '',
+            rust_h(http_build_query($params)),
+            rust_h(strtoupper($locale))
+        );
+    }
+    echo '</nav>';
 }
 
 /**
@@ -72,10 +95,9 @@ function rust_foot($referenceId = null)
     $reference = ($referenceId === null) ? null : rust_reference($referenceId);
     if ($reference && isset($reference['source'])):
   ?>
-    <p>Zdroj dat: <?php echo rust_h($reference['source']); ?></p>
+    <p><?php echo th('footer_source_label'); ?> <?php echo rust_h($reference['source']); ?></p>
   <?php endif; ?>
-  <p>Referenční data: SZÚ (CAV 2001 / 1991), Polsko (Kułaga et al.), WHO, CDC.
-     Nenahrazuje lékaře.</p>
+  <p><?php echo th('footer_credits'); ?></p>
 </footer>
 <script src="rust.js?v=<?php echo RUST_CSS_VERSION; ?>" defer></script>
 </body>

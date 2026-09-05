@@ -1058,16 +1058,15 @@ function parse_polish_school(string $path): array
 function export_reference(
     string $path,
     string $id,
-    string $label,
-    string $note,
-    string $source,
     string $comment,
     array $metrics
 ): void {
-    /* $source is shown in the page footer. For the Polish tables that is a
-       licence condition rather than a courtesy: both papers are Creative
-       Commons and require attribution. */
-    $payload = ['id' => $id, 'label' => $label, 'note' => $note, 'source' => $source, 'metrics' => []];
+    /* Deliberately no label/note/source here: those are display text, which
+       varies by locale, and this file does not know which locale it will be
+       read under. src/rust.inc's rust_reference() looks them up from
+       src/lang/{en,cs}.php (keys ref_{$id}_label/note/source) every time it
+       loads this file instead. */
+    $payload = ['id' => $id, 'metrics' => []];
     foreach ($metrics as $metric => $bySex) {
         foreach ($bySex as $sex => $rows) {
             check_age_range($id, $metric, $rows);
@@ -1170,9 +1169,6 @@ if ($worst > 0.15) {
 export_reference(
     $outDir . '/cav.php',
     'cav',
-    'ČR – CAV (SZÚ)',
-    'Výška podle CAV 2001, hmotnost podle CAV 1991. Česká národní reference.',
-    'Státní zdravotní ústav, 6. celostátní antropologický výzkum (CAV 2001 / 1991).',
     <<<TXT
  Czech national growth reference, derived from the 6th Nationwide
  Anthropological Survey published by Statni zdravotni ustav.
@@ -1216,9 +1212,6 @@ foreach (CDC_FILES as $metric => $sources) {
 export_reference(
     $outDir . '/cdc.php',
     'cdc',
-    'USA – CDC 2000',
-    'Americká reference CDC 2000, výška i hmotnost od narození do 20 let.',
-    'CDC, National Center for Health Statistics, growth charts 2000.',
     <<<TXT
  CDC 2000 growth charts for the United States, LMS parameters as published by
  the CDC. The birth-to-36-month and 2-to-20-year files are concatenated, with
@@ -1255,9 +1248,6 @@ foreach (WHO_FILES as $metric => $bySex) {
 export_reference(
     $outDir . '/who.php',
     'who',
-    'WHO',
-    'Mezinárodní standardy WHO. Hmotnost publikuje WHO jen do 10 let.',
-    'WHO Child Growth Standards (2006) a Growth Reference 5–19 (2007).',
     <<<TXT
  WHO growth standards and references, LMS parameters as published by WHO.
  Height blends the 0-5 y Child Growth Standards with the 5-19 y Growth
@@ -1330,9 +1320,6 @@ foreach (['height', 'weight', 'bmi'] as $metric) {
 export_reference(
     $outDir . '/pol.php',
     'pol',
-    'Polsko',
-    'Polská národní reference, 3–18 let. Sousední populace, bližší než WHO či CDC.',
-    'Kułaga Z. et al., Polish 2010 (7–18 let, CC BY-NC) a Polish 2012 (3–6 let, CC BY), Eur J Pediatr.',
     <<<TXT
  Polish national growth reference.
 
@@ -1436,9 +1423,6 @@ if ($worstCalibration > 0.15) {
 export_reference(
     $outDir . '/koj.php',
     'koj',
-    'ČR – kojené děti',
-    'Reference pro kojené děti, 0–1 rok. Kojenci přibývají jinak než nekojení.',
-    'SZÚ / 3. LF UK (4/2008), referenční grafy kojených dětí, odečteno z publikovaných grafů.',
     <<<TXT
  Czech reference for breastfed infants, birth to one year.
 

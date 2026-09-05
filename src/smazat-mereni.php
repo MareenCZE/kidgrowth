@@ -32,16 +32,18 @@ if (!$measurement) {
     exit;
 }
 
-rust_head('Smazat měření', $childId);
+rust_head(t('page_title_delete_measurement'), $childId);
 ?>
 
-<h1>Smazat měření?</h1>
+<h1><?php echo th('heading_delete_measurement'); ?></h1>
 <p>
-  Opravdu smazat měření <strong><?php echo rust_h($child['jmeno']); ?></strong>
-  z <strong><?php echo rust_h(rust_date_cz($measurement['datum'])); ?></strong>?
+  <?php echo t('confirm_delete_measurement', array(
+      'name' => '<strong>' . rust_h($child['jmeno']) . '</strong>',
+      'date' => '<strong>' . rust_h(rust_date_cz($measurement['datum'])) . '</strong>',
+  )); ?>
 </p>
 <p class="rust-poznamka">
-  Zůstane dostupné v <a href="kos.php">koši</a>, odkud jde obnovit.
+  <?php echo t('note_recoverable_from_trash'); ?>
 </p>
 
 <form method="post" action="zaznam.php" class="rust-formular">
@@ -50,11 +52,11 @@ rust_head('Smazat měření', $childId);
   <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
   <input type="hidden" name="id" value="<?php echo (int)$measurementId; ?>">
   <input type="hidden" name="ref" value="<?php echo rust_h($ref); ?>">
-  <button type="submit">Smazat</button>
+  <button type="submit"><?php echo th('button_delete'); ?></button>
 </form>
 
 <p class="rust-odkazy">
-  <a href="dite.php?id=<?php echo (int)$childId; ?>&amp;ref=<?php echo rust_h($ref); ?>">Zpět</a>
+  <a href="dite.php?id=<?php echo (int)$childId; ?>&amp;ref=<?php echo rust_h($ref); ?>"><?php echo th('nav_back'); ?></a>
 </p>
 
 <?php rust_foot(); ?>

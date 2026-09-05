@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['akce']) && $_POST['ak
     $breastfed = !empty($_POST['kojeno']);
 
     if ($name === '' || !rust_valid_date($born)) {
-        $error = 'Vyplňte jméno a datum narození.';
+        $error = t('error_name_and_birth_required');
     } elseif (strtotime($born) > time()) {
-        $error = 'Datum narození nemůže být v budoucnosti.';
+        $error = t('error_birth_in_future');
     } else {
         $id = rust_child_upsert($name, $sex, $born, $father, $mother, $breastfed);
         header('Location: dite.php?id=' . (int)$id);
@@ -35,12 +35,11 @@ $children = rust_children();
 rust_head('');
 ?>
 
-<h1>Růst dětí</h1>
+<h1><?php echo th('page_title_home'); ?></h1>
 
 <?php if (isset($_GET['smazano'])): ?>
   <p class="rust-poznamka">
-    <?php echo rust_h((string)$_GET['smazano']); ?> přesunuto do
-    <a href="kos.php">koše</a>, odkud jde obnovit.
+    <?php echo t('flash_moved_to_trash', array('name' => rust_h((string)$_GET['smazano']))); ?>
   </p>
 <?php endif; ?>
 
@@ -50,8 +49,7 @@ rust_head('');
 
 <?php if (!$children): ?>
   <p class="rust-uvod">
-    Zatím tu není žádné dítě. Přidejte první níže, nebo naimportujte data
-    z RůstCZ přes <a href="import.php">import CSV</a>.
+    <?php echo t('intro_no_children'); ?>
   </p>
 <?php else: ?>
   <ul class="rust-seznam">
@@ -80,10 +78,10 @@ rust_head('');
             <?php if ($last['vyska_cm'] !== null && $last['hmotnost_kg'] !== null): ?>,<?php endif; ?>
             <?php if ($last['hmotnost_kg'] !== null): ?>
               <?php echo rust_h(rust_num($last['hmotnost_kg'], 2)); ?> kg<?php endif; ?>
-            <span class="rust-pocet">(<?php echo count($measurements); ?> měření)</span>
+            <span class="rust-pocet"><?php echo th('count_measurements', array('n' => count($measurements))); ?></span>
           </span>
         <?php else: ?>
-          <span class="rust-posledni">zatím bez měření</span>
+          <span class="rust-posledni"><?php echo th('no_measurements_yet'); ?></span>
         <?php endif; ?>
       </li>
     <?php endforeach; ?>
@@ -91,44 +89,43 @@ rust_head('');
 <?php endif; ?>
 
 <details class="rust-panel"<?php echo $children ? '' : ' open'; ?>>
-  <summary>Přidat dítě</summary>
+  <summary><?php echo th('add_child_summary'); ?></summary>
   <form method="post" class="rust-formular">
     <?php echo rust_csrf_field(); ?>
     <input type="hidden" name="akce" value="nove_dite">
-    <label>Jméno
+    <label><?php echo th('label_name'); ?>
       <input type="text" name="jmeno" required maxlength="60">
     </label>
-    <label>Pohlaví
+    <label><?php echo th('label_sex'); ?>
       <select name="pohlavi">
-        <option value="m">chlapec</option>
-        <option value="z">dívka</option>
+        <option value="m"><?php echo th('sex_boy'); ?></option>
+        <option value="z"><?php echo th('sex_girl'); ?></option>
       </select>
     </label>
-    <label>Datum narození
+    <label><?php echo th('label_birth_date'); ?>
       <input type="date" name="narozeni" required max="<?php echo date('Y-m-d'); ?>">
     </label>
-    <label>Výška otce (cm)
-      <input type="text" inputmode="decimal" name="otec" placeholder="nepovinné">
+    <label><?php echo th('label_father_height'); ?>
+      <input type="text" inputmode="decimal" name="otec" placeholder="<?php echo th('placeholder_optional'); ?>">
     </label>
-    <label>Výška matky (cm)
-      <input type="text" inputmode="decimal" name="matka" placeholder="nepovinné">
+    <label><?php echo th('label_mother_height'); ?>
+      <input type="text" inputmode="decimal" name="matka" placeholder="<?php echo th('placeholder_optional'); ?>">
     </label>
     <label class="rust-zaskrtnuti">
       <input type="checkbox" name="kojeno" value="1">
-      Kojené dítě
+      <?php echo th('label_breastfed'); ?>
     </label>
-    <button type="submit">Přidat</button>
+    <button type="submit"><?php echo th('button_add'); ?></button>
   </form>
   <p class="rust-poznamka">
-    Výšky rodičů slouží k výpočtu cílové (genetické) výšky. Bez nich vše
-    ostatní funguje.
+    <?php echo th('note_parent_heights'); ?>
   </p>
 </details>
 
 <p class="rust-odkazy">
-  <a href="import.php">Import CSV</a>
+  <a href="import.php"><?php echo th('nav_import_csv'); ?></a>
   &middot;
-  <a href="kos.php">Koš</a>
+  <a href="kos.php"><?php echo th('nav_trash'); ?></a>
 </p>
 
 <?php rust_foot(); ?>

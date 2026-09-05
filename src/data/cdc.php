@@ -16,10 +16,7 @@
 
 return array (
   'id' => 'cdc',
-  'label' => 'USA – CDC 2000',
-  'note' => 'Americká reference CDC 2000, výška i hmotnost od narození do 20 let.',
-  'source' => 'CDC, National Center for Health Statistics, growth charts 2000.',
-  'metrics' => 
+  'metrics' =>
   array (
     'height' => 
     array (

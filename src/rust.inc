@@ -10,6 +10,8 @@
  * converted at build time - see tools/build_reference_data.php.
  */
 
+require_once __DIR__ . '/i18n.inc';
+
 /* ---------------------------------------------------------------- metrics */
 
 /**
@@ -33,20 +35,20 @@ function rust_metrics()
            exactly through every point, and the residual scatter collapses to
            near zero - at which point anything at all looks like an outlier. */
         'height' => array(
-            'label' => 'Tělesná výška', 'unit' => 'cm', 'decimals' => 1,
-            'index' => 'age', 'index_label' => 'věk (roky)', 'noise' => 0.5,
+            'label' => t('metric_height'), 'unit' => 'cm', 'decimals' => 1,
+            'index' => 'age', 'index_label' => t('index_age'), 'noise' => 0.5,
         ),
         'weight' => array(
-            'label' => 'Hmotnost', 'unit' => 'kg', 'decimals' => 2,
-            'index' => 'age', 'index_label' => 'věk (roky)', 'noise' => 0.3,
+            'label' => t('metric_weight'), 'unit' => 'kg', 'decimals' => 2,
+            'index' => 'age', 'index_label' => t('index_age'), 'noise' => 0.3,
         ),
         'bmi' => array(
-            'label' => 'BMI', 'unit' => 'kg/m²', 'decimals' => 1,
-            'index' => 'age', 'index_label' => 'věk (roky)', 'noise' => 0.4,
+            'label' => t('metric_bmi'), 'unit' => 'kg/m²', 'decimals' => 1,
+            'index' => 'age', 'index_label' => t('index_age'), 'noise' => 0.4,
         ),
         'wfh' => array(
-            'label' => 'Hmotnost k výšce', 'unit' => 'kg', 'decimals' => 2,
-            'index' => 'height', 'index_label' => 'tělesná výška (cm)', 'noise' => 0.3,
+            'label' => t('metric_wfh'), 'unit' => 'kg', 'decimals' => 2,
+            'index' => 'height', 'index_label' => t('index_height'), 'noise' => 0.3,
         ),
     );
 }
@@ -120,7 +122,15 @@ function rust_reference_ids_for($child)
     }));
 }
 
-/** Loads one reference file. Cached per request; these files are read-only. */
+/**
+ * Loads one reference file. Cached per request; these files are read-only.
+ *
+ * The generated file (tools/build_reference_data.php) carries only 'id' and
+ * 'metrics' - the LMS rows, which do not vary by locale. 'label', 'note' and
+ * 'source' are display text, so they are not baked into the generated file
+ * at all: they are looked up from the language files here, on every load,
+ * which is what lets the same generated data file serve every locale.
+ */
 function rust_reference($id)
 {
     static $cache = array();
@@ -132,7 +142,11 @@ function rust_reference($id)
         if (!is_file($path)) {
             return null;
         }
-        $cache[$id] = require $path;
+        $data = require $path;
+        $data['label'] = t('ref_' . $id . '_label');
+        $data['note'] = t('ref_' . $id . '_note');
+        $data['source'] = t('ref_' . $id . '_source');
+        $cache[$id] = $data;
     }
     return $cache[$id];
 }

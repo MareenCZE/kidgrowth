@@ -38,37 +38,37 @@ foreach (rust_children() as $child) {
     }
 }
 
-rust_head('Koš');
+rust_head(t('nav_trash'));
 ?>
 
-<h1>Koš</h1>
+<h1><?php echo th('nav_trash'); ?></h1>
 <p class="rust-poznamka">
-  Nic odtud nemizí samo - položky tu zůstávají, dokud je neobnovíte.
+  <?php echo th('trash_intro'); ?>
 </p>
 
-<h2>Smazané děti</h2>
+<h2><?php echo th('trash_children_heading'); ?></h2>
 <?php if (!$deletedChildren): ?>
-  <p class="rust-nodata">Žádné.</p>
+  <p class="rust-nodata"><?php echo th('trash_none'); ?></p>
 <?php else: ?>
   <ul class="rust-seznam">
     <?php foreach ($deletedChildren as $child): ?>
       <li>
         <?php echo rust_h($child['jmeno']); ?>
-        <span class="rust-slabe">(smazáno <?php echo rust_h($child['smazano']); ?>)</span>
+        <span class="rust-slabe"><?php echo th('trash_deleted_at', array('when' => rust_h($child['smazano']))); ?></span>
         <form method="post">
           <?php echo rust_csrf_field(); ?>
           <input type="hidden" name="akce" value="obnovit_dite">
           <input type="hidden" name="id" value="<?php echo (int)$child['id']; ?>">
-          <button type="submit">Obnovit</button>
+          <button type="submit"><?php echo th('button_restore'); ?></button>
         </form>
       </li>
     <?php endforeach; ?>
   </ul>
 <?php endif; ?>
 
-<h2>Smazaná měření</h2>
+<h2><?php echo th('trash_measurements_heading'); ?></h2>
 <?php if (!$deletedMeasurements): ?>
-  <p class="rust-nodata">Žádná.</p>
+  <p class="rust-nodata"><?php echo th('trash_none'); ?></p>
 <?php else: ?>
   <?php foreach ($deletedMeasurements as $group): ?>
     <h3><?php echo rust_h($group['child']['jmeno']); ?></h3>
@@ -76,13 +76,13 @@ rust_head('Koš');
       <?php foreach ($group['rows'] as $row): ?>
         <li>
           <?php echo rust_h(rust_date_cz($row['datum'])); ?>
-          <span class="rust-slabe">(smazáno <?php echo rust_h($row['smazano']); ?>)</span>
+          <span class="rust-slabe"><?php echo th('trash_deleted_at', array('when' => rust_h($row['smazano']))); ?></span>
           <form method="post">
             <?php echo rust_csrf_field(); ?>
             <input type="hidden" name="akce" value="obnovit_mereni">
             <input type="hidden" name="dite_id" value="<?php echo (int)$group['child']['id']; ?>">
             <input type="hidden" name="id" value="<?php echo (int)$row['id']; ?>">
-            <button type="submit">Obnovit</button>
+            <button type="submit"><?php echo th('button_restore'); ?></button>
           </form>
         </li>
       <?php endforeach; ?>
@@ -91,7 +91,7 @@ rust_head('Koš');
 <?php endif; ?>
 
 <p class="rust-odkazy">
-  <a href="index.php">Zpět na seznam dětí</a>
+  <a href="index.php"><?php echo th('nav_back_to_children'); ?></a>
 </p>
 
 <?php rust_foot(); ?>

@@ -9,8 +9,8 @@ $childId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $child = rust_child($childId);
 if (!$child) {
     header('HTTP/1.1 404 Not Found');
-    rust_head('Nenalezeno');
-    echo '<h1>Dítě nenalezeno</h1><p><a href="index.php">Zpět na seznam</a></p>';
+    rust_head(t('page_title_not_found'));
+    echo '<h1>' . th('heading_child_not_found') . '</h1><p><a href="index.php">' . th('nav_back_to_children') . '</a></p>';
     rust_foot();
     exit;
 }
@@ -95,9 +95,9 @@ rust_head($child['jmeno'], $childId);
 
 <h1><?php echo rust_h($child['jmeno']); ?></h1>
 <p class="rust-podtitul">
-  narozen<?php echo $sex === 'z' ? 'a' : ''; ?>
+  <?php echo th($sex === 'z' ? 'subtitle_born_f' : 'subtitle_born_m'); ?>
   <?php echo rust_h(rust_date_cz($born)); ?>,
-  nyní <?php echo rust_h(rust_age_cz($currentAge)); ?>
+  <?php echo th('subtitle_now'); ?> <?php echo rust_h(rust_age_cz($currentAge)); ?>
 </p>
 
 <?php rust_reference_picker($referenceId, $linkParams, $availableRefs); ?>
@@ -111,11 +111,11 @@ rust_head($child['jmeno'], $childId);
 ?>
 <p class="rust-rozsah">
   <a href="?<?php echo rust_h(http_build_query($rangeLink)); ?>"><?php
-    echo $fullRange ? 'Zobrazit jen doposud naměřený věk' : 'Zobrazit celý rozsah do dospělosti';
+    echo $fullRange ? th('link_show_measured_range') : th('link_show_full_range');
   ?></a>
   &middot;
   <a href="?<?php echo rust_h(http_build_query($smoothLink)); ?>"><?php
-    echo $smoothing ? 'Zobrazit jen naměřené hodnoty' : 'Vyrovnat kolísání měření';
+    echo $smoothing ? th('link_hide_smoothing') : th('link_show_smoothing');
   ?></a>
 </p>
 
@@ -141,20 +141,23 @@ foreach (rust_metrics() as $metric => $meta):
     /* only meaningful for the age-indexed metrics */
     $childCovered = ($span && $meta['index'] === 'age' && $currentAge !== null
         && $currentAge >= $span[0] && $currentAge <= $span[1]);
+    $indexWord = ($meta['index'] === 'age') ? th('index_word_age') : th('index_word_height');
     ?>
     <section class="rust-sekce">
       <h2><?php echo rust_h($meta['label']); ?></h2>
       <?php if (!$span): ?>
         <p class="rust-nodata">
-          Reference <?php echo rust_h($reference['label']); ?> tento údaj neobsahuje.
+          <?php echo t('nodata_metric_not_in_reference', array('reference' => rust_h($reference['label']))); ?>
         </p>
       <?php elseif (!$pointsInSpan && !$childCovered): ?>
         <p class="rust-nodata">
-          Reference <?php echo rust_h($reference['label']); ?> pokrývá
-          <?php echo rust_h($meta['index'] === 'age' ? 'věk' : 'výšku'); ?>
-          <?php echo rust_h(rust_num($span[0])); ?>&ndash;<?php echo rust_h(rust_num($span[1])); ?>
-          <?php echo rust_h($meta['index'] === 'age' ? 'let' : 'cm'); ?>
-          a odtud tu nejsou žádná měření. Zvolte jinou referenci.
+          <?php echo t('nodata_no_measurements_in_span', array(
+              'reference' => rust_h($reference['label']),
+              'index' => $indexWord,
+              'min' => rust_h(rust_num($span[0])),
+              'max' => rust_h(rust_num($span[1])),
+              'unit' => ($meta['index'] === 'age') ? th('unit_years_word') : 'cm',
+          )); ?>
         </p>
       <?php else: ?>
         <?php
@@ -168,50 +171,30 @@ foreach (rust_metrics() as $metric => $meta):
         <?php if (isset($smooth[$metric])): ?>
           <?php $fit = $smooth[$metric]; ?>
           <p class="rust-poznamka">
-            Typický rozptyl měření je
-            <strong>±<?php echo rust_h(rust_num($fit['scatter'], $meta['decimals'])); ?>
-            <?php echo rust_h($meta['unit']); ?></strong>
-            &ndash; tolik se jednotlivá měření liší od vyrovnané křivky.
+            <?php echo t('note_scatter', array(
+                'scatter' => '<strong>&plusmn;' . rust_h(rust_num($fit['scatter'], $meta['decimals']))
+                    . ' ' . rust_h($meta['unit']) . '</strong>',
+            )); ?>
             <?php if ($fit['suspect']): ?>
-              Zvýrazněná měření
-              (<?php echo count($fit['suspect']); ?>) se liší natolik, že stojí
-              za kontrolu zápisu.
+              <?php echo t('note_scatter_suspect', array('n' => count($fit['suspect']))); ?>
             <?php endif; ?>
           </p>
         <?php endif; ?>
         <?php if ($metric === 'bmi'): ?>
           <details class="rust-panel">
-            <summary>Co znamená BMI u dětí?</summary>
-            <p>
-              BMI dává hmotnost do poměru k výšce (kg/m²), takže samo o sobě
-              nezvýhodňuje vysoké ani malé děti.
-            </p>
-            <p>
-              <strong>U dětí neplatí pevné hranice jako u dospělých</strong>
-              &ndash; čísla 25 a 30 sem nepatří. Hodnotí se percentilem k věku
-              a pohlaví: podle SZÚ je pásmo 90.&ndash;97. percentilu nadváha
-              a nad 97. percentilem obezita. Jiné reference mají hranice jinde
-              (CDC 85. a 95.), takže stejné dítě může podle zvolené reference
-              vyjít různě.
-            </p>
-            <p>
-              <strong>Do pěti let dává česká praxe přednost grafu hmotnosti
-              k výšce</strong> před BMI, teprve u starších dětí se hodnotí BMI.
-              Oba grafy jsou tu výš.
-            </p>
-            <p class="rust-poznamka">
-              Že BMI v předškolním věku klesá, je normální a není důvod
-              k obavám: medián u chlapců stoupne asi na 17,2 kolem osmi měsíců,
-              pak klesá až na 15,4 ve zhruba šesti letech a teprve potom zase
-              roste, do osmnácti na 21,7. U dívek je ten pokles o něco dřív.
-            </p>
+            <summary><?php echo th('bmi_explainer_summary'); ?></summary>
+            <p><?php echo t('bmi_explainer_p1'); ?></p>
+            <p><?php echo t('bmi_explainer_p2'); ?></p>
+            <p><?php echo t('bmi_explainer_p3'); ?></p>
+            <p class="rust-poznamka"><?php echo t('bmi_explainer_p4'); ?></p>
           </details>
         <?php endif; ?>
         <?php if ($metric === 'weight' && $span[1] < 17.5): ?>
           <p class="rust-poznamka">
-            <?php echo rust_h($reference['label']); ?> publikuje hmotnost k věku
-            jen do <?php echo rust_h(rust_years_cz($span[1])); ?> &ndash; v pubertě
-            už samotná hmotnost neodliší výšku od tělesné hmoty.
+            <?php echo t('note_weight_ceiling', array(
+                'reference' => rust_h($reference['label']),
+                'age' => rust_h(rust_years_cz($span[1])),
+            )); ?>
           </p>
         <?php endif; ?>
         <?php
@@ -222,11 +205,14 @@ foreach (rust_metrics() as $metric => $meta):
         ?>
         <?php if ($hidden > 0): ?>
           <p class="rust-poznamka">
-            <?php echo rust_h($reference['label']); ?> pokrývá
-            <?php echo rust_h($meta['index'] === 'age' ? 'věk' : 'výšku'); ?>
-            <?php echo rust_h(rust_num($span[0])); ?>&ndash;<?php echo rust_h(rust_num($span[1])); ?>
-            <?php echo rust_h($meta['index'] === 'age' ? 'let' : 'cm'); ?>,
-            <?php echo (int)$hidden; ?> měření mimo tento rozsah graf nezobrazuje.
+            <?php echo t('note_hidden_measurements', array(
+                'reference' => rust_h($reference['label']),
+                'index' => $indexWord,
+                'min' => rust_h(rust_num($span[0])),
+                'max' => rust_h(rust_num($span[1])),
+                'unit' => ($meta['index'] === 'age') ? th('unit_years_word') : 'cm',
+                'n' => (int)$hidden,
+            )); ?>
           </p>
         <?php endif; ?>
       <?php endif; ?>
@@ -270,60 +256,42 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
 ?>
 <?php if ($velocityChart !== ''): ?>
   <section class="rust-sekce">
-    <h2>Rychlost růstu</h2>
+    <h2><?php echo th('heading_velocity'); ?></h2>
     <?php echo $velocityChart; ?>
-    <p class="rust-poznamka">
-      Kolik centimetrů dítě přirostlo za rok. <strong>Tempo mediánu</strong> je,
-      o kolik za stejné období vyroste dítě na 50.&nbsp;percentilu &ndash; není
-      to percentil rychlosti, ale růst mediánového dítěte. Percentily rychlosti
-      tu záměrně nejsou: nelze je odvodit z tabulek dosažené výšky a pro tento
-      věk je nikdo nepublikuje v použitelné podobě (WHO je má jen do dvou let,
-      SZÚ vůbec).
-    </p>
-    <p class="rust-poznamka">
-      Rychlost je ze všech údajů nejcitlivější na nepřesnost měření &ndash;
-      počítá se z rozdílu dvou hodnot, takže se jejich chyby sčítají. Proto se
-      měří za období kolem roku a proto se vyplatí číst spíš vyrovnaný průběh
-      než jednotlivé body.
-    </p>
+    <p class="rust-poznamka"><?php echo t('velocity_explainer_p1'); ?></p>
+    <p class="rust-poznamka"><?php echo t('velocity_explainer_p2'); ?></p>
   </section>
 <?php endif; ?>
 
 <?php if ($sdsChart !== ''): ?>
   <section class="rust-sekce">
-    <h2>Vývoj SD v čase</h2>
+    <h2><?php echo th('heading_sds'); ?></h2>
     <?php echo $sdsChart; ?>
-    <p class="rust-poznamka">
-      Tenhle graf odpovídá na otázku, kterou růstové grafy samy neukážou:
-      <strong>drží se dítě svého pásma?</strong> Vodorovná čára znamená, že
-      roste stále stejně vzhledem k vrstevníkům &ndash; ať už nahoře, nebo dole.
-      Stoupající nebo klesající čára znamená, že pásmo opouští, a právě to je
-      signál, který stojí za pozornost lékaře. Šedý pruh je rozmezí
-      &minus;2 až +2&nbsp;SD, kam patří zhruba 95&nbsp;% dětí.
-    </p>
+    <p class="rust-poznamka"><?php echo t('sds_explainer_p1'); ?></p>
   </section>
 <?php endif; ?>
 
 <section class="rust-sekce">
-  <h2>Předpověď dospělé výšky</h2>
+  <h2><?php echo th('heading_prediction'); ?></h2>
   <div class="rust-predpoved">
     <?php /* Measured first: it is built from this child's own growth, whereas
              the mid-parental target is a ~17 cm band that says the same thing
              for every child of the same two parents. */ ?>
     <div class="rust-karta rust-karta-hlavni">
-      <h3>Podle naměřených hodnot</h3>
+      <h3><?php echo th('heading_measured_prediction'); ?></h3>
       <?php if ($projection): ?>
         <p class="rust-cislo"><?php echo rust_h(rust_num($projection['mid'])); ?> cm</p>
         <p class="rust-rozptyl">
-          rozmezí <?php echo rust_h(rust_num($projection['low'])); ?>&ndash;<?php echo rust_h(rust_num($projection['high'])); ?> cm
+          <?php echo t('range_cm', array(
+              'low' => rust_h(rust_num($projection['low'])),
+              'high' => rust_h(rust_num($projection['high'])),
+          )); ?>
         </p>
         <p class="rust-poznamka">
-          Předpokládá, že dítě zůstane ve svém růstovém pásmu
-          (<?php echo rust_h(rust_num($projection['z'], 2)); ?> SD), spočteno
-          z posledních <?php echo (int)$projection['based_on']; ?> měření výšky.
-          V grafu je vyznačeno modrou značkou u osmnácti let.
-          <strong>V pubertě to neplatí</strong> &ndash; růstový výšvih běžně
-          posune dítě mezi pásmy.
+          <?php echo t('note_projection', array(
+              'z' => rust_h(rust_num($projection['z'], 2)),
+              'n' => (int)$projection['based_on'],
+          )); ?>
         </p>
       <?php else: ?>
         <?php
@@ -335,95 +303,75 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
         ?>
         <?php if (!$reachesAdulthood): ?>
           <p class="rust-nodata">
-            Reference <?php echo rust_h($reference['label']); ?> končí ve věku
-            <?php echo rust_h(rust_years_cz($heightSpan[1])); ?>, takže z ní
-            dospělou výšku odhadnout nelze. Přepněte na referenci, která sahá
-            do dospělosti.
+            <?php echo t('nodata_reference_too_short', array(
+                'reference' => rust_h($reference['label']),
+                'age' => rust_h(rust_years_cz($heightSpan[1])),
+            )); ?>
           </p>
         <?php else: ?>
-          <p class="rust-nodata">Potřebuje aspoň dvě měření výšky.</p>
+          <p class="rust-nodata"><?php echo th('nodata_need_two_measurements'); ?></p>
         <?php endif; ?>
       <?php endif; ?>
     </div>
 
     <div class="rust-karta">
-      <h3>Cílová (genetická) výška</h3>
+      <h3><?php echo th('heading_target_height'); ?></h3>
       <?php if ($target): ?>
         <p class="rust-cislo"><?php echo rust_h(rust_num($target['mid'])); ?> cm</p>
         <p class="rust-rozptyl">
-          rozmezí <?php echo rust_h(rust_num($target['low'])); ?>&ndash;<?php echo rust_h(rust_num($target['high'])); ?> cm
+          <?php echo t('range_cm', array(
+              'low' => rust_h(rust_num($target['low'])),
+              'high' => rust_h(rust_num($target['high'])),
+          )); ?>
         </p>
         <p class="rust-poznamka">
-          Jen z výšek rodičů (<?php echo rust_h(rust_num($child['vyska_otce_cm'])); ?> a
-          <?php echo rust_h(rust_num($child['vyska_matky_cm'])); ?> cm), bez ohledu
-          na naměřené hodnoty. Pásmo je široké zhruba 17 cm, takže jde spíš
-          o kontrolu než o předpověď. V grafu hnědě.
+          <?php echo t('note_target_height', array(
+              'father' => rust_h(rust_num($child['vyska_otce_cm'])),
+              'mother' => rust_h(rust_num($child['vyska_matky_cm'])),
+          )); ?>
         </p>
       <?php else: ?>
         <p class="rust-nodata">
-          Zadejte výšky rodičů v <a href="uprava.php?id=<?php echo (int)$childId; ?>">úpravě dítěte</a>.
+          <?php echo t('nodata_need_parent_heights', array(
+              'link_open' => '<a href="uprava.php?id=' . (int)$childId . '">',
+              'link_close' => '</a>',
+          )); ?>
         </p>
       <?php endif; ?>
     </div>
   </div>
-  <p class="rust-poznamka">
-    Přesnější metody (Bayley&ndash;Pinneau, Tanner&ndash;Whitehouse) vycházejí
-    z kostního věku, který se určuje z rentgenu ruky, a záměrně tu nejsou.
-  </p>
+  <p class="rust-poznamka"><?php echo t('note_bone_age'); ?></p>
 </section>
 
 <details class="rust-panel">
-  <summary>Co znamená percentil a SD?</summary>
-  <p>
-    <strong>Percentil</strong> říká, kolik procent dětí stejného věku a pohlaví
-    je menších. 25. percentil znamená, že čtvrtina dětí je menší a tři čtvrtiny
-    větší. Padesátý percentil je medián &ndash; přesný střed populace.
-  </p>
-  <p>
-    <strong>SD</strong> (směrodatná odchylka, také SDS nebo z-skóre) měří totéž,
-    ale jinou stupnicí: o kolik odchylek je dítě nad nebo pod průměrem.
-    0&nbsp;SD je přesný průměr, záporné číslo znamená pod průměrem.
-    Zhruba dvě třetiny dětí se vejdou mezi &minus;1 a +1&nbsp;SD a 95&nbsp;%
-    mezi &minus;2 a +2&nbsp;SD.
-  </p>
-  <p>
-    Převod je pevný: &minus;2&nbsp;SD je zhruba 2. percentil,
-    &minus;1&nbsp;SD asi 16., 0&nbsp;SD přesně 50., +1&nbsp;SD asi 84.
-    a +2&nbsp;SD zhruba 98.
-  </p>
-  <p class="rust-poznamka">
-    Proč jsou tu obojí: u dětí blízko průměru se percentil čte snáz, ale na
-    okrajích se percentily mačkají k sobě &ndash; mezi 1. a 0,1. percentilem je
-    víc než celá směrodatná odchylka růstu. Právě proto lékaři u velmi malých
-    a velmi velkých dětí sledují SD, ne percentil. <strong>Změna SD v čase je
-    přitom důležitější než jeho hodnota</strong>: dítě, které stabilně roste na
-    &minus;2&nbsp;SD, je nejspíš prostě malé, zatímco dítě, které se během roku
-    posune z &minus;0,5 na &minus;1,5&nbsp;SD, opouští své pásmo, a to stojí za
-    pozornost lékaře.
-  </p>
+  <summary><?php echo th('summary_percentile_sd'); ?></summary>
+  <p><?php echo t('percentile_sd_p1'); ?></p>
+  <p><?php echo t('percentile_sd_p2'); ?></p>
+  <p><?php echo t('percentile_sd_p3'); ?></p>
+  <p class="rust-poznamka"><?php echo t('percentile_sd_p4'); ?></p>
 </details>
 
 <section class="rust-sekce">
-  <h2>Měření</h2>
+  <h2><?php echo th('heading_measurements'); ?></h2>
 
   <form method="post" action="zaznam.php" class="rust-formular rust-radek">
     <?php echo rust_csrf_field(); ?>
     <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
     <input type="hidden" name="ref" value="<?php echo rust_h($referenceId); ?>">
-    <label>Datum
+    <label><?php echo th('label_date'); ?>
       <input type="date" name="datum" value="<?php echo date('Y-m-d'); ?>" required
              max="<?php echo date('Y-m-d'); ?>">
     </label>
-    <label>Výška (cm)
-      <input type="text" inputmode="decimal" name="vyska" placeholder="např. 122,5">
+    <label><?php echo th('label_height_cm'); ?>
+      <input type="text" inputmode="decimal" name="vyska" placeholder="<?php echo th('placeholder_example_height'); ?>">
     </label>
-    <label>Hmotnost (kg)
-      <input type="text" inputmode="decimal" name="hmotnost" placeholder="např. 20,5">
+    <label><?php echo th('label_weight_kg'); ?>
+      <input type="text" inputmode="decimal" name="hmotnost" placeholder="<?php echo th('placeholder_example_weight'); ?>">
     </label>
-    <button type="submit">Uložit</button>
+    <button type="submit"><?php echo th('button_save'); ?></button>
   </form>
   <p class="rust-poznamka">
-    Stačí vyplnit jen jeden z údajů. Uložení stejného data přepíše dřívější zápis.
+    <?php echo th('note_measurement_save'); ?>
   </p>
 
   <?php if ($measurements): ?>
@@ -438,11 +386,11 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
     <table class="rust-tabulka">
       <thead>
         <tr>
-          <th>Datum</th><th>Věk</th>
-          <th>Výška</th><th>Perc.</th><th>SD</th>
-          <th>Hmotnost</th><th>Perc.</th><th>SD</th>
-          <th>BMI</th><th>Perc.</th>
-          <th>Rychlost růstu</th><th></th>
+          <th><?php echo th('th_date'); ?></th><th><?php echo th('th_age'); ?></th>
+          <th><?php echo th('th_height'); ?></th><th><?php echo th('th_percentile_short'); ?></th><th>SD</th>
+          <th><?php echo th('th_weight'); ?></th><th><?php echo th('th_percentile_short'); ?></th><th>SD</th>
+          <th>BMI</th><th><?php echo th('th_percentile_short'); ?></th>
+          <th><?php echo th('th_velocity'); ?></th><th></th>
         </tr>
       </thead>
       <tbody>
@@ -471,36 +419,33 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
 
           <td class="rust-slabe">
             <?php if (isset($velocityByDate[$row['datum']])): $v = $velocityByDate[$row['datum']]; ?>
-              <span title="od <?php echo rust_h(rust_date_cz($v['from_date'])); ?>, za <?php echo rust_h(rust_years_span_cz($v['years'])); ?>">
-                <?php echo rust_h(rust_num($v['cm_per_year'])); ?>&nbsp;cm/rok
+              <span title="<?php echo th('velocity_since', array(
+                  'date' => rust_h(rust_date_cz($v['from_date'])),
+                  'span' => rust_h(rust_years_span_cz($v['years'])),
+              )); ?>">
+                <?php echo rust_h(rust_num($v['cm_per_year'])); ?>&nbsp;cm/<?php echo th('unit_year_short'); ?>
               </span>
             <?php endif; ?>
           </td>
           <td>
             <a href="smazat-mereni.php?dite_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo rust_h($referenceId); ?>"
-               class="rust-smazat" title="Smazat">&times;</a>
+               class="rust-smazat" title="<?php echo th('button_delete'); ?>">&times;</a>
           </td>
         </tr>
       <?php endforeach; ?>
       </tbody>
     </table>
     </div>
-    <p class="rust-poznamka">
-      Rychlost růstu je přepočtena na rok a měřena zhruba za poslední rok, ne
-      od předchozího měření &ndash; najeďte na hodnotu a uvidíte přesné období.
-      Krátký odstup by chybu měření zvětšil spolu s růstem: půl centimetru
-      nepřesnosti za čtyři měsíce vyjde jako 1,5&nbsp;cm/rok navíc, takže by
-      i rovnoměrně rostoucí dítě zdánlivě zrychlovalo a zpomalovalo.
-    </p>
+    <p class="rust-poznamka"><?php echo t('note_velocity_table'); ?></p>
   <?php endif; ?>
 </section>
 
 <p class="rust-odkazy">
-  <a href="uprava.php?id=<?php echo (int)$childId; ?>">Upravit dítě</a>
+  <a href="uprava.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_edit_child'); ?></a>
   &middot;
-  <a href="export.php?id=<?php echo (int)$childId; ?>">Export CSV</a>
+  <a href="export.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_export_csv'); ?></a>
   &middot;
-  <a href="index.php">Všechny děti</a>
+  <a href="index.php"><?php echo th('nav_all_children'); ?></a>
 </p>
 
 <?php rust_foot($referenceId); ?>

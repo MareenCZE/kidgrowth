@@ -1,0 +1,28 @@
+SSLRequireSSL
+
+# Children's health measurements: nothing here should be reachable without a
+# password. Fail-open is not acceptable for this application - see the
+# "Install" section of the README for the fail-closed check the app itself
+# also performs.
+AuthType Basic
+AuthName "Rust"
+# Point this OUTSIDE the web root (a sibling of, not inside, this directory's
+# docroot) and create it with:  htpasswd -c /path/outside/docroot/.htpasswd yourname
+AuthUserFile /path/outside/docroot/.htpasswd
+Require valid-user
+
+# .inc files are PHP source, not markup - some server configurations happily
+# serve them as plain text instead of executing them. This is the second
+# layer, independent of the auth above: someone who somehow gets past Basic
+# Auth still should not be able to read the source, and someone who
+# misconfigures the vhost should not leak it either.
+<Files "*.inc">
+  Require all denied
+</Files>
+
+# Same reasoning for the credentials file. db_config.php is executed as PHP
+# under normal configuration and never sends its contents to a browser, but
+# this is cheap insurance against the same misconfiguration as above.
+<Files "db_config.php">
+  Require all denied
+</Files>

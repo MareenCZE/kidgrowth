@@ -1,0 +1,16 @@
+# Real DB credentials - copy db_config.sample.php to this and fill it in
+src/db_config.php
+
+# Generated reference data that is not public domain (see DATA-LICENCES.md).
+# tools/build_reference_data.php fetches and writes these locally; only
+# data/cdc.php (public domain) ships in the repository.
+src/data/cav.php
+src/data/koj.php
+src/data/pol.php
+src/data/who.php
+
+# Basic Auth credentials for local/deployed instances
+.htpasswd*
+
+# Local scratch
+.DS_Store

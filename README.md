@@ -1,0 +1,96 @@
+# Růst
+
+A self-hosted web app for tracking a child's height and weight against
+national and international growth references, with percentiles, z-scores,
+smoothing and adult-height prediction.
+
+## Why this exists
+
+Růst replaces [RůstCZ](http://www.rustcz.cz/), a Windows desktop program for
+plotting Czech children's growth against the national percentile tables -
+still useful, no longer developed, and tied to a single machine. Růst is a
+small web app instead: it runs anywhere PHP does, works from a phone, and,
+because it stores LMS parameters rather than a fixed set of curves, can plot
+the same measurements against several national references side by side.
+
+The Czech reference data (from SZÚ's national anthropological surveys) is
+this project's actual differentiator - it exists nowhere else in a modern,
+self-hostable tool - but Růst also ships WHO, CDC (US) and Polish references,
+so it is useful well outside the Czech Republic.
+
+## What it does
+
+- Five growth references: Czech (SZÚ/CAV), Czech breastfed-infant curves, WHO,
+  US (CDC 2000), Poland.
+- Height, weight, BMI and weight-for-height charts, each with percentile and
+  z-score readouts.
+- Optional smoothing to see the trend through measurement noise, and a
+  growth-velocity chart.
+- A predicted adult-height channel, projected from the reference the
+  measurements are tracking.
+- CSV import/export, including a converter for RůstCZ's own database format
+  (`tools/import_rustcz.php`).
+- Installable as a PWA (works from a phone's home screen).
+
+## Install
+
+Requirements: **PHP 8.0+** and a **MySQL** (or MariaDB) database. (A
+zero-setup, file-based storage backend that needs neither is planned, but is
+not implemented yet; MySQL is the only backend today.)
+
+1. Clone the repository and point your web server's document root at `src/`.
+2. Create the database and load the schema:
+   ```
+   mysql -u root -p your_database < db/schema.sql
+   ```
+3. Copy `src/db_config.sample.php` to `src/db_config.php` and fill in your
+   database credentials.
+4. Build the reference data your installation will use:
+   ```
+   php tools/build_reference_data.php
+   ```
+   This downloads from SZÚ, WHO, PMC and the CDC and writes `src/data/*.php`
+   locally. Only `src/data/cdc.php` (public domain) ships in the repository -
+   see `DATA-LICENCES.md` for why the rest do not, and for what each source's
+   licence actually permits. Run this again any time you want to refresh the
+   data; nothing else in the application depends on network access.
+5. **Put Basic Auth (or an equivalent) in front of it.** Růst has no
+   authentication of its own - it relies entirely on your web server. A copy
+   of `src/.htaccess` is provided as a starting point for Apache; edit the
+   `AuthUserFile` path before using it, and point it somewhere outside your
+   document root. Publishing this application without an authentication layer
+   in front of it means publishing your children's health records to the open
+   internet.
+
+## Accuracy
+
+Růst's maths was validated against RůstCZ's own output across roughly 130
+real measurements of two children spanning nine years: in the range RůstCZ
+and SZÚ's published tables actually cover (the 3rd to 97th percentile),
+results agree to within 0.10 standard deviations. Where the two programs
+disagree outside that range, both are extrapolating past what SZÚ ever
+published, from different starting assumptions, and neither can be said to be
+more correct than the other - see `tools/check_rustcz_percentiles.php` for the
+detail.
+
+## The data
+
+See `DATA-LICENCES.md` for the full table of sources, licences and required
+attribution. In short: the code here is MIT, the reference data is not, and
+combining every available reference means the installation as a whole
+inherits a non-commercial restriction from two of the sources (Poland's
+school-age tables and WHO).
+
+## Disclaimer
+
+Růst is a tracking tool, not a diagnostic one. It plots measurements against
+published reference curves; it does not interpret them. Whether a child's
+growth is a cause for concern is a question for a paediatrician, not a web
+page.
+
+## Licence
+
+MIT for the code (see `LICENSE`); the reference data is separately licensed
+(see `DATA-LICENCES.md`). Credit to SZÚ, WHO, the CDC, and Kułaga et al. for
+the reference data itself, and to RůstCZ's author for the original idea and
+for a text-export format detailed enough to validate against.

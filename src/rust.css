@@ -1,0 +1,508 @@
+/*
+ * Growth tracker styles.
+ *
+ * Mobile first, because this is meant to be added to a phone's home screen and
+ * used standing in a hallway with a tape measure. The desktop layout is the
+ * enhancement, not the other way round.
+ */
+
+:root {
+  --rust-pozadi: #f7f7f4;
+  --rust-panel: #ffffff;
+  --rust-text: #23282c;
+  --rust-slabe: #6d757c;
+  --rust-linka: #dcdfe1;
+  --rust-akcent: #3c6e8f;
+  --rust-akcent-svetly: #e8f0f5;
+  --rust-chyba: #a3352b;
+  --rust-krivka: #b6c4cc;
+  --rust-pasmo: #eef2f4;
+  --rust-vyrovnani: #8a4bab;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--rust-pozadi);
+  color: var(--rust-text);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* keeps content clear of the notch when installed to the home screen */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+a { color: var(--rust-akcent); }
+
+/* ------------------------------------------------------------------ header */
+
+.rust-hlavicka {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--rust-panel);
+  border-bottom: 1px solid var(--rust-linka);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.rust-logo {
+  font-weight: 700;
+  font-size: 18px;
+  text-decoration: none;
+  color: var(--rust-akcent);
+}
+
+.rust-deti { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.rust-dite-odkaz {
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 14px;
+  background: var(--rust-pozadi);
+}
+
+.rust-dite-odkaz.rust-aktivni {
+  background: var(--rust-akcent);
+  color: #fff;
+}
+
+/* ----------------------------------------------------------------- layout */
+
+.rust-obsah {
+  /* Sized for a 1024px screen: 1000 of content plus 10 of padding each
+     side leaves room for a scrollbar without the page ever scrolling
+     sideways. Wider than a text column would want, but these are charts. */
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+h1 { font-size: 24px; margin: 8px 0 4px; }
+h2 { font-size: 18px; margin: 0 0 12px; }
+h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 600; }
+
+.rust-podtitul { margin: 0 0 16px; color: var(--rust-slabe); }
+
+.rust-sekce {
+  background: var(--rust-panel);
+  border: 1px solid var(--rust-linka);
+  border-radius: 10px;
+  /* modest side padding, which the charts then bleed back into - see
+     .rust-graf-obal - so the plots get the width without cramping the text */
+  padding: 12px 10px;
+  margin: 0 0 12px;
+}
+
+.rust-panel {
+  background: var(--rust-panel);
+  border: 1px solid var(--rust-linka);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 0 0 16px;
+}
+
+.rust-panel summary { cursor: pointer; font-weight: 600; }
+.rust-panel pre {
+  overflow-x: auto;
+  background: var(--rust-pozadi);
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.rust-poznamka { color: var(--rust-slabe); font-size: 13px; margin: 8px 0 0; }
+.rust-chyba { color: var(--rust-chyba); font-weight: 600; }
+.rust-nodata { color: var(--rust-slabe); font-style: italic; }
+.rust-odkazy { margin: 16px 0; font-size: 14px; }
+.rust-rozsah { margin: 0 0 12px; font-size: 14px; }
+
+/* ------------------------------------------------------------------- list */
+
+.rust-seznam { list-style: none; padding: 0; margin: 0 0 16px; }
+
+.rust-seznam li {
+  background: var(--rust-panel);
+  border: 1px solid var(--rust-linka);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+
+.rust-seznam a { text-decoration: none; font-size: 18px; }
+.rust-vek { color: var(--rust-slabe); font-size: 14px; margin-left: 8px; }
+.rust-posledni { display: block; color: var(--rust-slabe); font-size: 14px; margin-top: 4px; }
+.rust-pocet { margin-left: 4px; }
+
+/* ------------------------------------------------------------ the picker */
+
+.rust-prepinac { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
+
+.rust-volba {
+  padding: 6px 12px;
+  border: 1px solid var(--rust-linka);
+  border-radius: 999px;
+  background: var(--rust-panel);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.rust-volba.rust-aktivni {
+  background: var(--rust-akcent);
+  border-color: var(--rust-akcent);
+  color: #fff;
+}
+
+/* ------------------------------------------------------------------ forms */
+
+.rust-formular { display: flex; flex-direction: column; gap: 12px; }
+
+.rust-formular label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--rust-slabe);
+}
+
+.rust-formular input,
+.rust-formular select {
+  /* 16px keeps iOS Safari from zooming the page when a field is focused */
+  font-size: 16px;
+  padding: 9px 10px;
+  border: 1px solid var(--rust-linka);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--rust-text);
+}
+
+.rust-formular button {
+  font-size: 16px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--rust-akcent);
+  color: #fff;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+@media (min-width: 620px) {
+  .rust-radek { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
+  .rust-radek label { flex: 1 1 140px; }
+}
+
+/* ------------------------------------------------------------ predictions */
+
+.rust-predpoved { display: grid; gap: 12px; grid-template-columns: 1fr; }
+
+@media (min-width: 620px) {
+  .rust-predpoved { grid-template-columns: 1fr 1fr; }
+}
+
+.rust-karta {
+  border: 1px solid var(--rust-linka);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--rust-pozadi);
+}
+
+.rust-cislo { font-size: 26px; font-weight: 700; margin: 0; }
+.rust-rozptyl { margin: 2px 0 0; color: var(--rust-slabe); font-size: 14px; }
+
+/* ------------------------------------------------------------------ table */
+
+/* The table is wider than a phone; it scrolls inside its own box so the page
+   itself never scrolls sideways. */
+.rust-tabulka-obal { overflow-x: auto; margin-top: 16px; }
+
+.rust-tabulka { border-collapse: collapse; width: 100%; font-size: 14px; }
+
+.rust-tabulka th,
+.rust-tabulka td {
+  padding: 6px 8px;
+  text-align: right;
+  border-bottom: 1px solid var(--rust-linka);
+  white-space: nowrap;
+}
+
+.rust-tabulka th { text-align: right; color: var(--rust-slabe); font-weight: 600; }
+.rust-tabulka th:first-child,
+.rust-tabulka td:first-child { text-align: left; }
+.rust-tabulka .rust-slabe { color: var(--rust-slabe); }
+
+.rust-smazat { display: inline; }
+.rust-smazat button {
+  border: 0;
+  background: none;
+  color: var(--rust-slabe);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.rust-smazat button:hover { color: var(--rust-chyba); }
+
+/* ------------------------------------------------------------------ chart */
+
+/* Bleeds into the section padding so the plot gets the full width, while the
+   heading and the notes around it keep their breathing room. */
+.rust-graf-obal { margin: 0 -6px; position: relative; }
+
+.rust-graf-lista {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+  margin-bottom: 2px;
+}
+
+/* Reserves its line even when empty, so pointing at a dot does not shift the
+   chart down and slide the next dot out from under the cursor. */
+.rust-graf-hodnota {
+  font-size: 13px;
+  color: var(--rust-text);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.4em;
+}
+
+.rust-graf-full {
+  border: 1px solid var(--rust-linka);
+  background: var(--rust-panel);
+  color: var(--rust-slabe);
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1;
+  padding: 5px 9px;
+  cursor: pointer;
+  flex: none;
+}
+
+.rust-graf { width: 100%; height: auto; display: block; }
+
+.rust-child-dot { cursor: pointer; }
+/* A generous invisible hit area: the dot is 3.4 units across in a 760-unit
+   viewBox, which on a phone is far smaller than a fingertip. */
+.rust-child-dot { stroke: transparent; stroke-width: 14; }
+.rust-child-dot.rust-vybrany { stroke: var(--rust-akcent); stroke-width: 3; stroke-opacity: .35; }
+
+/* Full screen, both the real thing and the CSS fallback for iOS Safari, which
+   has no Fullscreen API for anything but video. */
+.rust-graf-obal:fullscreen,
+.rust-graf-obal.rust-celaobrazovka {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  margin: 0;
+  padding: 12px;
+  background: var(--rust-panel);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Room for the toolbar above and the legend below, both of which now travel
+   into full screen with the chart. */
+.rust-graf-obal:fullscreen .rust-graf,
+.rust-graf-obal.rust-celaobrazovka .rust-graf {
+  max-height: calc(100vh - 92px);
+}
+
+/* Landscape is the natural way to hold a phone for a wide chart, and there the
+   toolbar would otherwise eat most of the height. */
+@media (max-height: 480px) {
+  .rust-graf-obal.rust-celaobrazovka { padding: 6px; }
+  .rust-graf-obal.rust-celaobrazovka .rust-graf { max-height: calc(100vh - 66px); }
+}
+
+.rust-grid { stroke: var(--rust-linka); stroke-width: 1; }
+.rust-axis { fill: var(--rust-slabe); font-size: 11px; }
+.rust-axis-unit { font-size: 11px; }
+
+.rust-band { fill: var(--rust-pasmo); stroke: none; }
+.rust-p { fill: none; stroke: var(--rust-krivka); stroke-width: 1; }
+.rust-p-outer { stroke-dasharray: 4 3; }
+.rust-p50 { stroke: #8fa4b0; stroke-width: 1.6; }
+.rust-plabel { fill: var(--rust-slabe); font-size: 9px; }
+
+.rust-child-line { fill: none; stroke: var(--rust-akcent); stroke-width: 2; }
+.rust-child-dot { fill: var(--rust-akcent); }
+
+.rust-target { stroke: #b07d3a; stroke-width: 3; stroke-linecap: round; opacity: .55; }
+.rust-target-dot { fill: #b07d3a; }
+
+/* ---------------------------------------------------------------- footer */
+
+.rust-paticka {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 8px 10px 32px;
+  color: var(--rust-slabe);
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------- dark mode */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --rust-pozadi: #191c1e;
+    --rust-panel: #23272a;
+    --rust-text: #e8eaec;
+    --rust-slabe: #9aa3aa;
+    --rust-linka: #363b3f;
+    --rust-akcent: #7fb2d1;
+    --rust-akcent-svetly: #2a353d;
+    --rust-chyba: #e8897f;
+    --rust-krivka: #4d585f;
+    --rust-pasmo: #22292e;
+    --rust-vyrovnani: #c79ae2;
+  }
+
+  .rust-formular input,
+  .rust-formular select { background: #1c1f22; }
+  .rust-formular button { color: #10161a; }
+  .rust-dite-odkaz.rust-aktivni,
+  .rust-volba.rust-aktivni { color: #10161a; }
+  .rust-p50 { stroke: #6a7c86; }
+}
+
+/* An extrapolated value: shown, but visibly marked as an estimate. */
+.rust-odhad { color: var(--rust-slabe); border-bottom: 1px dotted var(--rust-slabe); cursor: help; }
+
+/* The measurement-based prediction leads, so it gets the accent border. */
+.rust-karta-hlavni { border-color: var(--rust-akcent); }
+
+.rust-zaskrtnuti {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  color: var(--rust-text) !important;
+}
+.rust-zaskrtnuti input { width: auto; }
+
+/* Adult-height predictions, drawn side by side at 18 years. */
+.rust-projection { stroke: var(--rust-akcent); stroke-width: 3; stroke-linecap: round; opacity: .55; }
+.rust-projection-dot { fill: var(--rust-akcent); }
+.rust-projection-line {
+  fill: none;
+  stroke: var(--rust-akcent);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
+  opacity: .5;
+}
+
+/* Anything with a readable value: measurement dots and the two predictions. */
+.rust-ukazatel { cursor: pointer; }
+.rust-ukazatel:focus { outline: none; }
+
+/* Circles get a generous invisible hit area - they are the primary target on a
+   phone, where the drawn 3.5-unit radius is far smaller than a fingertip. */
+.rust-projection-dot,
+.rust-target-dot { stroke: transparent; stroke-width: 14; }
+
+.rust-projection-dot.rust-vybrany { stroke: var(--rust-akcent); stroke-width: 3; stroke-opacity: .35; }
+.rust-target-dot.rust-vybrany { stroke: #b07d3a; stroke-width: 3; stroke-opacity: .35; }
+.rust-projection.rust-vybrany,
+.rust-target.rust-vybrany { opacity: 1; }
+
+/* --------------------------------------------------------------- smoothing */
+
+/* With smoothing on the raw line stays, but recedes behind the trend. */
+.rust-child-line-tlum { stroke-width: 1; opacity: .35; }
+
+/* A colour of its own rather than the accent: sharing it with the raw line and
+   the dots made the two hard to tell apart, which defeats the point of drawing
+   both. Violet is the one hue not already carrying meaning here - blue is the
+   child's own measurements, brown the mid-parental target, grey the reference
+   percentiles, red a suspect reading. */
+.rust-smooth-line {
+  fill: none;
+  stroke: var(--rust-vyrovnani);
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* A measurement the smoother could not reconcile with its neighbours. */
+.rust-child-dot.rust-podezrely { fill: var(--rust-chyba); }
+.rust-child-dot.rust-podezrely.rust-vybrany { stroke: var(--rust-chyba); }
+
+/* Swatches naming each line, drawn inside the figure so they stay visible in
+   full screen. */
+.rust-legenda-vyrovnani { color: var(--rust-vyrovnani); }
+.rust-legenda-mereni { color: var(--rust-akcent); }
+.rust-legenda-mereni::before { height: 1px; opacity: .55; }
+.rust-legenda-predpoved { color: var(--rust-akcent); }
+.rust-legenda-predpoved::before { height: 3px; opacity: .55; }
+.rust-legenda-cil { color: #b07d3a; }
+.rust-legenda-cil::before { height: 3px; opacity: .55; }
+.rust-legenda-tempo { color: var(--rust-slabe); }
+.rust-legenda-tempo::before { height: 2px; }
+
+/* The pace of the median curve on the velocity chart. Grey and dashed, like
+   the reference percentiles elsewhere, because it is a reference rather than
+   something measured. */
+.rust-tempo-line {
+  fill: none;
+  stroke: var(--rust-slabe);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 4;
+  opacity: .8;
+}
+
+/* ------------------------------------------------------------- SDS trend */
+
+.rust-sds-nula { stroke: var(--rust-slabe); stroke-width: 1.4; }
+.rust-sds-line { fill: none; stroke-width: 1.6; }
+
+/* With smoothing on, the raw SDS lines recede behind the smoothed ones. */
+.rust-sds-line-tlum { stroke-width: 1; opacity: .3; }
+.rust-sds-smooth {
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: #3c6e8f; }
+.rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: #b0653a; }
+.rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: #5d8c5a; }
+
+.rust-sds-dot { stroke: transparent; stroke-width: 14; }
+.rust-sds-dot.rust-sds-1 { fill: #3c6e8f; }
+.rust-sds-dot.rust-sds-2 { fill: #b0653a; }
+.rust-sds-dot.rust-sds-3 { fill: #5d8c5a; }
+.rust-sds-dot.rust-vybrany { stroke-opacity: .3; stroke-width: 10; }
+.rust-sds-dot.rust-vybrany.rust-sds-1 { stroke: #3c6e8f; }
+.rust-sds-dot.rust-vybrany.rust-sds-2 { stroke: #b0653a; }
+.rust-sds-dot.rust-vybrany.rust-sds-3 { stroke: #5d8c5a; }
+
+.rust-legenda-radek { margin: 6px 0 0; font-size: 13px; flex: none; }
+.rust-legenda { margin-right: 14px; }
+.rust-legenda::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  margin-right: 5px;
+  vertical-align: middle;
+  background: currentColor;
+}
+.rust-legenda.rust-sds-1 { color: #3c6e8f; }
+.rust-legenda.rust-sds-2 { color: #b0653a; }
+.rust-legenda.rust-sds-3 { color: #5d8c5a; }
+
+@media (prefers-color-scheme: dark) {
+  .rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: #7fb2d1; }
+  .rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: #d99b6c; }
+  .rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: #8ebd8a; }
+  .rust-sds-dot.rust-sds-1 { fill: #7fb2d1; }
+  .rust-sds-dot.rust-sds-2 { fill: #d99b6c; }
+  .rust-sds-dot.rust-sds-3 { fill: #8ebd8a; }
+  .rust-legenda.rust-sds-1 { color: #7fb2d1; }
+  .rust-legenda.rust-sds-2 { color: #d99b6c; }
+  .rust-legenda.rust-sds-3 { color: #8ebd8a; }
+}

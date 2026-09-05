@@ -43,6 +43,23 @@ so it is useful well outside the Czech Republic.
   there. Deleting a child asks you to retype their name first - it takes
   every one of their measurements with it.
 
+## Try it
+
+The fastest way to see it working, no install and nobody else's data involved:
+
+- **GitHub Codespaces.** Once this repository is on GitHub: **Code → Create
+  codespace on main**. `.devcontainer/` seeds two synthetic children
+  (`tools/seed_demo_data.php` - entirely invented measurement histories, never
+  a real family's) and starts the app on the forwarded port automatically.
+  Each Codespace is its own throwaway instance; nothing you enter is shared
+  with anyone else, and it disappears when the Codespace does. A banner in
+  the header says so, and CSV export is turned off there - there is nothing
+  in a demo worth taking with you.
+- **`docker compose up`**, then open <http://localhost:8080>. This runs the
+  real application, not the seeded demo, so - as the on-screen message will
+  tell you the first time - it needs the same authentication step as any
+  other install (see below) before it renders anything.
+
 ## Install
 
 Requirements: **PHP 8.0+**, and a **writable directory** - nothing else. By
@@ -89,6 +106,15 @@ application - `storage/.htaccess` denies web access to it as a second layer,
 but the real protection is that it sits outside your document root by
 default.
 
+### Demo mode
+
+`$DEMO_MODE = true;` in `config.php` adds the "this is a demo" banner and
+turns off CSV export (`src/export.php`). It changes nothing else - it is not
+a different code path, just those two things - so a demo instance is exactly
+what a real one looks like otherwise. This is what
+`.devcontainer/postCreate.sh` sets for Codespaces; you should not set it for
+a real deployment.
+
 ## Accuracy
 
 Růst's maths was validated against RůstCZ's own output across roughly 130
@@ -107,6 +133,27 @@ attribution. In short: the code here is MIT, the reference data is not, and
 combining every available reference means the installation as a whole
 inherits a non-commercial restriction from two of the sources (Poland's
 school-age tables and WHO).
+
+`docs/reference-data.md` explains how each source's numbers actually get out
+of a PDF, an Excel-shaped HTML page, or a chart with no numbers published at
+all - CID-keyed PDF fonts, a WHO filename reused for two different tables,
+non-breaking spaces that break `is_numeric()`, and the rest. `docs/architecture.md`
+explains the maths itself: the LMS model every reference is converted to, why
+smoothing happens in SDS space rather than centimetres, and why growth
+velocity is measured over the window closest to a year rather than between
+whichever two visits happened to occur.
+
+## Accessibility
+
+Text and every chart line were checked against WCAG's contrast requirements
+(4.5:1 for text, 3:1 for a graphical element like a chart line) by computing
+relative luminance directly rather than eyeballing it - see the comments next
+to the colours in `src/rust.css` for the actual ratios. The SD-over-time
+chart's three lines are additionally distinguished by dash pattern (solid /
+dashed / dotted), not colour alone, since brown-vs-green is the classic
+red-green colour-blindness confusion and the two metrics on that axis are
+exactly that pair. Not done: running an automated tool (axe, Lighthouse) - if
+you do, please open an issue with what it finds.
 
 ## Testing
 

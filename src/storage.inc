@@ -35,8 +35,23 @@ if (!isset($JSON_STORAGE_PATH)) {
 if (!isset($SQLITE_STORAGE_PATH)) {
     $SQLITE_STORAGE_PATH = __DIR__ . '/../storage/rust.sqlite';
 }
+if (!isset($DEMO_MODE)) {
+    $DEMO_MODE = false;
+}
 
 $GLOBALS['__rust_storage_backend'] = $STORAGE_BACKEND;
+$GLOBALS['__rust_demo_mode'] = (bool)$DEMO_MODE;
+
+/**
+ * True for a throwaway instance (a Codespace, most likely) seeded with
+ * invented data by tools/seed_demo_data.php - never for a real installation.
+ * Disables export (a demo visitor's session should leave no artefact once
+ * it ends) and puts a banner on every page saying so.
+ */
+function rust_demo_mode()
+{
+    return $GLOBALS['__rust_demo_mode'];
+}
 
 switch ($GLOBALS['__rust_storage_backend']) {
     case 'mysql':

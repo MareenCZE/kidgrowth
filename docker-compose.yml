@@ -1,0 +1,17 @@
+# Local trial: `docker compose up` and open http://localhost:8080. Uses the
+# stock PHP image and its built-in server - no Apache config, no image build
+# of our own, matching .devcontainer/devcontainer.json's approach for the
+# same reason: one less thing to keep in step with the application.
+#
+# This is for trying the app out, not for production - see README.md's
+# "Install" section for a real deployment (Basic Auth in front of it, a
+# storage backend of your choice).
+services:
+  rust:
+    image: php:8.3-cli
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    command: php -S 0.0.0.0:8080 -t src

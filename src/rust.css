@@ -10,12 +10,19 @@
   --rust-pozadi: #f7f7f4;
   --rust-panel: #ffffff;
   --rust-text: #23282c;
-  --rust-slabe: #6d757c;
+  /* 5.75:1 on the panel, 5.36:1 on the page background - the original
+     #6d757c scraped past text-contrast on the panel (4.68:1) but failed
+     against the page background (4.36:1, below the 4.5:1 AA floor). */
+  --rust-slabe: #5f676e;
   --rust-linka: #dcdfe1;
   --rust-akcent: #3c6e8f;
   --rust-akcent-svetly: #e8f0f5;
   --rust-chyba: #a3352b;
-  --rust-krivka: #b6c4cc;
+  /* 3.30:1 on the panel - the original #b6c4cc measured 1.79:1, well under
+     the 3:1 WCAG 1.4.11 floor for a non-text graphical element. This draws
+     the non-emphasised percentile curves (10th/25th/75th/90th) and, with
+     the outer pair's dashing, the 3rd/97th too. */
+  --rust-krivka: #7f909c;
   --rust-pasmo: #eef2f4;
   --rust-vyrovnani: #8a4bab;
 }
@@ -68,6 +75,36 @@ a { color: var(--rust-akcent); }
 .rust-dite-odkaz.rust-aktivni {
   background: var(--rust-akcent);
   color: #fff;
+}
+
+/* The language and units switchers - same pill style as the child links,
+   pushed to the far end of the header by the auto margin on the first one. */
+.rust-jazyk, .rust-jednotky { display: flex; gap: 4px; }
+.rust-jazyk { margin-left: auto; }
+
+.rust-volba-jazyka, .rust-volba-jednotek {
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 13px;
+  color: var(--rust-slabe);
+  background: var(--rust-pozadi);
+}
+
+.rust-volba-jazyka.rust-aktivni, .rust-volba-jednotek.rust-aktivni {
+  background: var(--rust-akcent);
+  color: #fff;
+}
+
+/* A throwaway demo instance (tools/seed_demo_data.php) - loud enough that
+   nobody mistakes invented data for their own. */
+.rust-demo {
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--rust-akcent-svetly);
+  color: var(--rust-akcent);
+  font-size: 13px;
+  text-align: center;
 }
 
 /* ----------------------------------------------------------------- layout */
@@ -325,7 +362,10 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 .rust-band { fill: var(--rust-pasmo); stroke: none; }
 .rust-p { fill: none; stroke: var(--rust-krivka); stroke-width: 1; }
 .rust-p-outer { stroke-dasharray: 4 3; }
-.rust-p50 { stroke: #8fa4b0; stroke-width: 1.6; }
+/* 4.94:1 on the panel (was #8fa4b0 at 2.59:1) - the emphasised P50 line
+   needs to clear the same 3:1 floor as the others, and by more of a margin
+   since it carries the most weight visually. */
+.rust-p50 { stroke: #5a7482; stroke-width: 1.6; }
 .rust-plabel { fill: var(--rust-slabe); font-size: 9px; }
 
 .rust-child-line { fill: none; stroke: var(--rust-akcent); stroke-width: 2; }
@@ -356,7 +396,8 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
     --rust-akcent: #7fb2d1;
     --rust-akcent-svetly: #2a353d;
     --rust-chyba: #e8897f;
-    --rust-krivka: #4d585f;
+    /* 3.53:1 on the dark panel (was #4d585f at 2.06:1). */
+    --rust-krivka: #5c7f95;
     --rust-pasmo: #22292e;
     --rust-vyrovnani: #c79ae2;
   }
@@ -366,6 +407,7 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
   .rust-formular button { color: #10161a; }
   .rust-dite-odkaz.rust-aktivni,
   .rust-volba.rust-aktivni { color: #10161a; }
+  /* Already passed (3.47:1 on the dark panel) - unchanged. */
   .rust-p50 { stroke: #6a7c86; }
 }
 
@@ -467,18 +509,36 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
   stroke-linejoin: round;
 }
 
-.rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: #3c6e8f; }
-.rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: #b0653a; }
-.rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: #5d8c5a; }
+/*
+ * Colour alone cannot carry these three lines: red-green colour blindness
+ * (roughly 8% of men) confuses exactly the brown/green pair here, and the
+ * original palette measured pairwise contrasts of 1.25/1.40/1.12 - close
+ * enough in lightness that even ordinary vision struggles at a glance. Two
+ * fixes, layered:
+ *
+ * 1. Dash pattern per line (solid / dashed / dotted, below) - a shape cue
+ *    that survives any colour vision, so this is the fix that actually
+ *    solves the problem.
+ * 2. Lightness spread as a second, visual-only aid. All three now clear
+ *    3:1 against their own background (was measured), and the brown/green
+ *    pair - the one colour blindness actually confuses - separately clears
+ *    3:1 against each other too (3.03:1 light, 3.54:1 dark). A third pair
+ *    all pairwise >=3:1 while every line stays legible against its
+ *    background is not achievable with three hues (the lightest of three
+ *    evenly-spread colours would be near-invisible on a light panel).
+ */
+.rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: #1f3f54; }
+.rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: #5c3010; stroke-dasharray: 7 4; }
+.rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: #6b8f5f; stroke-linecap: round; stroke-dasharray: 1 5; }
 
 .rust-sds-dot { stroke: transparent; stroke-width: 14; }
-.rust-sds-dot.rust-sds-1 { fill: #3c6e8f; }
-.rust-sds-dot.rust-sds-2 { fill: #b0653a; }
-.rust-sds-dot.rust-sds-3 { fill: #5d8c5a; }
+.rust-sds-dot.rust-sds-1 { fill: #1f3f54; }
+.rust-sds-dot.rust-sds-2 { fill: #5c3010; }
+.rust-sds-dot.rust-sds-3 { fill: #6b8f5f; }
 .rust-sds-dot.rust-vybrany { stroke-opacity: .3; stroke-width: 10; }
-.rust-sds-dot.rust-vybrany.rust-sds-1 { stroke: #3c6e8f; }
-.rust-sds-dot.rust-vybrany.rust-sds-2 { stroke: #b0653a; }
-.rust-sds-dot.rust-vybrany.rust-sds-3 { stroke: #5d8c5a; }
+.rust-sds-dot.rust-vybrany.rust-sds-1 { stroke: #1f3f54; }
+.rust-sds-dot.rust-vybrany.rust-sds-2 { stroke: #5c3010; }
+.rust-sds-dot.rust-vybrany.rust-sds-3 { stroke: #6b8f5f; }
 
 .rust-legenda-radek { margin: 6px 0 0; font-size: 13px; flex: none; }
 .rust-legenda { margin-right: 14px; }
@@ -491,18 +551,25 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
   vertical-align: middle;
   background: currentColor;
 }
-.rust-legenda.rust-sds-1 { color: #3c6e8f; }
-.rust-legenda.rust-sds-2 { color: #b0653a; }
-.rust-legenda.rust-sds-3 { color: #5d8c5a; }
+/* The swatch echoes each line's own dash pattern, not just its colour. */
+.rust-legenda.rust-sds-2::before {
+  background: repeating-linear-gradient(to right, currentColor 0 5px, transparent 5px 8px);
+}
+.rust-legenda.rust-sds-3::before {
+  background: repeating-linear-gradient(to right, currentColor 0 2px, transparent 2px 5px);
+}
+.rust-legenda.rust-sds-1 { color: #1f3f54; }
+.rust-legenda.rust-sds-2 { color: #5c3010; }
+.rust-legenda.rust-sds-3 { color: #6b8f5f; }
 
 @media (prefers-color-scheme: dark) {
   .rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: #7fb2d1; }
-  .rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: #d99b6c; }
-  .rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: #8ebd8a; }
+  .rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: #a8622f; }
+  .rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: #c9e8bd; }
   .rust-sds-dot.rust-sds-1 { fill: #7fb2d1; }
-  .rust-sds-dot.rust-sds-2 { fill: #d99b6c; }
-  .rust-sds-dot.rust-sds-3 { fill: #8ebd8a; }
+  .rust-sds-dot.rust-sds-2 { fill: #a8622f; }
+  .rust-sds-dot.rust-sds-3 { fill: #c9e8bd; }
   .rust-legenda.rust-sds-1 { color: #7fb2d1; }
-  .rust-legenda.rust-sds-2 { color: #d99b6c; }
-  .rust-legenda.rust-sds-3 { color: #8ebd8a; }
+  .rust-legenda.rust-sds-2 { color: #a8622f; }
+  .rust-legenda.rust-sds-3 { color: #c9e8bd; }
 }

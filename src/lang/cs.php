@@ -163,6 +163,10 @@ return array(
     'import_from_rustcz_heading' => 'Z RůstCZ',
     'import_from_rustcz_intro' => 'Převod staré databáze na toto CSV:',
 
+    /* ------------------------------------------------------------------ demo */
+    'demo_banner' => 'Ukázková instance – vymyšlená data, po restartu Codespace zmizí. Nic, co sem zadáte, se nikam trvale neukládá.',
+    'demo_export_disabled' => 'V této ukázce je export vypnutý – není tu nic, co by stálo za odnesení.',
+
     /* ---------------------------------------------------------------- footer */
     'footer_source_label' => 'Zdroj dat:',
     'footer_credits' => 'Referenční data: SZÚ (CAV 2001 / 1991), Polsko (Kułaga et al.), WHO, CDC. Nenahrazuje lékaře.',

@@ -93,3 +93,35 @@ function test_target_height_both_sexes()
     assert_close(17.0, $boy['high'] - $boy['low'], 1e-9, 'band width');
     assert_null(rust_target_height(null, 165.0, 'm'), 'missing father height');
 }
+
+/**
+ * The "70 cm bug": rust_channel_projection() used to clamp
+ * to the reference table's last age instead of refusing when asked to
+ * project past where the table ends, which against the breastfed reference
+ * (which stops at one year) silently turned "adult height" into "height at
+ * one year" - a confident-looking 70 cm. Tested here against CDC (which
+ * ships by default) asked to project to age 30, past its own 20-year
+ * ceiling, rather than against the breastfed reference specifically: the
+ * guard this pins is the general one, not particular to any one table.
+ */
+function test_channel_projection_refuses_past_reference_ceiling()
+{
+    $measurements = array(
+        array('datum' => '2020-01-01', 'vyska_cm' => 90.0, 'hmotnost_kg' => 13.0),
+        array('datum' => '2021-01-01', 'vyska_cm' => 96.0, 'hmotnost_kg' => 14.0),
+    );
+    $result = rust_channel_projection('2018-01-01', 'm', $measurements, 'cdc', 30.0);
+    assert_null($result, 'must refuse rather than extrapolate past the reference ceiling');
+}
+
+function test_channel_projection_succeeds_within_reference_range()
+{
+    $measurements = array(
+        array('datum' => '2020-01-01', 'vyska_cm' => 90.0, 'hmotnost_kg' => 13.0),
+        array('datum' => '2021-01-01', 'vyska_cm' => 96.0, 'hmotnost_kg' => 14.0),
+        array('datum' => '2022-01-01', 'vyska_cm' => 102.0, 'hmotnost_kg' => 16.0),
+    );
+    $result = rust_channel_projection('2018-01-01', 'm', $measurements, 'cdc', 18.0);
+    assert_true($result !== null, 'a projection within the reference range should succeed');
+    assert_true($result['mid'] > 100.0 && $result['mid'] < 220.0, 'projected adult height should be a plausible number');
+}

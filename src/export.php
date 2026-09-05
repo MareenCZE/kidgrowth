@@ -8,6 +8,15 @@
  */
 require_once __DIR__ . '/data.inc';
 
+if (rust_demo_mode()) {
+    require_once __DIR__ . '/shell.inc';
+    rust_head(t('nav_export_csv'));
+    echo '<h1>' . th('nav_export_csv') . '</h1><p class="rust-nodata">' . th('demo_export_disabled') . '</p>';
+    echo '<p class="rust-odkazy"><a href="index.php">' . th('nav_back_to_children') . '</a></p>';
+    rust_foot();
+    exit;
+}
+
 $childId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $children = $childId ? array_filter(rust_children(), function ($c) use ($childId) {
     return (int)$c['id'] === $childId;

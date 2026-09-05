@@ -162,6 +162,10 @@ return array(
     'import_from_rustcz_heading' => 'From RůstCZ',
     'import_from_rustcz_intro' => "Converting the old database to this CSV:",
 
+    /* ------------------------------------------------------------------ demo */
+    'demo_banner' => "Demo instance - invented data, resets when this Codespace does. Nothing you enter here is saved anywhere permanent.",
+    'demo_export_disabled' => 'Export is disabled in this demo - there is nothing here worth taking with you.',
+
     /* ---------------------------------------------------------------- footer */
     'footer_source_label' => 'Data source:',
     'footer_credits' => 'Reference data: SZÚ (CAV 2001 / 1991), Poland (Kułaga et al.), WHO, CDC. Does not replace a doctor.',

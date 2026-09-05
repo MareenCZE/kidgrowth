@@ -12,6 +12,21 @@
 
 require_once __DIR__ . '/rust.inc';
 
+/*
+ * The fullscreen button's icon, inline SVG rather than the "⛶" glyph it
+ * used to be: an emoji glyph depends on the platform shipping a font that
+ * covers it, and this one is inconsistent enough across Android and Windows
+ * that it sometimes renders as a blank box. An inline path always renders
+ * the same way, inherits the button's colour via currentColor, and is
+ * aria-hidden since the button already carries its own aria-label.
+ */
+const RUST_FULLSCREEN_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"'
+    . ' stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"'
+    . ' aria-hidden="true" focusable="false">'
+    . '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+    . '<path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/>'
+    . '</svg>';
+
 /* The percentile curves drawn behind the child's own line. P50 is emphasised;
    the outer pair bound the range SZU actually publishes, which is why the
    shading stops there rather than fading out arbitrarily. */
@@ -177,7 +192,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
     $svg[] = '<figcaption class="rust-graf-lista">'
         . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
         . '<button type="button" class="rust-graf-full" hidden'
-        . ' aria-label="' . th('button_fullscreen') . '">⛶</button>'
+        . ' aria-label="' . th('button_fullscreen') . '">' . RUST_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
         '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
@@ -487,7 +502,7 @@ function rust_sds_chart_svg($seriesByMetric, $options = array())
     $svg[] = '<figcaption class="rust-graf-lista">'
         . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
         . '<button type="button" class="rust-graf-full" hidden'
-        . ' aria-label="' . th('button_fullscreen') . '">⛶</button>'
+        . ' aria-label="' . th('button_fullscreen') . '">' . RUST_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
         '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
@@ -751,7 +766,7 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
     $svg[] = '<figcaption class="rust-graf-lista">'
         . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
         . '<button type="button" class="rust-graf-full" hidden'
-        . ' aria-label="' . th('button_fullscreen') . '">⛶</button>'
+        . ' aria-label="' . th('button_fullscreen') . '">' . RUST_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
         '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',

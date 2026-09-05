@@ -53,6 +53,9 @@ function rust_head($title, $childId = null)
     rust_units_switcher();
   ?>
 </header>
+<?php if (rust_demo_mode()): ?>
+  <p class="rust-demo"><?php echo th('demo_banner'); ?></p>
+<?php endif; ?>
 <main class="rust-obsah">
     <?php
 }

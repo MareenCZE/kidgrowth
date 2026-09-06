@@ -167,6 +167,7 @@ return array(
     'import_error_too_many_rows' => 'Soubor má víc než {max} řádků, zbytek nebyl zpracován.',
     'import_error_column_count' => 'Řádek {line}: nesedí počet sloupců.',
     'import_error_invalid_birth' => 'Řádek {line}: neplatné datum narození.',
+    'import_error_invalid_sex' => 'Řádek {line}: pohlaví musí být m nebo f.',
     'import_summary' => 'Naimportováno {n} měření.',
     'import_skipped' => 'Přeskočeno {n} řádků bez výšky i hmotnosti.',
     'label_csv_file' => 'Soubor CSV',

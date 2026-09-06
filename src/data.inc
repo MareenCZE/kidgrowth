@@ -308,6 +308,31 @@ function growth_input_number($value)
     return ($number > 0) ? $number : null;
 }
 
+/**
+ * Turns a sex field into 'm', 'f', or null when it is neither.
+ *
+ * Null means "this is not a sex I recognise", and every caller has to treat
+ * it as a refusal rather than pick a default. CSV import used to read the
+ * field as `($value === 'f') ? 'f' : 'm'`, which never failed and so never
+ * told anyone anything: a typo, a stray space, or a Czech `z` from an older
+ * export all arrived silently as male. Sex selects the whole reference set,
+ * so such a child is then plotted against the wrong percentile curves and the
+ * wrong adult-height projection, on a chart that looks entirely plausible.
+ * Nothing in the application reveals it afterwards, which is what makes
+ * guessing worse here than stopping.
+ *
+ * Case and surrounding space are forgiven, because a spreadsheet introduces
+ * both without being asked. Nothing else is: `z` was retired when the stored
+ * value became English (see docs/backlog.md), and accepting it here would
+ * quietly reinstate a second spelling that the rest of the code no longer
+ * understands.
+ */
+function growth_input_sex($value)
+{
+    $value = strtolower(trim((string)$value));
+    return ($value === 'm' || $value === 'f') ? $value : null;
+}
+
 /** Guards against an open redirect on the return-to parameter. */
 function growth_safe_return($value, $fallback)
 {

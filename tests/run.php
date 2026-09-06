@@ -28,6 +28,13 @@ foreach ($files as $file) {
         exec('php ' . escapeshellarg($file) . ' 2>&1', $out, $code);
         if ($code === 0) {
             $totalPass++;
+            /* Echoed even on success, deliberately: the guard reports whether
+               it actually had a denylist to check against, and a silent skip
+               that looks exactly like a clean run is the failure mode this
+               whole check exists to avoid. */
+            foreach ($out as $line) {
+                echo "$line\n";
+            }
         } else {
             $totalFail++;
             echo "FAIL " . basename($file) . "\n";

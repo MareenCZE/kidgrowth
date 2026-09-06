@@ -11,7 +11,7 @@
 
 require_once __DIR__ . '/data.inc';
 
-const RUST_CSS_VERSION = '20260904-12';
+const RUST_CSS_VERSION = '20260906-13';
 
 function rust_head($title, $childId = null)
 {
@@ -114,6 +114,20 @@ function rust_units_switcher()
  */
 function rust_foot($referenceId = null)
 {
+    /* Credit the references this installation actually has, not the full
+       catalogue: only data/cdc.php ships in the repository, so a demo or a
+       fresh clone that has not run tools/build_reference_data.php would
+       otherwise credit three sources it cannot draw. The short labels are
+       enough here - the full citation for whichever reference is on screen
+       is printed above, which is what the Polish tables' CC attribution
+       condition actually needs. */
+    $credits = array();
+    foreach (rust_installed_reference_ids() as $id) {
+        $installed = rust_reference($id);
+        if ($installed) {
+            $credits[] = $installed['label'];
+        }
+    }
     ?>
 </main>
 <footer class="rust-paticka">
@@ -123,7 +137,12 @@ function rust_foot($referenceId = null)
   ?>
     <p><?php echo th('footer_source_label'); ?> <?php echo rust_h($reference['source']); ?></p>
   <?php endif; ?>
-  <p><?php echo th('footer_credits'); ?></p>
+  <p>
+    <?php if ($credits): ?>
+      <?php echo th('footer_credits_label'); ?> <?php echo rust_h(implode(', ', $credits)); ?>.
+    <?php endif; ?>
+    <?php echo th('footer_disclaimer'); ?>
+  </p>
 </footer>
 <script src="rust.js?v=<?php echo RUST_CSS_VERSION; ?>" defer></script>
 </body>

@@ -169,7 +169,8 @@ return array(
 
     /* ---------------------------------------------------------------- footer */
     'footer_source_label' => 'Zdroj dat:',
-    'footer_credits' => 'Referenční data: SZÚ (CAV 2001 / 1991), Polsko (Kułaga et al.), WHO, CDC. Nenahrazuje lékaře.',
+    'footer_credits_label' => 'Referenční data:',
+    'footer_disclaimer' => 'Nenahrazuje lékaře.',
 
     /* --------------------------------------------------------------- charts */
     'button_fullscreen' => 'Zobrazit graf na celou obrazovku',

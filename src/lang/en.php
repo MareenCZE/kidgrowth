@@ -168,7 +168,8 @@ return array(
 
     /* ---------------------------------------------------------------- footer */
     'footer_source_label' => 'Data source:',
-    'footer_credits' => 'Reference data: SZÚ (CAV 2001 / 1991), Poland (Kułaga et al.), WHO, CDC. Does not replace a doctor.',
+    'footer_credits_label' => 'Reference data:',
+    'footer_disclaimer' => 'Does not replace a doctor.',
 
     /* --------------------------------------------------------------- charts */
     'button_fullscreen' => 'Show the chart full screen',

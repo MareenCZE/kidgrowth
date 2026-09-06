@@ -1,7 +1,7 @@
 -- Schema for the growth tracker's MySQL backend.
 --
 -- Both parent heights are nullable: they feed the target-height projection
--- (rust_target_height() in src/rust.inc) but are not required to record a
+-- (rust_target_height() in src/growth.inc) but are not required to record a
 -- measurement, and not every user will know them or want to enter them.
 --
 -- Height and weight on rust_mereni are both nullable on purpose: a visit

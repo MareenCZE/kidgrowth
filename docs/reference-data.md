@@ -60,7 +60,7 @@ Two more WHO-specific details:
   being able to separate height from body mass through puberty, which is
   their own stated reason. The application must show no weight curve above
   that age rather than inventing one; see `rust_reference_span()` in
-  `src/rust.inc`.
+  `src/growth.inc`.
 
 ## Poland: two papers, two licences, HTML tables
 

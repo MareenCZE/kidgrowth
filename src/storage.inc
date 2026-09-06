@@ -30,10 +30,10 @@ if (!isset($STORAGE_BACKEND)) {
     $STORAGE_BACKEND = 'json';
 }
 if (!isset($JSON_STORAGE_PATH)) {
-    $JSON_STORAGE_PATH = __DIR__ . '/../storage/rust.json';
+    $JSON_STORAGE_PATH = __DIR__ . '/../storage/growth.json';
 }
 if (!isset($SQLITE_STORAGE_PATH)) {
-    $SQLITE_STORAGE_PATH = __DIR__ . '/../storage/rust.sqlite';
+    $SQLITE_STORAGE_PATH = __DIR__ . '/../storage/growth.sqlite';
 }
 if (!isset($DEMO_MODE)) {
     $DEMO_MODE = false;

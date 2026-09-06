@@ -18,14 +18,14 @@ require_once __DIR__ . '/auth.inc';
 require_once __DIR__ . '/csrf.inc';
 require_once __DIR__ . '/units.inc';
 require_once __DIR__ . '/storage.inc';
-require_once __DIR__ . '/rust.inc';
+require_once __DIR__ . '/growth.inc';
 
 rust_require_auth();
 
 /* Started here, unconditionally, before any page has echoed a single byte -
  * not lazily on first use inside a form far down the page. session_start()
  * only sends its Set-Cookie header if nothing has been sent yet; a page with
- * enough HTML before its first form (dite.php easily clears the 4 KB default
+ * enough HTML before its first form (child.php easily clears the 4 KB default
  * output_buffering threshold on PHP's built-in server, and plenty of real
  * php.ini configs set the same default) would otherwise cross that threshold,
  * silently lose the cookie, and hand every visitor a fresh session - and

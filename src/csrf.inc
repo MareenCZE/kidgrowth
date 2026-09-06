@@ -6,7 +6,7 @@
  *
  * Behind Basic Auth the risk this closes is real but easy to miss: a browser
  * holding cached credentials attaches them automatically to a cross-site form
- * POST, so a page on another site can submit to zaznam.php or uprava.php on
+ * POST, so a page on another site can submit to save-measurement.php or edit-child.php on
  * a visitor's behalf without ever seeing the password. A public project
  * cannot assume every deployment sits behind auth strong enough to make that
  * moot.

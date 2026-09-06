@@ -1063,7 +1063,7 @@ function export_reference(
 ): void {
     /* Deliberately no label/note/source here: those are display text, which
        varies by locale, and this file does not know which locale it will be
-       read under. src/rust.inc's rust_reference() looks them up from
+       read under. src/growth.inc's rust_reference() looks them up from
        src/lang/{en,cs}.php (keys ref_{$id}_label/note/source) every time it
        loads this file instead. */
     $payload = ['id' => $id, 'metrics' => []];
@@ -1075,7 +1075,7 @@ function export_reference(
     }
     $body = "<?php\n\n/*\n" . $comment . "\n\n"
         . " Format: each metric/sex is one string of \"age,L,M,S\" rows separated by\n"
-        . " spaces, with age in years. Parsed by rust_reference_rows() in rust.inc.\n*/\n\n"
+        . " spaces, with age in years. Parsed by rust_reference_rows() in growth.inc.\n*/\n\n"
         . 'return ' . var_export($payload, true) . ";\n";
     file_put_contents($path, $body);
     fwrite(STDERR, '  wrote ' . basename($path) . ' (' . number_format(filesize($path)) . " bytes)\n");

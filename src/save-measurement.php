@@ -26,7 +26,7 @@ $reference = isset($_POST['ref']) ? (string)$_POST['ref'] : 'cav';
 if (!in_array($reference, rust_reference_ids(), true)) {
     $reference = 'cav';
 }
-$back = 'dite.php?id=' . $childId . '&ref=' . urlencode($reference);
+$back = 'child.php?id=' . $childId . '&ref=' . urlencode($reference);
 
 $action = isset($_POST['akce']) ? (string)$_POST['akce'] : 'ulozit';
 

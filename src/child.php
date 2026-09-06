@@ -3,7 +3,7 @@
  * Growth tracker - one child: charts, predictions and the measurement table.
  */
 require_once __DIR__ . '/shell.inc';
-require_once __DIR__ . '/graf.inc';
+require_once __DIR__ . '/chart.inc';
 
 $childId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $child = rust_child($childId);
@@ -341,7 +341,7 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
       <?php else: ?>
         <p class="rust-nodata">
           <?php echo t('nodata_need_parent_heights', array(
-              'link_open' => '<a href="uprava.php?id=' . (int)$childId . '">',
+              'link_open' => '<a href="edit-child.php?id=' . (int)$childId . '">',
               'link_close' => '</a>',
           )); ?>
         </p>
@@ -362,7 +362,7 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
 <section class="rust-sekce">
   <h2><?php echo th('heading_measurements'); ?></h2>
 
-  <form method="post" action="zaznam.php" class="rust-formular rust-radek">
+  <form method="post" action="save-measurement.php" class="rust-formular rust-radek">
     <?php echo rust_csrf_field(); ?>
     <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
     <input type="hidden" name="ref" value="<?php echo rust_h($referenceId); ?>">
@@ -439,7 +439,7 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
             <?php endif; ?>
           </td>
           <td>
-            <a href="smazat-mereni.php?dite_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo rust_h($referenceId); ?>"
+            <a href="delete-measurement.php?dite_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo rust_h($referenceId); ?>"
                class="rust-smazat" title="<?php echo th('button_delete'); ?>">&times;</a>
           </td>
         </tr>
@@ -457,7 +457,7 @@ $velocityChart = rust_velocity_chart_svg($referenceId, $sex, $velocities, array(
 </section>
 
 <p class="rust-odkazy">
-  <a href="uprava.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_edit_child'); ?></a>
+  <a href="edit-child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_edit_child'); ?></a>
   &middot;
   <a href="export.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_export_csv'); ?></a>
   &middot;

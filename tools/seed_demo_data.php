@@ -18,7 +18,7 @@
  */
 
 require_once __DIR__ . '/../src/storage.inc';
-require_once __DIR__ . '/../src/rust.inc';
+require_once __DIR__ . '/../src/growth.inc';
 
 function seed_measurements($childId, $sex, $birthDate, $ageYears, $targetZ)
 {

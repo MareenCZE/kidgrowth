@@ -28,7 +28,7 @@ function rust_head($title, $childId = null)
 <title><?php echo rust_h($full); ?></title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
-<link rel="stylesheet" href="rust.css?v=<?php echo RUST_CSS_VERSION; ?>">
+<link rel="stylesheet" href="growth.css?v=<?php echo RUST_CSS_VERSION; ?>">
 </head>
 <body>
 <header class="rust-hlavicka">
@@ -40,7 +40,7 @@ function rust_head($title, $childId = null)
         foreach ($children as $child) {
             $current = ($childId !== null && (int)$child['id'] === (int)$childId);
             printf(
-                '<a class="rust-dite-odkaz%s" href="dite.php?id=%d%s">%s</a>',
+                '<a class="rust-dite-odkaz%s" href="child.php?id=%d%s">%s</a>',
                 $current ? ' rust-aktivni' : '',
                 (int)$child['id'],
                 isset($_GET['ref']) ? '&amp;ref=' . rust_h(rust_selected_reference()) : '',
@@ -144,7 +144,7 @@ function rust_foot($referenceId = null)
     <?php echo th('footer_disclaimer'); ?>
   </p>
 </footer>
-<script src="rust.js?v=<?php echo RUST_CSS_VERSION; ?>" defer></script>
+<script src="growth.js?v=<?php echo RUST_CSS_VERSION; ?>" defer></script>
 </body>
 </html>
     <?php

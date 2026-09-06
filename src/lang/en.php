@@ -20,7 +20,7 @@ return array(
 
     /* --------------------------------------------------------------- home */
     'page_title_home' => 'Children',
-    'flash_moved_to_trash' => '{name} moved to the <a href="kos.php">trash</a>, where you can restore it.',
+    'flash_moved_to_trash' => '{name} moved to the <a href="trash.php">trash</a>, where you can restore it.',
     'intro_no_children' => 'No children yet. Add the first one below, or import from RůstCZ via <a href="import.php">CSV import</a>.',
     'no_measurements_yet' => 'no measurements yet',
     'count_measurements' => '({n} measurements)',
@@ -123,12 +123,12 @@ return array(
     'page_title_delete_measurement' => 'Delete measurement',
     'heading_delete_measurement' => 'Delete this measurement?',
     'confirm_delete_measurement' => 'Really delete {name}’s measurement from {date}?',
-    'note_recoverable_from_trash' => 'It stays available in the <a href="kos.php">trash</a>, where it can be restored.',
+    'note_recoverable_from_trash' => 'It stays available in the <a href="trash.php">trash</a>, where it can be restored.',
 
     'page_title_delete_child' => 'Delete child',
     'heading_delete_child' => 'Delete {name}?',
     'confirm_delete_child' => 'This will move {name} and all {n} of their measurements to the trash at once.',
-    'note_delete_child_confirm' => "It can be undone from the <a href=\"kos.php\">trash</a> – but to make sure this doesn't happen by accident, type the child's name exactly as shown above.",
+    'note_delete_child_confirm' => "It can be undone from the <a href=\"trash.php\">trash</a> – but to make sure this doesn't happen by accident, type the child's name exactly as shown above.",
     'error_name_mismatch' => "The name doesn't match; the child was not deleted.",
     'label_confirm_name' => 'Name, to confirm',
     'button_move_to_trash' => 'Move to trash',

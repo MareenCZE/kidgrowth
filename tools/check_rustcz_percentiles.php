@@ -19,7 +19,7 @@
  * reason the tolerances below are not tighter.
  */
 
-require_once __DIR__ . '/../src/rust.inc';
+require_once __DIR__ . '/../src/growth.inc';
 
 /* RustCZ prints percentiles as whole numbers and z to two decimals, and its
    ages are rounded too, so exact equality is not achievable. These bounds are

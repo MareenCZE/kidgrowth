@@ -5,8 +5,8 @@
  * A JS-only confirm() does nothing with JavaScript off - a real page here,
  * requiring a real second request with its own CSRF token, is what actually
  * stops an accidental click or a cross-site POST. The deletion itself is
- * still done by zaznam.php, which this page's form posts to; it is a soft
- * delete, recoverable from kos.php.
+ * still done by save-measurement.php, which this page's form posts to; it is a soft
+ * delete, recoverable from trash.php.
  */
 require_once __DIR__ . '/shell.inc';
 
@@ -28,7 +28,7 @@ foreach (rust_measurements($childId) as $row) {
     }
 }
 if (!$measurement) {
-    header('Location: dite.php?id=' . $childId . '&ref=' . urlencode($ref));
+    header('Location: child.php?id=' . $childId . '&ref=' . urlencode($ref));
     exit;
 }
 
@@ -46,7 +46,7 @@ rust_head(t('page_title_delete_measurement'), $childId);
   <?php echo t('note_recoverable_from_trash'); ?>
 </p>
 
-<form method="post" action="zaznam.php" class="rust-formular">
+<form method="post" action="save-measurement.php" class="rust-formular">
   <?php echo rust_csrf_field(); ?>
   <input type="hidden" name="akce" value="smazat">
   <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
@@ -56,7 +56,7 @@ rust_head(t('page_title_delete_measurement'), $childId);
 </form>
 
 <p class="rust-odkazy">
-  <a href="dite.php?id=<?php echo (int)$childId; ?>&amp;ref=<?php echo rust_h($ref); ?>"><?php echo th('nav_back'); ?></a>
+  <a href="child.php?id=<?php echo (int)$childId; ?>&amp;ref=<?php echo rust_h($ref); ?>"><?php echo th('nav_back'); ?></a>
 </p>
 
 <?php rust_foot(); ?>

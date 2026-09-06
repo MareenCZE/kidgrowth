@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('error_birth_in_future');
     } else {
         rust_child_update($childId, $name, $sex, $born, $father, $mother, $breastfed);
-        header('Location: dite.php?id=' . $childId);
+        header('Location: child.php?id=' . $childId);
         exit;
     }
     $child = array_merge($child, array(
@@ -81,9 +81,9 @@ rust_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
 </form>
 
 <p class="rust-odkazy">
-  <a href="dite.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_back'); ?></a>
+  <a href="child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_back'); ?></a>
   &middot;
-  <a href="smazat-dite.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_delete_child'); ?></a>
+  <a href="delete-child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_delete_child'); ?></a>
 </p>
 
 <?php rust_foot(); ?>

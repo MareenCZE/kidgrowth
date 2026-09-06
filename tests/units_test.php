@@ -116,7 +116,7 @@ function test_lms_conversion_is_scale_invariant()
        converted M and a converted value must equal the z-score computed in
        metric, since (X/M)^L is invariant under scaling both by the same
        factor. */
-    require_once __DIR__ . '/../src/rust.inc';
+    require_once __DIR__ . '/../src/growth.inc';
     $lms = array('l' => 1.1, 'm' => 100.0, 's' => 0.08);
     $metricZ = rust_zscore(103.0, $lms);
 

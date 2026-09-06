@@ -12,8 +12,8 @@ src/data/who.php
 
 # The JSON/SQLite storage backends' actual data: real children's real
 # measurements. Never committed, regardless of where it's pointed.
-storage/rust.json
-storage/rust.sqlite
+storage/growth.json
+storage/growth.sqlite
 
 # Basic Auth credentials for local/deployed instances
 .htpasswd*

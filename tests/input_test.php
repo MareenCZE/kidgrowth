@@ -2,7 +2,7 @@
 
 /**
  * Input handling - the injection surface. Requires
- * data.inc rather than rust.inc alone, since rust_input_number(),
+ * data.inc rather than growth.inc alone, since rust_input_number(),
  * rust_valid_date() and rust_safe_return() live there; data.inc is safe to
  * require from the CLI test runner (see the CLI check in auth.inc and the
  * optional config.php in storage.inc).
@@ -73,7 +73,7 @@ function test_valid_date_rejects_shaped_but_impossible_dates()
 
 function test_safe_return_rejects_open_redirect()
 {
-    assert_equals('/dite.php', rust_safe_return('/dite.php', '/'), 'an ordinary internal path passes through');
+    assert_equals('/child.php', rust_safe_return('/child.php', '/'), 'an ordinary internal path passes through');
     assert_equals('/', rust_safe_return('https://evil.example/', '/'), 'absolute URL rejected');
     assert_equals('/', rust_safe_return('//evil.example/', '/'), 'protocol-relative URL rejected');
     assert_equals('/', rust_safe_return('', '/'), 'empty value falls back');

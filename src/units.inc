@@ -151,7 +151,7 @@ function rust_display_chart_scalar($value, $kind)
 }
 
 /**
- * Per-rust_metrics()-id conversion, for dite.php and graf.inc: which physical
+ * Per-rust_metrics()-id conversion, for child.php and chart.inc: which physical
  * quantity a metric's value (or, for weight-for-height, its index) is, so
  * the right conversion applies without every call site special-casing 'wfh'
  * itself. bmi is never converted - see rust_display_rows()'s docblock.

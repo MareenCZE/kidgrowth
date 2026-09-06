@@ -12,11 +12,14 @@
  * not need a service worker to install a PWA at all - the manifest is enough.
  */
 
-var CACHE = 'rust-shell-v1';
+/* Bumped when the cached asset names change: an installed PWA holds the old
+   shell until the cache name differs, so renaming rust.css/rust.js without
+   this would keep serving files that no longer exist. */
+var CACHE = 'growth-shell-v2';
 
 var SHELL = [
-  'rust.css',
-  'rust.js',
+  'growth.css',
+  'growth.js',
   'manifest.json',
   'icon-180.png',
   'icon-192.png',

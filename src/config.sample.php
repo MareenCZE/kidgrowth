@@ -20,11 +20,11 @@ $STORAGE_BACKEND = 'json';
  * already is, as long as your document root points at src/ as the README
  * describes. storage/.htaccess denies access to it too, as a second layer for
  * a document root that is not set up that way. */
-$JSON_STORAGE_PATH = __DIR__ . '/../storage/rust.json';
+$JSON_STORAGE_PATH = __DIR__ . '/../storage/growth.json';
 
 /* Used only when $STORAGE_BACKEND is 'sqlite'. Same placement reasoning as
  * above. Requires the pdo_sqlite extension. */
-$SQLITE_STORAGE_PATH = __DIR__ . '/../storage/rust.sqlite';
+$SQLITE_STORAGE_PATH = __DIR__ . '/../storage/growth.sqlite';
 
 /* Used only when $STORAGE_BACKEND is 'mysql'. Load db/schema.sql into this
  * database before first use. */

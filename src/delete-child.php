@@ -3,9 +3,9 @@
  * Confirmation step before deleting a child.
  *
  * This cascades to years of measurements at once, so it gets a stronger
- * confirmation than a single measurement does (smazat-mereni.php): retyping
+ * confirmation than a single measurement does (delete-measurement.php): retyping
  * the child's name, not just clicking past a warning. Still a soft delete -
- * see kos.php - but the point of asking for the name is to stop the click
+ * see trash.php - but the point of asking for the name is to stop the click
  * that was never meant to happen, not to make it easy to undo after the fact.
  */
 require_once __DIR__ . '/shell.inc';
@@ -60,7 +60,7 @@ rust_head(t('page_title_delete_child'), $childId);
 </form>
 
 <p class="rust-odkazy">
-  <a href="dite.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_back'); ?></a>
+  <a href="child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_back'); ?></a>
 </p>
 
 <?php rust_foot(); ?>

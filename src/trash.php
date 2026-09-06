@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             isset($_POST['id']) ? (int)$_POST['id'] : 0
         );
     }
-    header('Location: kos.php');
+    header('Location: trash.php');
     exit;
 }
 

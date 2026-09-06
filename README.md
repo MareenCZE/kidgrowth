@@ -38,7 +38,7 @@ so it is useful well outside the Czech Republic.
   language. Height accepts feet-and-inches (`4'3"`, `4 ft 3 in`) as well as a
   plain number of inches; everything is still stored in cm/kg regardless of
   which unit you type in or view.
-- Soft delete: deleting a child or a measurement moves it to `kos.php` (the
+- Soft delete: deleting a child or a measurement moves it to `trash.php` (the
   "Koš" / trash view) rather than removing it, and it can be restored from
   there. Deleting a child asks you to retype their name first - it takes
   every one of their measurements with it.
@@ -66,7 +66,7 @@ The fastest way to see it working, no install and nobody else's data involved:
 ## Install
 
 Requirements: **PHP 8.0+**, and a **writable directory** - nothing else. By
-default, Růst stores its data as a single JSON file (`storage/rust.json`);
+default, Růst stores its data as a single JSON file (`storage/growth.json`);
 SQLite and MySQL are also available, see below.
 
 1. Clone the repository and point your web server's document root at `src/`.
@@ -94,10 +94,10 @@ SQLite and MySQL are also available, see below.
 
 Copy `src/config.sample.php` to `src/config.php` and set `$STORAGE_BACKEND`:
 
-- **`'json'`** (default) - one file, `storage/rust.json`. No setup. Fine for
+- **`'json'`** (default) - one file, `storage/growth.json`. No setup. Fine for
   a family's own data: a handful of writes a month, a dataset that stays
   comfortably under a megabyte for years.
-- **`'sqlite'`** - one file, `storage/rust.sqlite`, created automatically.
+- **`'sqlite'`** - one file, `storage/growth.sqlite`, created automatically.
   Needs the `pdo_sqlite` PHP extension. Preferred over MySQL where available,
   for the same "one file" simplicity with proper concurrent-write handling.
 - **`'mysql'`** - for a deployment that already runs one. Load `db/schema.sql`
@@ -151,7 +151,7 @@ whichever two visits happened to occur.
 Text and every chart line were checked against WCAG's contrast requirements
 (4.5:1 for text, 3:1 for a graphical element like a chart line) by computing
 relative luminance directly rather than eyeballing it - see the comments next
-to the colours in `src/rust.css` for the actual ratios. The SD-over-time
+to the colours in `src/growth.css` for the actual ratios. The SD-over-time
 chart's three lines are additionally distinguished by dash pattern (solid /
 dashed / dotted), not colour alone, since brown-vs-green is the classic
 red-green colour-blindness confusion and the two metrics on that axis are

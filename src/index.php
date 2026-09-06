@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['akce']) && $_POST['ak
         $error = t('error_birth_in_future');
     } else {
         $id = rust_child_upsert($name, $sex, $born, $father, $mother, $breastfed);
-        header('Location: dite.php?id=' . (int)$id);
+        header('Location: child.php?id=' . (int)$id);
         exit;
     }
 }
@@ -66,7 +66,7 @@ rust_head('');
         $age = rust_decimal_age($child['datum_narozeni'], date('Y-m-d'));
       ?>
       <li>
-        <a href="dite.php?id=<?php echo (int)$child['id']; ?>">
+        <a href="child.php?id=<?php echo (int)$child['id']; ?>">
           <strong><?php echo rust_h($child['jmeno']); ?></strong>
           <span class="rust-vek"><?php echo rust_h(rust_age_cz($age)); ?></span>
         </a>
@@ -126,7 +126,7 @@ rust_head('');
 <p class="rust-odkazy">
   <a href="import.php"><?php echo th('nav_import_csv'); ?></a>
   &middot;
-  <a href="kos.php"><?php echo th('nav_trash'); ?></a>
+  <a href="trash.php"><?php echo th('nav_trash'); ?></a>
 </p>
 
 <?php rust_foot(); ?>

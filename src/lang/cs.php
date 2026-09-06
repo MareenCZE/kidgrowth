@@ -21,7 +21,7 @@ return array(
 
     /* --------------------------------------------------------------- home */
     'page_title_home' => 'Růst dětí',
-    'flash_moved_to_trash' => '{name} přesunuto do <a href="kos.php">koše</a>, odkud jde obnovit.',
+    'flash_moved_to_trash' => '{name} přesunuto do <a href="trash.php">koše</a>, odkud jde obnovit.',
     'intro_no_children' => 'Zatím tu není žádné dítě. Přidejte první níže, nebo naimportujte data z RůstCZ přes <a href="import.php">import CSV</a>.',
     'no_measurements_yet' => 'zatím bez měření',
     'count_measurements' => '({n} měření)',
@@ -124,12 +124,12 @@ return array(
     'page_title_delete_measurement' => 'Smazat měření',
     'heading_delete_measurement' => 'Smazat měření?',
     'confirm_delete_measurement' => 'Opravdu smazat měření {name} z {date}?',
-    'note_recoverable_from_trash' => 'Zůstane dostupné v <a href="kos.php">koši</a>, odkud jde obnovit.',
+    'note_recoverable_from_trash' => 'Zůstane dostupné v <a href="trash.php">koši</a>, odkud jde obnovit.',
 
     'page_title_delete_child' => 'Smazat dítě',
     'heading_delete_child' => 'Smazat {name}?',
     'confirm_delete_child' => 'Tohle přesune {name} i všech {n} jeho/jejích měření najednou do koše.',
-    'note_delete_child_confirm' => 'Jde to vzít zpět z <a href="kos.php">koše</a> – ale aby se to nestalo omylem, napište jméno dítěte přesně tak, jak je uvedeno výše.',
+    'note_delete_child_confirm' => 'Jde to vzít zpět z <a href="trash.php">koše</a> – ale aby se to nestalo omylem, napište jméno dítěte přesně tak, jak je uvedeno výše.',
     'error_name_mismatch' => 'Jméno nesouhlasí, dítě nebylo smazáno.',
     'label_confirm_name' => 'Jméno pro potvrzení',
     'button_move_to_trash' => 'Přesunout do koše',

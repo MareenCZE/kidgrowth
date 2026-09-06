@@ -1,6 +1,6 @@
 # How the growth maths fits together
 
-This is about `src/rust.inc` - the pure-maths core - not the application
+This is about `src/growth.inc` - the pure-maths core - not the application
 around it. See `docs/reference-data.md` for how the reference tables
 themselves are produced, and the code comments in `src/storage.inc`,
 `src/i18n.inc` and `src/units.inc` for how storage, language and units are
@@ -50,7 +50,7 @@ series approximation rather than PHP's own (which lives only in the optional
 A single measurement carries real noise that is not growth: half a
 centimetre of reading error between observers is routine, and a person
 measures measurably taller in the morning than the evening because the spine
-compresses over the day. `rust_smooth_series()` (in `src/rust.inc`) exists to
+compresses over the day. `rust_smooth_series()` (in `src/growth.inc`) exists to
 show the trend through that noise, and two decisions about *where* to smooth
 matter more than the smoothing algorithm itself.
 

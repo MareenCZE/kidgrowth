@@ -6,7 +6,7 @@
  * come first: highest value, easiest to test.
  */
 
-require_once __DIR__ . '/../src/rust.inc';
+require_once __DIR__ . '/../src/growth.inc';
 
 function test_zscore_value_at_z_round_trip()
 {

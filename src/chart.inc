@@ -6,11 +6,11 @@
  * Inline SVG rather than a JavaScript charting library because this project has
  * no bundler and no dependency mechanism to hang one on, and because a chart
  * that is already in the HTML works with JavaScript off, prints properly, and
- * costs no extra request. Colours come from rust.css so the chart follows the
+ * costs no extra request. Colours come from growth.css so the chart follows the
  * page rather than hard-coding a palette here.
  */
 
-require_once __DIR__ . '/rust.inc';
+require_once __DIR__ . '/growth.inc';
 
 /*
  * The fullscreen button's icon, inline SVG rather than the "⛶" glyph it

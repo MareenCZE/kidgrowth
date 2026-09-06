@@ -187,21 +187,43 @@ function fetch_cached(string $url, string $cacheDir): string
        times should not dictate which PHP extensions a machine needs. Plain
        streams cover it, and the curl binary is the fallback when a hardened
        php.ini has allow_url_fopen off. */
+    /* The shape of this string matters, which is not obvious and cost an
+       afternoon. cdc.gov sits behind a bot filter that answers 403 to an
+       unrecognised user agent: 'kidgrowth reference-data build script' is
+       refused, and so is a bare token like 'kidgrowth/1.0'. What passes is
+       either a well-known client (curl/*, Wget/*, PHP/*) or the conventional
+       polite-crawler form below - a token, a version, and a contact URL in
+       parentheses. Verified against cdc.gov from two unrelated networks.
+       szu.gov.cz and cdn.who.int accept anything. */
     $context = stream_context_create(['http' => [
         'timeout' => 180,
         'follow_location' => 1,
-        'user_agent' => 'kidgrowth reference-data build script',
+        'user_agent' => 'kidgrowth/1.0 (+https://github.com/MareenCZE/kidgrowth)',
     ]]);
+    error_clear_last();
     $body = @file_get_contents($url, false, $context);
+    $streamError = ($body === false || $body === '') ? error_get_last() : null;
 
     if ($body === false || $body === '') {
         /* -f matters: without it curl happily returns the server's 404 page,
            which is a perfectly valid non-empty string and would be cached and
-           parsed as if it were data. */
-        $body = shell_exec('curl -fsSL --max-time 180 ' . escapeshellarg($url));
+           parsed as if it were data.
+
+           This fallback is less of a safety net than it looks: shell_exec is
+           in disable_functions on plenty of shared hosting, where it returns
+           null without running anything. It is a second chance, not a
+           guarantee, which is why the message below reports what the first
+           attempt actually said. */
+        $body = @shell_exec('curl -fsSL --max-time 180 ' . escapeshellarg($url));
     }
     if ($body === false || $body === null || $body === '') {
         fwrite(STDERR, "FATAL: download failed: $url\n");
+        if ($streamError && isset($streamError['message'])) {
+            fwrite(STDERR, '       ' . preg_replace('~\s+~', ' ', $streamError['message']) . "\n");
+        }
+        if (!function_exists('shell_exec') || in_array('shell_exec', array_map('trim', explode(',', (string)ini_get('disable_functions'))), true)) {
+            fwrite(STDERR, "       (shell_exec is disabled here, so the curl fallback never ran)\n");
+        }
         exit(1);
     }
     file_put_contents($path, $body);

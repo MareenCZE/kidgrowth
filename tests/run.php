@@ -20,9 +20,14 @@ $files = glob(__DIR__ . '/*_test.php');
 sort($files);
 
 foreach ($files as $file) {
-    if (basename($file) === 'no_personal_data_test.php') {
-        /* A standalone script with its own exit code, not test_*() functions -
-           run it as a subprocess so it still gates the suite. */
+    /* Some test files cannot share this process. no_personal_data_test.php is
+       a script with its own exit code rather than a set of test_*() functions,
+       and a storage backend's tests load storage/<backend>.inc - two of those
+       in one process redeclare every growth_storage_*() function and take the
+       whole run down with a fatal. Both kinds say so with an @standalone
+       marker in their header and are run as subprocesses instead. */
+    if (strpos(file_get_contents($file), '@standalone') !== false) {
+        /* Run as a subprocess so it still gates the suite. */
         $out = array();
         $code = 0;
         exec('php ' . escapeshellarg($file) . ' 2>&1', $out, $code);

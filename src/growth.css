@@ -71,6 +71,16 @@ a { color: var(--growth-accent); }
   color: var(--growth-accent);
 }
 
+/* The descriptive line beside the wordmark. One name for the application in
+   every language; what it does is what gets translated. Dropped on a narrow
+   screen, where the header has to hold the child switcher instead. */
+.growth-tagline {
+  font-size: 13px;
+  color: var(--growth-muted);
+  margin-left: -2px;
+}
+@media (max-width: 560px) { .growth-tagline { display: none; } }
+
 .growth-children { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .growth-child-link {

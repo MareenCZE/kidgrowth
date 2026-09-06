@@ -19,6 +19,7 @@ return array(
     'nav_trash' => 'Trash',
 
     /* --------------------------------------------------------------- home */
+    'brand_tagline' => 'child growth',
     'page_title_home' => 'Children',
     'flash_moved_to_trash' => '{name} moved to the <a href="trash.php">trash</a>, where you can restore it.',
     'intro_no_children' => 'No children yet. Add the first one below, or import from RůstCZ via <a href="import.php">CSV import</a>.',

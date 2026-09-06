@@ -1,14 +1,14 @@
 {
-  "name": "Růst",
-  "short_name": "Růst",
-  "description": "Sledování růstu dětí proti českým percentilovým grafům",
+  "name": "KidGrowth",
+  "short_name": "KidGrowth",
+  "description": "Track a child's height and weight against national and international growth references",
   "start_url": "index.php",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f7f7f4",
   "theme_color": "#3c6e8f",
-  "lang": "cs",
+  "lang": "en",
   "icons": [
     { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },

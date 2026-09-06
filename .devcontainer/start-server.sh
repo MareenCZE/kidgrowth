@@ -22,7 +22,7 @@ log=/tmp/growth-server.log
 serving() { curl -s -o /dev/null "http://127.0.0.1:$port/"; }
 
 if serving; then
-    echo "Růst is already serving on port $port."
+    echo "KidGrowth is already serving on port $port."
     exit 0
 fi
 
@@ -32,7 +32,7 @@ setsid nohup php -S "0.0.0.0:$port" -t src > "$log" 2>&1 < /dev/null &
 
 for _ in $(seq 1 50); do
     if serving; then
-        echo "Růst is serving on port $port. Open the Ports panel (next to the"
+        echo "KidGrowth is serving on port $port. Open the Ports panel (next to the"
         echo "terminal), find port $port, and click the globe icon to open it."
         exit 0
     fi

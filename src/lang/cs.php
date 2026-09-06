@@ -20,6 +20,7 @@ return array(
     'nav_trash' => 'Koš',
 
     /* --------------------------------------------------------------- home */
+    'brand_tagline' => 'růst dětí',
     'page_title_home' => 'Růst dětí',
     'flash_moved_to_trash' => '{name} přesunuto do <a href="trash.php">koše</a>, odkud jde obnovit.',
     'intro_no_children' => 'Zatím tu není žádné dítě. Přidejte první níže, nebo naimportujte data z RůstCZ přes <a href="import.php">import CSV</a>.',

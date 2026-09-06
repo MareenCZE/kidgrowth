@@ -15,7 +15,7 @@ const GROWTH_ASSET_VERSION = '20260906-13';
 
 function growth_head($title, $childId = null)
 {
-    $full = $title === '' ? 'Růst' : ($title . ' – Růst');
+    $full = $title === '' ? 'KidGrowth' : ($title . ' – KidGrowth');
     ?>
 <!DOCTYPE html>
 <html lang="<?php echo growth_h(growth_locale()); ?>">
@@ -32,7 +32,8 @@ function growth_head($title, $childId = null)
 </head>
 <body>
 <header class="growth-header">
-  <a class="growth-logo" href="index.php">Růst</a>
+  <a class="growth-logo" href="index.php">KidGrowth</a>
+  <span class="growth-tagline"><?php echo th('brand_tagline'); ?></span>
   <?php
     $children = growth_children();
     if (count($children) > 0) {

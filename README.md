@@ -1,4 +1,4 @@
-# Růst
+# KidGrowth
 
 A self-hosted web app for tracking a child's height and weight against
 national and international growth references, with percentiles, z-scores,
@@ -6,16 +6,16 @@ smoothing and adult-height prediction.
 
 ## Why this exists
 
-Růst replaces [RůstCZ](http://www.rustcz.cz/), a Windows desktop program for
+KidGrowth replaces [RůstCZ](http://www.rustcz.cz/), a Windows desktop program for
 plotting Czech children's growth against the national percentile tables -
-still useful, no longer developed, and tied to a single machine. Růst is a
+still useful, no longer developed, and tied to a single machine. KidGrowth is a
 small web app instead: it runs anywhere PHP does, works from a phone, and,
 because it stores LMS parameters rather than a fixed set of curves, can plot
 the same measurements against several national references side by side.
 
 The Czech reference data (from SZÚ's national anthropological surveys) is
 this project's actual differentiator - it exists nowhere else in a modern,
-self-hostable tool - but Růst also ships WHO, CDC (US) and Polish references,
+self-hostable tool - but KidGrowth also ships WHO, CDC (US) and Polish references,
 so it is useful well outside the Czech Republic.
 
 ## What it does
@@ -51,7 +51,7 @@ The fastest way to see it working, no install and nobody else's data involved:
   `.devcontainer/` seeds two synthetic children (`tools/seed_demo_data.php` -
   entirely invented measurement histories, never a real family's) and starts
   the app on port 8080. To open it, use the **Ports** panel beside the
-  terminal: find port 8080 ("Růst") and click the globe icon. The editor also
+  terminal: find port 8080 ("KidGrowth") and click the globe icon. The editor also
   offers a notification when the port comes up, though in the browser-based
   editor that is easy to miss.
   Each Codespace is its own throwaway instance; nothing you enter is shared
@@ -66,7 +66,7 @@ The fastest way to see it working, no install and nobody else's data involved:
 ## Install
 
 Requirements: **PHP 8.0+**, and a **writable directory** - nothing else. By
-default, Růst stores its data as a single JSON file (`storage/growth.json`);
+default, KidGrowth stores its data as a single JSON file (`storage/growth.json`);
 SQLite and MySQL are also available, see below.
 
 1. Clone the repository and point your web server's document root at `src/`.
@@ -81,7 +81,7 @@ SQLite and MySQL are also available, see below.
    licence actually permits. Run this again any time you want to refresh the
    data; nothing else in the application depends on network access. Until you
    run it, the app works with CDC's reference alone.
-3. **Put Basic Auth (or an equivalent) in front of it.** Růst has no
+3. **Put Basic Auth (or an equivalent) in front of it.** KidGrowth has no
    authentication of its own - it relies entirely on your web server, and
    refuses to render anything at all if it cannot see that one is configured
    (`src/auth.inc`). A copy of `src/.htaccess` is provided as a starting point
@@ -120,7 +120,7 @@ a real deployment.
 
 ## Accuracy
 
-Růst's maths was validated against RůstCZ's own output across roughly 130
+KidGrowth's maths was validated against RůstCZ's own output across roughly 130
 real measurements of two children spanning nine years: in the range RůstCZ
 and SZÚ's published tables actually cover (the 3rd to 97th percentile),
 results agree to within 0.10 standard deviations. Where the two programs
@@ -171,7 +171,7 @@ PHP 8.1/8.3/8.4.
 
 ## Disclaimer
 
-Růst is a tracking tool, not a diagnostic one. It plots measurements against
+KidGrowth is a tracking tool, not a diagnostic one. It plots measurements against
 published reference curves; it does not interpret them. Whether a child's
 growth is a cause for concern is a question for a paediatrician, not a web
 page.

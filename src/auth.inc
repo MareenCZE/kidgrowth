@@ -34,7 +34,7 @@ function growth_require_auth()
 <body style="font: 16px/1.5 sans-serif; max-width: 40em; margin: 3em auto; padding: 0 1em;">
 <h1>This installation is not protected</h1>
 <p>
-  Růst has no login of its own - it expects your web server to require
+  KidGrowth has no login of its own - it expects your web server to require
   authentication before PHP ever runs, and <code>REMOTE_USER</code> is empty,
   so nothing did. Without that, anyone who finds this URL can read and edit
   these health records.

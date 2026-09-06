@@ -220,8 +220,8 @@ foreach ($children as $index => $child) {
 /* --------------------------------------------------------------- emit CSV */
 
 $out = fopen('php://output', 'w');
-fputcsv($out, array('dite', 'pohlavi', 'narozeni', 'otec_cm', 'matka_cm',
-                    'datum', 'vyska_cm', 'hmotnost_kg'));
+fputcsv($out, array('child', 'sex', 'birth_date', 'father_cm', 'mother_cm',
+                    'date', 'height_cm', 'weight_kg'));
 
 $written = 0;
 $empty = 0;

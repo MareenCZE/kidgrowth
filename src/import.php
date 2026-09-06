@@ -68,7 +68,7 @@ function growth_import_csv($handle)
         return strtolower(trim((string)$name));
     }, $header);
 
-    $required = array('child', 'sex', 'born', 'date');
+    $required = array('child', 'sex', 'birth_date', 'date');
     foreach ($required as $column) {
         if (!in_array($column, $header, true)) {
             $report['errors'][] = t('import_error_missing_column', array('column' => $column));
@@ -105,15 +105,15 @@ function growth_import_csv($handle)
 
         if (!isset($childIds[$name])) {
             $sex = (trim((string)$data['sex']) === 'f') ? 'f' : 'm';
-            $born = trim((string)$data['born']);
+            $born = trim((string)$data['birth_date']);
             if (!growth_valid_date($born)) {
                 $report['errors'][] = t('import_error_invalid_birth', array('line' => $line));
                 continue;
             }
             $childIds[$name] = growth_child_upsert(
                 $name, $sex, $born,
-                growth_input_number(isset($data['otec_cm']) ? $data['otec_cm'] : ''),
-                growth_input_number(isset($data['matka_cm']) ? $data['matka_cm'] : '')
+                growth_input_number(isset($data['father_cm']) ? $data['father_cm'] : ''),
+                growth_input_number(isset($data['mother_cm']) ? $data['mother_cm'] : '')
             );
             $report['children'][$name] = 0;
         }
@@ -173,8 +173,8 @@ growth_head(t('page_title_import'));
 <div class="growth-panel">
   <h2><?php echo th('import_format_heading'); ?></h2>
   <p><?php echo th('import_format_intro'); ?></p>
-  <pre>child,sex,born,otec_cm,matka_cm,date,height_cm,weight_kg
-"Novak Jan",m,2018-03-14,180,165,2018-05-20,58,4.2</pre>
+  <pre>child,sex,birth_date,father_cm,mother_cm,date,height_cm,weight_kg,note
+"Novak Jan",m,2018-03-14,180,165,2018-05-20,58,4.2,</pre>
   <p class="growth-note">
     <?php echo t('import_format_note'); ?>
   </p>

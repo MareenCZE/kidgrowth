@@ -27,14 +27,14 @@ if (!$children) {
     exit;
 }
 
-$filename = 'rust-' . date('Y-m-d') . '.csv';
+$filename = 'kidgrowth-' . date('Y-m-d') . '.csv';
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 
 $out = fopen('php://output', 'w');
 /* A UTF-8 BOM, so Excel opens Czech names correctly instead of as mojibake. */
 fwrite($out, "\xEF\xBB\xBF");
-fputcsv($out, array('child', 'sex', 'born', 'otec_cm', 'matka_cm',
+fputcsv($out, array('child', 'sex', 'birth_date', 'father_cm', 'mother_cm',
                     'date', 'height_cm', 'weight_kg', 'note'));
 
 foreach ($children as $child) {

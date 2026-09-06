@@ -18,13 +18,22 @@
   --rust-akcent: #3c6e8f;
   --rust-akcent-svetly: #e8f0f5;
   --rust-chyba: #a3352b;
-  /* 3.30:1 on the panel - the original #b6c4cc measured 1.79:1, well under
-     the 3:1 WCAG 1.4.11 floor for a non-text graphical element. This draws
-     the non-emphasised percentile curves (10th/25th/75th/90th) and, with
-     the outer pair's dashing, the 3rd/97th too. */
-  --rust-krivka: #7f909c;
+  /* Chart colours. The reference is deliberately neutral grey and the child's
+     own data is the only saturated thing on the chart - the two used to be
+     shades of one blue-grey, so the measurement competed with the curves it
+     was supposed to be read against. Every value here clears the 3:1 WCAG
+     1.4.11 floor for non-text graphics against its own panel (ratios noted),
+     and the categorical sets were checked for colour-blind separation in
+     OKLab: worst adjacent pair 24.6 dE protan, 26.6 dE normal vision. */
+  --rust-krivka: #8d9497;      /* 3.08:1 - percentile curves, recessive */
+  --rust-p50: #6f7679;         /* 4.62:1 - the emphasised median */
+  --rust-mereni: #dc3e1f;      /* 4.42:1 - the child's measured line */
+  --rust-vyrovnani: #8259d6;   /* 4.83:1 - the smoothed trend */
+  --rust-cil: #0f9b7d;         /* 3.50:1 - adult-height prediction */
+  --rust-sds-1: #2f85d1;       /* 3.89:1 - height on the SDS chart */
+  --rust-sds-2: #d66d16;       /* 3.47:1 - weight */
+  --rust-sds-3: #9560cc;       /* 4.35:1 - BMI */
   --rust-pasmo: #eef2f4;
-  --rust-vyrovnani: #8a4bab;
 }
 
 * { box-sizing: border-box; }
@@ -365,14 +374,14 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 /* 4.94:1 on the panel (was #8fa4b0 at 2.59:1) - the emphasised P50 line
    needs to clear the same 3:1 floor as the others, and by more of a margin
    since it carries the most weight visually. */
-.rust-p50 { stroke: #5a7482; stroke-width: 1.6; }
+.rust-p50 { stroke: var(--rust-p50); stroke-width: 1.6; }
 .rust-plabel { fill: var(--rust-slabe); font-size: 9px; }
 
-.rust-child-line { fill: none; stroke: var(--rust-akcent); stroke-width: 2; }
-.rust-child-dot { fill: var(--rust-akcent); }
+.rust-child-line { fill: none; stroke: var(--rust-mereni); stroke-width: 2.2; }
+.rust-child-dot { fill: var(--rust-mereni); }
 
-.rust-target { stroke: #b07d3a; stroke-width: 3; stroke-linecap: round; opacity: .55; }
-.rust-target-dot { fill: #b07d3a; }
+.rust-target { stroke: var(--rust-cil); stroke-width: 3; stroke-linecap: round; opacity: .6; }
+.rust-target-dot { fill: var(--rust-cil); }
 
 /* ---------------------------------------------------------------- footer */
 
@@ -396,10 +405,18 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
     --rust-akcent: #7fb2d1;
     --rust-akcent-svetly: #2a353d;
     --rust-chyba: #e8897f;
-    /* 3.53:1 on the dark panel (was #4d585f at 2.06:1). */
-    --rust-krivka: #5c7f95;
+    /* Stepped for this surface rather than flipped from the light values:
+       same roles, own ratios against the dark panel, same OKLab separation
+       check (worst adjacent pair 25.0 dE protan, 26.9 dE normal vision). */
+    --rust-krivka: #7c8589;      /* 3.99:1 */
+    --rust-p50: #98a1a5;         /* 5.72:1 */
+    --rust-mereni: #e05f42;      /* 4.22:1 */
+    --rust-vyrovnani: #9b74e0;   /* 4.28:1 */
+    --rust-cil: #1fa98a;         /* 5.09:1 */
+    --rust-sds-1: #3d99e0;       /* 4.90:1 */
+    --rust-sds-2: #d47a20;       /* 4.73:1 */
+    --rust-sds-3: #a86ce0;       /* 4.22:1 */
     --rust-pasmo: #22292e;
-    --rust-vyrovnani: #c79ae2;
   }
 
   .rust-formular input,
@@ -407,8 +424,6 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
   .rust-formular button { color: #10161a; }
   .rust-dite-odkaz.rust-aktivni,
   .rust-volba.rust-aktivni { color: #10161a; }
-  /* Already passed (3.47:1 on the dark panel) - unchanged. */
-  .rust-p50 { stroke: #6a7c86; }
 }
 
 /* An extrapolated value: shown, but visibly marked as an estimate. */
@@ -446,7 +461,7 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 .rust-target-dot { stroke: transparent; stroke-width: 14; }
 
 .rust-projection-dot.rust-vybrany { stroke: var(--rust-akcent); stroke-width: 3; stroke-opacity: .35; }
-.rust-target-dot.rust-vybrany { stroke: #b07d3a; stroke-width: 3; stroke-opacity: .35; }
+.rust-target-dot.rust-vybrany { stroke: var(--rust-cil); stroke-width: 3; stroke-opacity: .35; }
 .rust-projection.rust-vybrany,
 .rust-target.rust-vybrany { opacity: 1; }
 
@@ -479,7 +494,7 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 .rust-legenda-mereni::before { height: 1px; opacity: .55; }
 .rust-legenda-predpoved { color: var(--rust-akcent); }
 .rust-legenda-predpoved::before { height: 3px; opacity: .55; }
-.rust-legenda-cil { color: #b07d3a; }
+.rust-legenda-cil { color: var(--rust-cil); }
 .rust-legenda-cil::before { height: 3px; opacity: .55; }
 .rust-legenda-tempo { color: var(--rust-slabe); }
 .rust-legenda-tempo::before { height: 2px; }
@@ -510,35 +525,32 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 }
 
 /*
- * Colour alone cannot carry these three lines: red-green colour blindness
- * (roughly 8% of men) confuses exactly the brown/green pair here, and the
- * original palette measured pairwise contrasts of 1.25/1.40/1.12 - close
- * enough in lightness that even ordinary vision struggles at a glance. Two
- * fixes, layered:
+ * Two cues carry these three lines, deliberately:
  *
- * 1. Dash pattern per line (solid / dashed / dotted, below) - a shape cue
- *    that survives any colour vision, so this is the fix that actually
- *    solves the problem.
- * 2. Lightness spread as a second, visual-only aid. All three now clear
- *    3:1 against their own background (was measured), and the brown/green
- *    pair - the one colour blindness actually confuses - separately clears
- *    3:1 against each other too (3.03:1 light, 3.54:1 dark). A third pair
- *    all pairwise >=3:1 while every line stays legible against its
- *    background is not achievable with three hues (the lightest of three
- *    evenly-spread colours would be near-invisible on a light panel).
+ * 1. Dash pattern per series (solid / dashed / dotted, below) - a shape cue
+ *    that survives any colour vision, and the one that actually solves the
+ *    problem for the ~8% of men with red-green colour blindness.
+ * 2. Hue. The previous navy/brown/green trio leaned entirely on cue 1: the
+ *    navy and brown separated by only 13.0 dE in OKLab, under the 15 floor
+ *    at which a full-colour reader can still tell two lines apart at a
+ *    glance, and all three sat below the chroma floor that keeps a line from
+ *    reading as grey. The blue/orange/violet set replacing them separates by
+ *    26.6 dE for normal vision and 24.6 dE under protanopia, the worst
+ *    adjacent pair in each case, while every line still clears 3:1 against
+ *    its own panel (ratios beside the tokens at the top of this file).
  */
-.rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: #1f3f54; }
-.rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: #5c3010; stroke-dasharray: 7 4; }
-.rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: #6b8f5f; stroke-linecap: round; stroke-dasharray: 1 5; }
+.rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: var(--rust-sds-1); }
+.rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: var(--rust-sds-2); stroke-dasharray: 7 4; }
+.rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: var(--rust-sds-3); stroke-linecap: round; stroke-dasharray: 1 5; }
 
 .rust-sds-dot { stroke: transparent; stroke-width: 14; }
-.rust-sds-dot.rust-sds-1 { fill: #1f3f54; }
-.rust-sds-dot.rust-sds-2 { fill: #5c3010; }
-.rust-sds-dot.rust-sds-3 { fill: #6b8f5f; }
+.rust-sds-dot.rust-sds-1 { fill: var(--rust-sds-1); }
+.rust-sds-dot.rust-sds-2 { fill: var(--rust-sds-2); }
+.rust-sds-dot.rust-sds-3 { fill: var(--rust-sds-3); }
 .rust-sds-dot.rust-vybrany { stroke-opacity: .3; stroke-width: 10; }
-.rust-sds-dot.rust-vybrany.rust-sds-1 { stroke: #1f3f54; }
-.rust-sds-dot.rust-vybrany.rust-sds-2 { stroke: #5c3010; }
-.rust-sds-dot.rust-vybrany.rust-sds-3 { stroke: #6b8f5f; }
+.rust-sds-dot.rust-vybrany.rust-sds-1 { stroke: var(--rust-sds-1); }
+.rust-sds-dot.rust-vybrany.rust-sds-2 { stroke: var(--rust-sds-2); }
+.rust-sds-dot.rust-vybrany.rust-sds-3 { stroke: var(--rust-sds-3); }
 
 .rust-legenda-radek { margin: 6px 0 0; font-size: 13px; flex: none; }
 .rust-legenda { margin-right: 14px; }
@@ -558,18 +570,7 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 .rust-legenda.rust-sds-3::before {
   background: repeating-linear-gradient(to right, currentColor 0 2px, transparent 2px 5px);
 }
-.rust-legenda.rust-sds-1 { color: #1f3f54; }
-.rust-legenda.rust-sds-2 { color: #5c3010; }
-.rust-legenda.rust-sds-3 { color: #6b8f5f; }
+.rust-legenda.rust-sds-1 { color: var(--rust-sds-1); }
+.rust-legenda.rust-sds-2 { color: var(--rust-sds-2); }
+.rust-legenda.rust-sds-3 { color: var(--rust-sds-3); }
 
-@media (prefers-color-scheme: dark) {
-  .rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: #7fb2d1; }
-  .rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: #a8622f; }
-  .rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: #c9e8bd; }
-  .rust-sds-dot.rust-sds-1 { fill: #7fb2d1; }
-  .rust-sds-dot.rust-sds-2 { fill: #a8622f; }
-  .rust-sds-dot.rust-sds-3 { fill: #c9e8bd; }
-  .rust-legenda.rust-sds-1 { color: #7fb2d1; }
-  .rust-legenda.rust-sds-2 { color: #a8622f; }
-  .rust-legenda.rust-sds-3 { color: #c9e8bd; }
-}

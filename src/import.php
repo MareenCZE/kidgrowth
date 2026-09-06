@@ -103,8 +103,19 @@ function growth_import_csv($handle)
             continue;
         }
 
+        /* Checked on every row that carries it, not only on the row that
+           creates the child: a file that was never converted from an older
+           export has the wrong spelling throughout, and catching it only when
+           the first child happens to be female would be luck rather than a
+           check. The value is still taken from the first row for a given
+           child, as everything else about that child is. */
+        $sex = growth_input_sex($data['sex']);
+        if ($sex === null) {
+            $report['errors'][] = t('import_error_invalid_sex', array('line' => $line));
+            continue;
+        }
+
         if (!isset($childIds[$name])) {
-            $sex = (trim((string)$data['sex']) === 'f') ? 'f' : 'm';
             $born = trim((string)$data['birth_date']);
             if (!growth_valid_date($born)) {
                 $report['errors'][] = t('import_error_invalid_birth', array('line' => $line));

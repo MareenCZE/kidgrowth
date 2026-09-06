@@ -71,6 +71,29 @@ function test_valid_date_rejects_shaped_but_impossible_dates()
     assert_true(!growth_valid_date('2025-02-29'), '2025 is not a leap year');
 }
 
+function test_input_sex_accepts_only_m_and_f()
+{
+    assert_equals('m', growth_input_sex('m'), 'plain m');
+    assert_equals('f', growth_input_sex('f'), 'plain f');
+    assert_equals('f', growth_input_sex('F'), 'a spreadsheet may capitalise it');
+    assert_equals('m', growth_input_sex('  m  '), 'surrounding space is forgiven');
+}
+
+function test_input_sex_rejects_everything_else()
+{
+    /* The whole point: these used to arrive as 'm' without a word said, and a
+       child stored under the wrong sex is plotted against the wrong reference
+       curves on a chart that looks entirely plausible. */
+    assert_null(growth_input_sex('z'), 'the retired Czech spelling for female');
+    assert_null(growth_input_sex('Z'), 'the same, capitalised');
+    assert_null(growth_input_sex('zena'), 'a whole Czech word');
+    assert_null(growth_input_sex('female'), 'the English word rather than the letter');
+    assert_null(growth_input_sex(''), 'empty field');
+    assert_null(growth_input_sex('   '), 'whitespace only');
+    assert_null(growth_input_sex('mf'), 'both letters');
+    assert_null(growth_input_sex('1'), 'a numeric code');
+}
+
 function test_safe_return_rejects_open_redirect()
 {
     assert_equals('/child.php', growth_safe_return('/child.php', '/'), 'an ordinary internal path passes through');

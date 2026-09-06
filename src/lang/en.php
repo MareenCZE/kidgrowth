@@ -166,6 +166,7 @@ return array(
     'import_error_too_many_rows' => 'The file has more than {max} rows; the rest was not processed.',
     'import_error_column_count' => "Row {line}: the number of columns doesn't match.",
     'import_error_invalid_birth' => 'Row {line}: invalid date of birth.',
+    'import_error_invalid_sex' => 'Row {line}: sex must be m or f.',
     'import_summary' => 'Imported {n} measurements.',
     'import_skipped' => 'Skipped {n} row(s) with neither height nor weight.',
     'label_csv_file' => 'CSV file',

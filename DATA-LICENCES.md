@@ -52,7 +52,7 @@ lets this project exist without resolving that question first.
 ## Attribution strings
 
 Printed by the application's own footer wherever the corresponding reference
-is on screen (see `rust_foot()` in `src/shell.inc`), and reproduced here for
+is on screen (see `growth_foot()` in `src/shell.inc`), and reproduced here for
 anyone reusing the data outside the application:
 
 - **CDC**: "CDC, National Center for Health Statistics, growth charts 2000."

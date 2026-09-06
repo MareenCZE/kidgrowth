@@ -1,24 +1,24 @@
 -- Schema for the growth tracker's MySQL backend.
 --
 -- Both parent heights are nullable: they feed the target-height projection
--- (rust_target_height() in src/growth.inc) but are not required to record a
+-- (growth_target_height() in src/growth.inc) but are not required to record a
 -- measurement, and not every user will know them or want to enter them.
 --
--- Height and weight on rust_mereni are both nullable on purpose: a visit
+-- Height and weight on growth_mereni are both nullable on purpose: a visit
 -- often produces only one of the two, and storing a missing measurement as 0
 -- would corrupt every chart and trend that reads it - see the NULL handling
--- in rust_measurements() (src/data.inc).
+-- in growth_measurements() (src/data.inc).
 --
 -- The unique key on (dite_id, datum) makes saving the same date twice an
 -- update - or, for a soft-deleted row, a revival - rather than a collision;
--- see rust_storage_measurement_save() in src/storage/mysql.inc.
+-- see growth_storage_measurement_save() in src/storage/mysql.inc.
 --
 -- `smazano` is soft delete: a timestamp instead of NULL means deleted, never
 -- actually removed. Every read in src/storage/mysql.inc filters on it - see
 -- src/storage.inc for why the interface, not each backend, owns the cascade
 -- between a deleted child and its measurements.
 
-CREATE TABLE `rust_deti` (
+CREATE TABLE `growth_deti` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `jmeno` varchar(60) NOT NULL,
   `pohlavi` enum('m','z') NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE `rust_deti` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-CREATE TABLE `rust_mereni` (
+CREATE TABLE `growth_mereni` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `dite_id` int(11) NOT NULL,
   `datum` date NOT NULL,

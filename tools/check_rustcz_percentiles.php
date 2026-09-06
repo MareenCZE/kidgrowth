@@ -167,13 +167,13 @@ foreach ($files as $file) {
     $tailWorst = 0.0;
 
     foreach ($cases as $case) {
-        $lms = rust_lms_at(rust_reference_rows('cav', $case['metric'], $sex), $case['age']);
+        $lms = growth_lms_at(growth_reference_rows('cav', $case['metric'], $sex), $case['age']);
         if (!$lms) {
             $skipped++;
             continue;
         }
-        $z = rust_zscore($case['value'], $lms);
-        $pct = rust_percentile($z);
+        $z = growth_zscore($case['value'], $lms);
+        $pct = growth_percentile($z);
         if ($z === null) {
             $skipped++;
             continue;

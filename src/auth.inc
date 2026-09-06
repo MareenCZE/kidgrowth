@@ -11,15 +11,15 @@
  * children's health records to the open internet. This refuses to render
  * anything at all when that looks like what has happened.
  */
-function rust_require_auth()
+function growth_require_auth()
 {
     /* CLI callers - the test suite, tools/*.php - are not the thing this
        guards against: nobody reaches a CLI script's output over the web. */
     if (PHP_SAPI === 'cli') {
         return;
     }
-    global $RUST_AUTH_HANDLED_EXTERNALLY;
-    if (!empty($RUST_AUTH_HANDLED_EXTERNALLY)) {
+    global $GROWTH_AUTH_HANDLED_EXTERNALLY;
+    if (!empty($GROWTH_AUTH_HANDLED_EXTERNALLY)) {
         return;
     }
     if (!empty($_SERVER['REMOTE_USER'])) {
@@ -44,7 +44,7 @@ function rust_require_auth()
   edit its <code>AuthUserFile</code> path before using it. If you have your
   own authentication layer in front of this application (a reverse proxy, for
   example) and have verified it actually gates access, set
-  <code>$RUST_AUTH_HANDLED_EXTERNALLY = true;</code> in
+  <code>$GROWTH_AUTH_HANDLED_EXTERNALLY = true;</code> in
   <code>src/config.php</code> to skip this check.
 </p>
 </body>

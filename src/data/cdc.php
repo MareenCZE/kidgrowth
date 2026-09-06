@@ -11,7 +11,7 @@
      php tools/build_reference_data.php
 
  Format: each metric/sex is one string of "age,L,M,S" rows separated by
- spaces, with age in years. Parsed by rust_reference_rows() in growth.inc.
+ spaces, with age in years. Parsed by growth_reference_rows() in growth.inc.
 */
 
 return array (

@@ -59,7 +59,7 @@ Two more WHO-specific details:
 - **WHO does not publish weight-for-age past age 10** - weight alone stops
   being able to separate height from body mass through puberty, which is
   their own stated reason. The application must show no weight curve above
-  that age rather than inventing one; see `rust_reference_span()` in
+  that age rather than inventing one; see `growth_reference_span()` in
   `src/growth.inc`.
 
 ## Poland: two papers, two licences, HTML tables

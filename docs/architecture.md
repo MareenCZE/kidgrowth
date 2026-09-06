@@ -25,8 +25,8 @@ z = ln(value / M) / S                       when L is ~0 (log-normal case)
 ```
 
 and the inverse - "what value sits at z SD" - is the same formula solved for
-`value`. Both directions are implemented once, in `rust_zscore()` and
-`rust_value_at_z()`, and everything above them - percentiles, the charts,
+`value`. Both directions are implemented once, in `growth_zscore()` and
+`growth_value_at_z()`, and everything above them - percentiles, the charts,
 smoothing, prediction - goes through these two functions rather than
 touching the LMS formula directly.
 
@@ -41,7 +41,7 @@ expensive as it looks, and the result is committed to a generated file that
 changes only when the source data does.
 
 A percentile is then just the standard normal CDF applied to z
-(`rust_percentile()`), computed via `erf()` through Abramowitz & Stegun's
+(`growth_percentile()`), computed via `erf()` through Abramowitz & Stegun's
 series approximation rather than PHP's own (which lives only in the optional
 `ext/stats`, not something a build step can assume a shared host has).
 
@@ -50,7 +50,7 @@ series approximation rather than PHP's own (which lives only in the optional
 A single measurement carries real noise that is not growth: half a
 centimetre of reading error between observers is routine, and a person
 measures measurably taller in the morning than the evening because the spine
-compresses over the day. `rust_smooth_series()` (in `src/growth.inc`) exists to
+compresses over the day. `growth_smooth_series()` (in `src/growth.inc`) exists to
 show the trend through that noise, and two decisions about *where* to smooth
 matter more than the smoothing algorithm itself.
 
@@ -82,7 +82,7 @@ badly each point fit last time (bisquare) so that one mis-recorded outlier
 does not drag the whole local fit toward it.
 
 The residual between each raw point and the fitted curve - converted back to
-the metric's own unit - is what `rust_num($fit['scatter'], ...)` reports as
+the metric's own unit - is what `growth_num($fit['scatter'], ...)` reports as
 "typical spread", and a point whose residual clears a noise floor (itself
 based on realistic measurement precision - half a centimetre for height, a
 finer threshold for weight) gets flagged as worth double-checking rather than
@@ -90,7 +90,7 @@ silently trusted or silently dropped.
 
 ## Growth velocity is measured over the window closest to a year
 
-`rust_velocities()` computes centimetres gained, but not simply between
+`growth_velocities()` computes centimetres gained, but not simply between
 consecutive measurements. For each visit it searches backward for the
 **earlier measurement whose age gap is closest to one year**, with a 0.7-year
 floor below which it will not compute a velocity at all.
@@ -118,7 +118,7 @@ meaning nothing.
 
 ## Predicting adult height assumes the channel holds
 
-`rust_channel_projection()` takes the child's most recent height
+`growth_channel_projection()` takes the child's most recent height
 measurements (up to four), converts each to a z-score against the *selected*
 reference, and projects the mean of those z-scores forward to age 18 through
 that same reference's LMS at 18. The band around the prediction comes from

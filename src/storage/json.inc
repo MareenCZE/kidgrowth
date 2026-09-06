@@ -16,17 +16,17 @@
  * rewriting it wholesale on every write costs nothing.
  */
 
-function rust_json_path()
+function growth_json_path()
 {
     global $JSON_STORAGE_PATH;
     return $JSON_STORAGE_PATH;
 }
 
 /** Reads the store, ignoring locks - used only where a write follows under
- *  its own lock in the same request (see rust_json_write()). */
-function rust_json_read()
+ *  its own lock in the same request (see growth_json_write()). */
+function growth_json_read()
 {
-    $path = rust_json_path();
+    $path = growth_json_path();
     if (!is_file($path)) {
         return array('children' => array(), 'measurements' => array());
     }
@@ -38,10 +38,10 @@ function rust_json_read()
     $contents = stream_get_contents($handle);
     flock($handle, LOCK_UN);
     fclose($handle);
-    return rust_json_decode($contents);
+    return growth_json_decode($contents);
 }
 
-function rust_json_decode($contents)
+function growth_json_decode($contents)
 {
     $data = json_decode((string)$contents, true);
     if (!is_array($data)) {
@@ -55,9 +55,9 @@ function rust_json_decode($contents)
  * writes the result back atomically. The read happens while the lock is
  * held, so two requests can never interleave a lost update.
  */
-function rust_json_write(callable $mutator)
+function growth_json_write(callable $mutator)
 {
-    $path = rust_json_path();
+    $path = growth_json_path();
     $dir = dirname($path);
     if (!is_dir($dir)) {
         @mkdir($dir, 0770, true);
@@ -69,7 +69,7 @@ function rust_json_write(callable $mutator)
     }
     flock($handle, LOCK_EX);
 
-    $data = rust_json_decode(stream_get_contents($handle));
+    $data = growth_json_decode(stream_get_contents($handle));
     $data = $mutator($data);
 
     $tmp = $path . '.' . bin2hex(random_bytes(6)) . '.tmp';
@@ -82,7 +82,7 @@ function rust_json_write(callable $mutator)
     return true;
 }
 
-function rust_json_next_id($rows)
+function growth_json_next_id($rows)
 {
     $max = 0;
     foreach ($rows as $row) {
@@ -93,9 +93,9 @@ function rust_json_next_id($rows)
 
 /* ---------------------------------------------------------------- children */
 
-function rust_storage_children()
+function growth_storage_children()
 {
-    $rows = array_values(array_filter(rust_json_read()['children'], function ($c) {
+    $rows = array_values(array_filter(growth_json_read()['children'], function ($c) {
         return empty($c['smazano']);
     }));
     usort($rows, function ($a, $b) {
@@ -104,9 +104,9 @@ function rust_storage_children()
     return $rows;
 }
 
-function rust_storage_children_deleted()
+function growth_storage_children_deleted()
 {
-    $rows = array_values(array_filter(rust_json_read()['children'], function ($c) {
+    $rows = array_values(array_filter(growth_json_read()['children'], function ($c) {
         return !empty($c['smazano']);
     }));
     usort($rows, function ($a, $b) {
@@ -115,9 +115,9 @@ function rust_storage_children_deleted()
     return $rows;
 }
 
-function rust_storage_child($id)
+function growth_storage_child($id)
 {
-    foreach (rust_json_read()['children'] as $c) {
+    foreach (growth_json_read()['children'] as $c) {
         if ((int)$c['id'] === $id && empty($c['smazano'])) {
             return $c;
         }
@@ -125,9 +125,9 @@ function rust_storage_child($id)
     return null;
 }
 
-function rust_storage_child_deleted_at($id)
+function growth_storage_child_deleted_at($id)
 {
-    foreach (rust_json_read()['children'] as $c) {
+    foreach (growth_json_read()['children'] as $c) {
         if ((int)$c['id'] === $id) {
             return $c['smazano'] ?: null;
         }
@@ -135,17 +135,17 @@ function rust_storage_child_deleted_at($id)
     return null;
 }
 
-function rust_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $breastfed)
+function growth_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $breastfed)
 {
     $id = null;
-    rust_json_write(function ($data) use ($name, $sex, $born, $fatherCm, $motherCm, $breastfed, &$id) {
+    growth_json_write(function ($data) use ($name, $sex, $born, $fatherCm, $motherCm, $breastfed, &$id) {
         foreach ($data['children'] as $c) {
             if ($c['jmeno'] === $name && empty($c['smazano'])) {
                 $id = (int)$c['id'];
                 return $data;
             }
         }
-        $id = rust_json_next_id($data['children']);
+        $id = growth_json_next_id($data['children']);
         $data['children'][] = array(
             'id' => $id, 'jmeno' => $name, 'pohlavi' => $sex, 'datum_narozeni' => $born,
             'vyska_otce_cm' => $fatherCm, 'vyska_matky_cm' => $motherCm, 'poradi' => 0,
@@ -156,10 +156,10 @@ function rust_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $br
     return $id;
 }
 
-function rust_storage_child_update($id, $name, $sex, $born, $fatherCm, $motherCm, $breastfed)
+function growth_storage_child_update($id, $name, $sex, $born, $fatherCm, $motherCm, $breastfed)
 {
     $ok = false;
-    rust_json_write(function ($data) use ($id, $name, $sex, $born, $fatherCm, $motherCm, $breastfed, &$ok) {
+    growth_json_write(function ($data) use ($id, $name, $sex, $born, $fatherCm, $motherCm, $breastfed, &$ok) {
         foreach ($data['children'] as &$c) {
             if ((int)$c['id'] === $id) {
                 $c['jmeno'] = $name;
@@ -177,10 +177,10 @@ function rust_storage_child_update($id, $name, $sex, $born, $fatherCm, $motherCm
     return $ok;
 }
 
-function rust_storage_child_delete($id, $when)
+function growth_storage_child_delete($id, $when)
 {
     $ok = false;
-    rust_json_write(function ($data) use ($id, $when, &$ok) {
+    growth_json_write(function ($data) use ($id, $when, &$ok) {
         foreach ($data['children'] as &$c) {
             if ((int)$c['id'] === $id && empty($c['smazano'])) {
                 $c['smazano'] = $when;
@@ -193,10 +193,10 @@ function rust_storage_child_delete($id, $when)
     return $ok;
 }
 
-function rust_storage_child_restore($id)
+function growth_storage_child_restore($id)
 {
     $ok = false;
-    rust_json_write(function ($data) use ($id, &$ok) {
+    growth_json_write(function ($data) use ($id, &$ok) {
         foreach ($data['children'] as &$c) {
             if ((int)$c['id'] === $id && !empty($c['smazano'])) {
                 $c['smazano'] = null;
@@ -211,9 +211,9 @@ function rust_storage_child_restore($id)
 
 /* ------------------------------------------------------------ measurements */
 
-function rust_storage_measurements($childId)
+function growth_storage_measurements($childId)
 {
-    $rows = array_values(array_filter(rust_json_read()['measurements'], function ($m) use ($childId) {
+    $rows = array_values(array_filter(growth_json_read()['measurements'], function ($m) use ($childId) {
         return (int)$m['dite_id'] === $childId && empty($m['smazano']);
     }));
     usort($rows, function ($a, $b) {
@@ -222,9 +222,9 @@ function rust_storage_measurements($childId)
     return $rows;
 }
 
-function rust_storage_measurements_deleted($childId)
+function growth_storage_measurements_deleted($childId)
 {
-    $rows = array_values(array_filter(rust_json_read()['measurements'], function ($m) use ($childId) {
+    $rows = array_values(array_filter(growth_json_read()['measurements'], function ($m) use ($childId) {
         return (int)$m['dite_id'] === $childId && !empty($m['smazano']);
     }));
     usort($rows, function ($a, $b) {
@@ -233,9 +233,9 @@ function rust_storage_measurements_deleted($childId)
     return $rows;
 }
 
-function rust_storage_measurement_save($childId, $date, $heightCm, $weightKg, $note)
+function growth_storage_measurement_save($childId, $date, $heightCm, $weightKg, $note)
 {
-    rust_json_write(function ($data) use ($childId, $date, $heightCm, $weightKg, $note) {
+    growth_json_write(function ($data) use ($childId, $date, $heightCm, $weightKg, $note) {
         foreach ($data['measurements'] as &$m) {
             if ((int)$m['dite_id'] === $childId && $m['datum'] === $date) {
                 $m['vyska_cm'] = $heightCm;
@@ -246,7 +246,7 @@ function rust_storage_measurement_save($childId, $date, $heightCm, $weightKg, $n
             }
         }
         unset($m);
-        $id = rust_json_next_id($data['measurements']);
+        $id = growth_json_next_id($data['measurements']);
         $data['measurements'][] = array(
             'id' => $id, 'dite_id' => $childId, 'datum' => $date,
             'vyska_cm' => $heightCm, 'hmotnost_kg' => $weightKg, 'poznamka' => $note, 'smazano' => null,
@@ -256,10 +256,10 @@ function rust_storage_measurement_save($childId, $date, $heightCm, $weightKg, $n
     return true;
 }
 
-function rust_storage_measurement_delete($childId, $id, $when)
+function growth_storage_measurement_delete($childId, $id, $when)
 {
     $ok = false;
-    rust_json_write(function ($data) use ($childId, $id, $when, &$ok) {
+    growth_json_write(function ($data) use ($childId, $id, $when, &$ok) {
         foreach ($data['measurements'] as &$m) {
             if ((int)$m['id'] === $id && (int)$m['dite_id'] === $childId && empty($m['smazano'])) {
                 $m['smazano'] = $when;
@@ -272,10 +272,10 @@ function rust_storage_measurement_delete($childId, $id, $when)
     return $ok;
 }
 
-function rust_storage_measurement_restore($childId, $id)
+function growth_storage_measurement_restore($childId, $id)
 {
     $ok = false;
-    rust_json_write(function ($data) use ($childId, $id, &$ok) {
+    growth_json_write(function ($data) use ($childId, $id, &$ok) {
         foreach ($data['measurements'] as &$m) {
             if ((int)$m['id'] === $id && (int)$m['dite_id'] === $childId && !empty($m['smazano'])) {
                 $m['smazano'] = null;
@@ -288,9 +288,9 @@ function rust_storage_measurement_restore($childId, $id)
     return $ok;
 }
 
-function rust_storage_measurements_delete_for_child($childId, $when)
+function growth_storage_measurements_delete_for_child($childId, $when)
 {
-    rust_json_write(function ($data) use ($childId, $when) {
+    growth_json_write(function ($data) use ($childId, $when) {
         foreach ($data['measurements'] as &$m) {
             if ((int)$m['dite_id'] === $childId && empty($m['smazano'])) {
                 $m['smazano'] = $when;
@@ -302,9 +302,9 @@ function rust_storage_measurements_delete_for_child($childId, $when)
     return true;
 }
 
-function rust_storage_measurements_restore_for_child($childId, $when)
+function growth_storage_measurements_restore_for_child($childId, $when)
 {
-    rust_json_write(function ($data) use ($childId, $when) {
+    growth_json_write(function ($data) use ($childId, $when) {
         foreach ($data['measurements'] as &$m) {
             if ((int)$m['dite_id'] === $childId && isset($m['smazano']) && $m['smazano'] === $when) {
                 $m['smazano'] = null;

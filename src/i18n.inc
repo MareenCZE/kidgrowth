@@ -2,7 +2,7 @@
 
 /**
  * Internationalization: locale selection, the t() lookup helper, and the
- * per-user unit preference (metric/imperial - see rust_units() and units.inc).
+ * per-user unit preference (metric/imperial - see growth_units() and units.inc).
  *
  * Deliberately simple mechanics rather than importing gettext: a flat
  * array('key' => 'text') per language, and a lookup with a fallback to
@@ -14,28 +14,28 @@
  * WHO/CDC audience the international references serve.
  */
 
-const RUST_LOCALES = array('en', 'cs');
-const RUST_DEFAULT_LOCALE = 'en';
+const GROWTH_LOCALES = array('en', 'cs');
+const GROWTH_DEFAULT_LOCALE = 'en';
 
 /**
  * The active locale: an explicit ?lang= switch (persisted to a cookie for
  * the rest of the visit), else a previously-set cookie, else a guess from
  * the browser's Accept-Language header, else the default.
  */
-function rust_locale()
+function growth_locale()
 {
     static $locale = null;
     if ($locale !== null) {
         return $locale;
     }
 
-    if (isset($_GET['lang']) && in_array($_GET['lang'], RUST_LOCALES, true)) {
+    if (isset($_GET['lang']) && in_array($_GET['lang'], GROWTH_LOCALES, true)) {
         $locale = $_GET['lang'];
-        rust_set_preference_cookie('rust_lang', $locale);
+        growth_set_preference_cookie('growth_lang', $locale);
         return $locale;
     }
-    if (isset($_COOKIE['rust_lang']) && in_array($_COOKIE['rust_lang'], RUST_LOCALES, true)) {
-        $locale = $_COOKIE['rust_lang'];
+    if (isset($_COOKIE['growth_lang']) && in_array($_COOKIE['growth_lang'], GROWTH_LOCALES, true)) {
+        $locale = $_COOKIE['growth_lang'];
         return $locale;
     }
     $accept = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']) : '';
@@ -43,12 +43,12 @@ function rust_locale()
         $locale = 'cs';
         return $locale;
     }
-    $locale = RUST_DEFAULT_LOCALE;
+    $locale = GROWTH_DEFAULT_LOCALE;
     return $locale;
 }
 
-/** Shared by rust_locale() and rust_units() - a year-long, first-party preference cookie. */
-function rust_set_preference_cookie($name, $value)
+/** Shared by growth_locale() and growth_units() - a year-long, first-party preference cookie. */
+function growth_set_preference_cookie($name, $value)
 {
     if (headers_sent()) {
         return;
@@ -64,7 +64,7 @@ function rust_set_preference_cookie($name, $value)
 }
 
 /** One language file, cached for the request - these are tiny, read-only arrays. */
-function rust_lang_table($locale)
+function growth_lang_table($locale)
 {
     static $cache = array();
     if (!isset($cache[$locale])) {
@@ -81,17 +81,17 @@ function rust_lang_table($locale)
  *
  * $params does simple {name} substitution - this application has no need for
  * plural rules or gender inside a single string; the few places that do
- * (rust_years_cz() and friends in data.inc) already handle that themselves
+ * (growth_format_years() and friends in data.inc) already handle that themselves
  * and are passed in as an already-formatted parameter.
  */
 function t($key, $params = array())
 {
-    $locale = rust_locale();
-    $table = rust_lang_table($locale);
+    $locale = growth_locale();
+    $table = growth_lang_table($locale);
     if (isset($table[$key])) {
         $text = $table[$key];
     } else {
-        $en = rust_lang_table('en');
+        $en = growth_lang_table('en');
         $text = isset($en[$key]) ? $en[$key] : $key;
     }
     foreach ($params as $name => $value) {
@@ -103,5 +103,5 @@ function t($key, $params = array())
 /** t(), HTML-escaped - the common case in a template. */
 function th($key, $params = array())
 {
-    return rust_h(t($key, $params));
+    return growth_h(t($key, $params));
 }

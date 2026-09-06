@@ -20,7 +20,7 @@ require_once __DIR__ . '/growth.inc';
  * the same way, inherits the button's colour via currentColor, and is
  * aria-hidden since the button already carries its own aria-label.
  */
-const RUST_FULLSCREEN_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"'
+const GROWTH_FULLSCREEN_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"'
     . ' stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"'
     . ' aria-hidden="true" focusable="false">'
     . '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
@@ -30,7 +30,7 @@ const RUST_FULLSCREEN_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fi
 /* The percentile curves drawn behind the child's own line. P50 is emphasised;
    the outer pair bound the range SZU actually publishes, which is why the
    shading stops there rather than fading out arbitrarily. */
-function rust_chart_percentiles()
+function growth_chart_percentiles()
 {
     return array(3, 10, 25, 50, 75, 90, 97);
 }
@@ -41,15 +41,15 @@ function rust_chart_percentiles()
  * $points are the child's measurements as array('age' => float, 'value' =>
  * float, 'date' => 'Y-m-d'), already filtered to this metric and sorted by age.
  * $extras may carry a 'target' band (mid/low/high, drawn at age 18) and a
- * 'projection' band from rust_channel_projection().
+ * 'projection' band from growth_channel_projection().
  */
-function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array())
+function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array())
 {
-    $meta = rust_metric($metric);
+    $meta = growth_metric($metric);
     if (!$meta) {
         return '';
     }
-    $rows = rust_reference_rows($referenceId, $metric, $sex);
+    $rows = growth_reference_rows($referenceId, $metric, $sex);
     if (!$rows) {
         return '<p class="rust-nodata">' . th('nodata_reference_missing') . '</p>';
     }
@@ -59,15 +59,15 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
        metric - a linear conversion changes no geometry, only the numbers
        printed on it. See units.inc's docblocks for why this is exact rather
        than approximate. */
-    $indexKind = rust_metric_index_kind($metric);
-    $valueKind = rust_metric_value_kind($metric);
-    $rows = rust_display_chart_rows($rows, $indexKind, $valueKind);
-    $points = rust_display_chart_points($points, $indexKind, $valueKind);
-    if (rust_units() === 'imperial') {
+    $indexKind = growth_metric_index_kind($metric);
+    $valueKind = growth_metric_value_kind($metric);
+    $rows = growth_display_chart_rows($rows, $indexKind, $valueKind);
+    $points = growth_display_chart_points($points, $indexKind, $valueKind);
+    if (growth_units() === 'imperial') {
         foreach (array('target', 'projection') as $band) {
             if (!empty($options[$band])) {
                 foreach (array('mid', 'low', 'high') as $field) {
-                    $options[$band][$field] = rust_display_chart_scalar($options[$band][$field], $valueKind);
+                    $options[$band][$field] = growth_display_chart_scalar($options[$band][$field], $valueKind);
                 }
             }
         }
@@ -76,8 +76,8 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                 $converted = array();
                 foreach ($options['smooth']['curve'] as $pair) {
                     $converted[] = array(
-                        ($indexKind === 'length') ? rust_display_length($pair[0]) : $pair[0],
-                        rust_display_chart_scalar($pair[1], $valueKind),
+                        ($indexKind === 'length') ? growth_display_length($pair[0]) : $pair[0],
+                        growth_display_chart_scalar($pair[1], $valueKind),
                     );
                 }
                 $options['smooth']['curve'] = $converted;
@@ -114,16 +114,16 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
     /* --- sample the reference curves ------------------------------------ */
     $steps = 160;
     $curves = array();
-    foreach (rust_chart_percentiles() as $percentile) {
-        $z = rust_z_from_percentile($percentile);
+    foreach (growth_chart_percentiles() as $percentile) {
+        $z = growth_z_from_percentile($percentile);
         $curve = array();
         for ($i = 0; $i <= $steps; $i++) {
             $age = $xMin + ($xMax - $xMin) * $i / $steps;
-            $lms = rust_lms_at($rows, $age);
+            $lms = growth_lms_at($rows, $age);
             if (!$lms) {
                 continue;
             }
-            $value = rust_value_at_z($lms, $z);
+            $value = growth_value_at_z($lms, $z);
             if ($value !== null) {
                 $curve[] = array($age, $value);
             }
@@ -181,8 +181,8 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
         return $top + $plotH * (1.0 - (($value - $yMin) / ($yMax - $yMin)));
     };
 
-    $unit = rust_display_metric_unit($metric) ?: $meta['unit'];
-    $decimals = ($valueKind === 'weight') ? rust_weight_decimals() : $meta['decimals'];
+    $unit = growth_display_metric_unit($metric) ?: $meta['unit'];
+    $decimals = ($valueKind === 'weight') ? growth_weight_decimals() : $meta['decimals'];
     $title = t('chart_title_growth', array('label' => $meta['label']));
 
     $svg = array();
@@ -192,38 +192,38 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
     $svg[] = '<figcaption class="rust-graf-lista">'
         . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
         . '<button type="button" class="rust-graf-full" hidden'
-        . ' aria-label="' . th('button_fullscreen') . '">' . RUST_FULLSCREEN_ICON . '</button>'
+        . ' aria-label="' . th('button_fullscreen') . '">' . GROWTH_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
         '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
-        $width, $height, rust_h($title)
+        $width, $height, growth_h($title)
     );
 
     /* --- gridlines and axes --------------------------------------------- */
-    $xTicks = rust_nice_ticks($xMin, $xMax, 9);
-    $yTicks = rust_nice_ticks($yMin, $yMax, 8);
+    $xTicks = growth_nice_ticks($xMin, $xMax, 9);
+    $yTicks = growth_nice_ticks($yMin, $yMax, 8);
 
     foreach ($xTicks as $tick) {
         $x = $sx($tick);
         $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $x, $top, $x, $top + $plotH);
         $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
-            $x, $top + $plotH + 20, rust_h(rust_tick_label($tick)));
+            $x, $top + $plotH + 20, growth_h(growth_tick_label($tick)));
     }
     foreach ($yTicks as $tick) {
         $y = $sy($tick);
         $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $left, $y, $left + $plotW, $y);
         $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
-            $left - 6, $y + 4, rust_h(rust_tick_label($tick)));
+            $left - 6, $y + 4, growth_h(growth_tick_label($tick)));
     }
     $svg[] = sprintf('<text class="rust-axis rust-axis-unit" x="%.1f" y="%.1f">%s</text>',
-        4, $top + 4, rust_h($unit));
+        4, $top + 4, growth_h($unit));
     $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
-        $left + $plotW, $top + $plotH + 32, rust_h($meta['index_label']));
+        $left + $plotW, $top + $plotH + 32, growth_h($meta['index_label']));
 
     /* --- the band between P3 and P97 ------------------------------------ */
-    $band = rust_area_path($curves[3], $curves[97], $sx, $sy);
+    $band = growth_area_path($curves[3], $curves[97], $sx, $sy);
     if ($band !== '') {
         $svg[] = '<path class="rust-band" d="' . $band . '"/>';
     }
@@ -236,7 +236,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
         } elseif ($percentile === 3 || $percentile === 97) {
             $class .= ' rust-p-outer';
         }
-        $path = rust_line_path($curve, $sx, $sy);
+        $path = growth_line_path($curve, $sx, $sy);
         if ($path === '') {
             continue;
         }
@@ -260,22 +260,22 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
             $projection = $options['projection'];
             $x = $x18 - 5;
             $label = t('chart_label_projection', array(
-                'mid' => rust_num($projection['mid']),
-                'low' => rust_num($projection['low']),
-                'high' => rust_num($projection['high']),
-                'z' => rust_num($projection['z'], 2),
+                'mid' => growth_num($projection['mid']),
+                'low' => growth_num($projection['low']),
+                'high' => growth_num($projection['high']),
+                'z' => growth_num($projection['z'], 2),
                 'n' => (int)$projection['based_on'],
                 'unit' => $unit,
             ));
             $svg[] = sprintf(
                 '<line class="rust-projection rust-ukazatel" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"'
                 . ' tabindex="0" role="img"><title>%s</title></line>',
-                $x, $sy($projection['high']), $x, $sy($projection['low']), rust_h($label)
+                $x, $sy($projection['high']), $x, $sy($projection['low']), growth_h($label)
             );
             $svg[] = sprintf(
                 '<circle class="rust-projection-dot rust-ukazatel" cx="%.1f" cy="%.1f" r="3"'
                 . ' tabindex="0" role="img"><title>%s</title></circle>',
-                $x, $sy($projection['mid']), rust_h($label)
+                $x, $sy($projection['mid']), growth_h($label)
             );
             /* a dashed run from the last measurement to the predicted adult
                height, so the projection reads as a continuation of the child's
@@ -293,20 +293,20 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
             $target = $options['target'];
             $x = $x18 + 5;
             $label = t('chart_label_target', array(
-                'mid' => rust_num($target['mid']),
-                'low' => rust_num($target['low']),
-                'high' => rust_num($target['high']),
+                'mid' => growth_num($target['mid']),
+                'low' => growth_num($target['low']),
+                'high' => growth_num($target['high']),
                 'unit' => $unit,
             ));
             $svg[] = sprintf(
                 '<line class="rust-target rust-ukazatel" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"'
                 . ' tabindex="0" role="img"><title>%s</title></line>',
-                $x, $sy($target['high']), $x, $sy($target['low']), rust_h($label)
+                $x, $sy($target['high']), $x, $sy($target['low']), growth_h($label)
             );
             $svg[] = sprintf(
                 '<circle class="rust-target-dot rust-ukazatel" cx="%.1f" cy="%.1f" r="3"'
                 . ' tabindex="0" role="img"><title>%s</title></circle>',
-                $x, $sy($target['mid']), rust_h($label)
+                $x, $sy($target['mid']), growth_h($label)
             );
         }
     }
@@ -321,7 +321,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
     if ($inRange) {
         $smoothed = !empty($options['smooth']) ? $options['smooth'] : null;
 
-        $childPath = rust_line_path(
+        $childPath = growth_line_path(
             array_map(function ($p) { return array($p['age'], $p['value']); }, $inRange),
             $sx, $sy
         );
@@ -339,7 +339,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                     $within[] = $pair;
                 }
             }
-            $smoothPath = rust_line_path($within, $sx, $sy);
+            $smoothPath = growth_line_path($within, $sx, $sy);
             if ($smoothPath !== '') {
                 $svg[] = '<path class="rust-smooth-line" d="' . $smoothPath . '"/>';
             }
@@ -349,9 +349,9 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                request and works on a phone, where there is no hover at all and
                a tap has to be enough. The <title> stays as the no-JavaScript
                fallback: browsers show it natively. */
-            $lms = rust_lms_at($rows, $point['age']);
-            $z = $lms ? rust_zscore($point['value'], $lms) : null;
-            $percentile = ($z === null) ? null : rust_percentile($z);
+            $lms = growth_lms_at($rows, $point['age']);
+            $z = $lms ? growth_zscore($point['value'], $lms) : null;
+            $percentile = ($z === null) ? null : growth_percentile($z);
 
             /* One label serves both purposes: browsers show a <title> natively
                as a tooltip when JavaScript is off, and the readout above the
@@ -359,30 +359,30 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                the two can never drift apart, and the Czech number formatting
                stays on the PHP side where the rest of it lives. */
             $parts = array(
-                rust_date_cz($point['date']),
-                rust_num($point['value'], $decimals) . ' ' . $unit,
+                growth_format_date($point['date']),
+                growth_num($point['value'], $decimals) . ' ' . $unit,
             );
             /* M is the median by definition, so the gap to it needs no extra
                lookup - and it is the part of the readout a parent can act on
                without first translating a percentile in their head. */
             if ($lms) {
-                $diff = rust_median_diff_cz($point['value'], $lms['m'], $decimals, $unit);
+                $diff = growth_format_median_diff($point['value'], $lms['m'], $decimals, $unit);
                 if ($diff !== '') {
                     $parts[] = $diff;
                 }
             }
             if ($percentile !== null) {
                 $parts[] = t('tooltip_percentile', array(
-                    'n' => rust_num($percentile, ($percentile < 1 || $percentile > 99) ? 2 : 1),
+                    'n' => growth_num($percentile, ($percentile < 1 || $percentile > 99) ? 2 : 1),
                 ));
             }
             if ($z !== null) {
-                $parts[] = rust_num($z, 2) . ' SD';
+                $parts[] = growth_num($z, 2) . ' SD';
             }
             /* what the point is plotted against: an age, or a height */
             $parts[] = ($meta['index'] === 'age')
-                ? t('tooltip_age', array('age' => rust_age_cz($point['age'])))
-                : t('tooltip_height', array('height' => rust_num($point['age'], 1), 'unit' => rust_length_unit()));
+                ? t('tooltip_age', array('age' => growth_format_age($point['age'])))
+                : t('tooltip_height', array('height' => growth_num($point['age'], 1), 'unit' => growth_length_unit()));
 
             /* A measurement the smoother could not reconcile with its
                neighbours. Flagged rather than dropped: only the person who
@@ -390,13 +390,13 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
             $class = 'rust-child-dot rust-ukazatel';
             if (isset($point['suspect'])) {
                 $class .= ' rust-podezrely';
-                /* rust_num() already carries its own "-" for a negative deviation;
+                /* growth_num() already carries its own "-" for a negative deviation;
                    "%+s" cannot add the matching "+" for a positive one (PHP's sign
                    flag has no effect on a string conversion), so it is prepended
                    by hand instead. */
                 $parts[] = t('tooltip_suspect', array(
                     'deviation' => (($point['suspect'] >= 0) ? '+' : '')
-                        . rust_num($point['suspect'], $decimals),
+                        . growth_num($point['suspect'], $decimals),
                     'unit' => $unit,
                 ));
             }
@@ -405,7 +405,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
                 '<circle class="%s" cx="%.1f" cy="%.1f" r="2.8"'
                 . ' tabindex="0" role="img"><title>%s</title></circle>',
                 $class, $sx($point['age']), $sy($point['value']),
-                rust_h(implode(' · ', $parts))
+                growth_h(implode(' · ', $parts))
             );
         }
     }
@@ -434,7 +434,7 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
         $items = array();
         foreach ($legend as $entry) {
             $items[] = sprintf('<span class="rust-legenda rust-legenda-%s">%s</span>',
-                $entry[0], rust_h($entry[1]));
+                $entry[0], growth_h($entry[1]));
         }
         $svg[] = '<p class="rust-legenda-radek">' . implode(' ', $items) . '</p>';
     }
@@ -456,9 +456,9 @@ function rust_chart_svg($referenceId, $metric, $sex, $points, $options = array()
  * $seriesByMetric maps a metric id to points of array('age', 'z', 'date',
  * 'value'). Only age-indexed metrics belong here.
  */
-function rust_sds_chart_svg($seriesByMetric, $options = array())
+function growth_sds_chart_svg($seriesByMetric, $options = array())
 {
-    $metrics = rust_metrics();
+    $metrics = growth_metrics();
     $colours = array('height' => 1, 'weight' => 2, 'bmi' => 3);
 
     $maxAge = 0.0;
@@ -502,7 +502,7 @@ function rust_sds_chart_svg($seriesByMetric, $options = array())
     $svg[] = '<figcaption class="rust-graf-lista">'
         . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
         . '<button type="button" class="rust-graf-full" hidden'
-        . ' aria-label="' . th('button_fullscreen') . '">' . RUST_FULLSCREEN_ICON . '</button>'
+        . ' aria-label="' . th('button_fullscreen') . '">' . GROWTH_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
         '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
@@ -521,12 +521,12 @@ function rust_sds_chart_svg($seriesByMetric, $options = array())
         $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%+d</text>',
             $left - 6, $y + 4, $line);
     }
-    foreach (rust_nice_ticks($xMin, $xMax, 9) as $tick) {
+    foreach (growth_nice_ticks($xMin, $xMax, 9) as $tick) {
         $x = $sx($tick);
         $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $x, $top, $x, $top + $plotH);
         $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
-            $x, $top + $plotH + 20, rust_h(rust_tick_label($tick)));
+            $x, $top + $plotH + 20, growth_h(growth_tick_label($tick)));
     }
     $svg[] = sprintf('<text class="rust-axis rust-axis-unit" x="%.1f" y="%.1f">SD</text>', 4, $top + 4);
     $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
@@ -541,7 +541,7 @@ function rust_sds_chart_svg($seriesByMetric, $options = array())
         $meta = $metrics[$metricId];
         $n = $colours[$metricId];
 
-        $path = rust_line_path(
+        $path = growth_line_path(
             array_map(function ($p) { return array($p['age'], $p['z']); }, $points),
             $sx, $sy
         );
@@ -557,33 +557,33 @@ function rust_sds_chart_svg($seriesByMetric, $options = array())
         }
 
         if (isset($smoothing[$metricId]['curve_z'])) {
-            $smoothPath = rust_line_path($smoothing[$metricId]['curve_z'], $sx, $sy);
+            $smoothPath = growth_line_path($smoothing[$metricId]['curve_z'], $sx, $sy);
             if ($smoothPath !== '') {
                 $svg[] = sprintf('<path class="rust-sds-smooth rust-sds-%d" d="%s"/>', $n, $smoothPath);
             }
         }
-        $sdsKind = rust_metric_value_kind($metricId);
-        $sdsUnit = rust_display_metric_unit($metricId) ?: $meta['unit'];
-        $sdsDecimals = ($sdsKind === 'weight') ? rust_weight_decimals() : $meta['decimals'];
+        $sdsKind = growth_metric_value_kind($metricId);
+        $sdsUnit = growth_display_metric_unit($metricId) ?: $meta['unit'];
+        $sdsDecimals = ($sdsKind === 'weight') ? growth_weight_decimals() : $meta['decimals'];
         foreach ($points as $point) {
-            $displayValue = rust_display_chart_scalar($point['value'], $sdsKind);
+            $displayValue = growth_display_chart_scalar($point['value'], $sdsKind);
             $bits = array(
                 $meta['label'],
-                rust_date_cz($point['date']),
-                rust_num($displayValue, $sdsDecimals) . ' ' . $sdsUnit,
+                growth_format_date($point['date']),
+                growth_num($displayValue, $sdsDecimals) . ' ' . $sdsUnit,
             );
             if (isset($point['median'])) {
-                $diff = rust_median_diff_cz($displayValue, rust_display_chart_scalar($point['median'], $sdsKind),
+                $diff = growth_format_median_diff($displayValue, growth_display_chart_scalar($point['median'], $sdsKind),
                     $sdsDecimals, $sdsUnit);
                 if ($diff !== '') { $bits[] = $diff; }
             }
-            $bits[] = rust_num($point['z'], 2) . ' SD';
-            $bits[] = t('tooltip_age', array('age' => rust_age_cz($point['age'])));
+            $bits[] = growth_num($point['z'], 2) . ' SD';
+            $bits[] = t('tooltip_age', array('age' => growth_format_age($point['age'])));
             $label = implode(' · ', $bits);
             $svg[] = sprintf(
                 '<circle class="rust-sds-dot rust-sds-%d rust-ukazatel" cx="%.1f" cy="%.1f" r="2.5"'
                 . ' tabindex="0" role="img"><title>%s</title></circle>',
-                $n, $sx($point['age']), $sy($point['z']), rust_h($label)
+                $n, $sx($point['age']), $sy($point['z']), growth_h($label)
             );
         }
     }
@@ -597,7 +597,7 @@ function rust_sds_chart_svg($seriesByMetric, $options = array())
             continue;
         }
         $legend[] = sprintf('<span class="rust-legenda rust-sds-%d">%s</span>',
-            $colours[$metricId], rust_h($metrics[$metricId]['label']));
+            $colours[$metricId], growth_h($metrics[$metricId]['label']));
     }
     if ($legend) {
         $svg[] = '<p class="rust-legenda-radek">' . implode(' ', $legend) . '</p>';
@@ -627,27 +627,27 @@ function rust_sds_chart_svg($seriesByMetric, $options = array())
  * mid-childhood, but not the same quantity, which is why it is labelled as a
  * pace rather than as a percentile.
  */
-function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = array())
+function growth_velocity_chart_svg($referenceId, $sex, $velocities, $options = array())
 {
     if (count($velocities) < 2) {
         return '';
     }
-    $rows = rust_reference_rows($referenceId, 'height', $sex);
+    $rows = growth_reference_rows($referenceId, 'height', $sex);
     if (!$rows) {
         return '';
     }
 
-    /* Same one-time unit conversion as rust_chart_svg(): height's M is a
+    /* Same one-time unit conversion as growth_chart_svg(): height's M is a
        length, so it converts, and its difference over a year (the median
        pace below) is then correctly expressed in the display unit too. */
-    $rows = rust_display_chart_rows($rows, null, 'length');
+    $rows = growth_display_chart_rows($rows, null, 'length');
     $velocities = array_map(function ($v) {
-        $v['cm_per_year'] = rust_display_velocity($v['cm_per_year']);
+        $v['cm_per_year'] = growth_display_velocity($v['cm_per_year']);
         return $v;
     }, $velocities);
     if (!empty($options['smooth']['curve'])) {
         $options['smooth']['curve'] = array_map(function ($pair) {
-            return array($pair[0], rust_display_length($pair[1]));
+            return array($pair[0], growth_display_length($pair[1]));
         }, $options['smooth']['curve']);
     }
 
@@ -659,8 +659,8 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
         if ($age - 1.0 < $refMin || $age > $refMax) {
             return null;
         }
-        $now = rust_lms_at($rows, $age);
-        $before = rust_lms_at($rows, $age - 1.0);
+        $now = growth_lms_at($rows, $age);
+        $before = growth_lms_at($rows, $age - 1.0);
         if (!$now || !$before) {
             return null;
         }
@@ -766,33 +766,33 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
     $svg[] = '<figcaption class="rust-graf-lista">'
         . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
         . '<button type="button" class="rust-graf-full" hidden'
-        . ' aria-label="' . th('button_fullscreen') . '">' . RUST_FULLSCREEN_ICON . '</button>'
+        . ' aria-label="' . th('button_fullscreen') . '">' . GROWTH_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
         '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
         $width, $height, th('heading_velocity')
     );
 
-    foreach (rust_nice_ticks($yMin, $yMax, 6) as $tick) {
+    foreach (growth_nice_ticks($yMin, $yMax, 6) as $tick) {
         $y = $sy($tick);
         $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $left, $y, $left + $plotW, $y);
         $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
-            $left - 6, $y + 4, rust_h(rust_tick_label($tick)));
+            $left - 6, $y + 4, growth_h(growth_tick_label($tick)));
     }
-    foreach (rust_nice_ticks($xMin, $xMax, 9) as $tick) {
+    foreach (growth_nice_ticks($xMin, $xMax, 9) as $tick) {
         $x = $sx($tick);
         $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $x, $top, $x, $top + $plotH);
         $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
-            $x, $top + $plotH + 20, rust_h(rust_tick_label($tick)));
+            $x, $top + $plotH + 20, growth_h(growth_tick_label($tick)));
     }
     $svg[] = sprintf('<text class="rust-axis rust-axis-unit" x="%.1f" y="%.1f">%s</text>',
-        4, $top + 4, rust_h(rust_velocity_unit()));
+        4, $top + 4, growth_h(growth_velocity_unit()));
     $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
         $left + $plotW, $top + $plotH + 32, th('index_age'));
 
-    $pacePath = rust_line_path($paceCurve, $sx, $sy);
+    $pacePath = growth_line_path($paceCurve, $sx, $sy);
     if ($pacePath !== '') {
         $svg[] = '<path class="rust-tempo-line" d="' . $pacePath . '"/>';
     }
@@ -803,14 +803,14 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
             $points[] = array($v['age'], $v['cm_per_year']);
         }
     }
-    $childPath = rust_line_path($points, $sx, $sy);
+    $childPath = growth_line_path($points, $sx, $sy);
     if ($childPath !== '') {
         $class = $smoothCurve ? 'rust-child-line rust-child-line-tlum' : 'rust-child-line';
         $svg[] = sprintf('<path class="%s" d="%s"/>', $class, $childPath);
     }
 
     if ($smoothCurve) {
-        $smoothPath = rust_line_path($smoothCurve, $sx, $sy);
+        $smoothPath = growth_line_path($smoothCurve, $sx, $sy);
         if ($smoothPath !== '') {
             $svg[] = '<path class="rust-smooth-line" d="' . $smoothPath . '"/>';
         }
@@ -821,25 +821,25 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
             continue;
         }
         $pace = $medianPace($v['age']);
-        $cmPerYear = rust_h(rust_velocity_unit());
+        $cmPerYear = growth_h(growth_velocity_unit());
         $parts = array(
-            rust_date_cz($v['date']),
-            rust_num($v['cm_per_year']) . ' ' . $cmPerYear,
+            growth_format_date($v['date']),
+            growth_num($v['cm_per_year']) . ' ' . $cmPerYear,
             th('velocity_since', array(
-                'date' => rust_date_cz($v['from_date']),
-                'span' => rust_years_span_cz($v['years']),
+                'date' => growth_format_date($v['from_date']),
+                'span' => growth_format_years_span($v['years']),
             )),
         );
         if ($pace !== null) {
             $parts[] = t('tooltip_median_pace', array(
-                'pace' => rust_num($pace),
+                'pace' => growth_num($pace),
                 'unit' => $cmPerYear,
             ));
         }
         $svg[] = sprintf(
             '<circle class="rust-child-dot rust-ukazatel" cx="%.1f" cy="%.1f" r="2.8"'
             . ' tabindex="0" role="img"><title>%s</title></circle>',
-            $sx($v['age']), $sy($v['cm_per_year']), rust_h(implode(' · ', $parts))
+            $sx($v['age']), $sy($v['cm_per_year']), growth_h(implode(' · ', $parts))
         );
     }
 
@@ -853,7 +853,7 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
     $items = array();
     foreach ($legend as $entry) {
         $items[] = sprintf('<span class="rust-legenda rust-legenda-%s">%s</span>',
-            $entry[0], rust_h($entry[1]));
+            $entry[0], growth_h($entry[1]));
     }
     $svg[] = '<p class="rust-legenda-radek">' . implode(' ', $items) . '</p>';
     $svg[] = '</figure>';
@@ -863,7 +863,7 @@ function rust_velocity_chart_svg($referenceId, $sex, $velocities, $options = arr
 
 /* ------------------------------------------------------------- path helpers */
 
-function rust_line_path($curve, $sx, $sy)
+function growth_line_path($curve, $sx, $sy)
 {
     $parts = array();
     foreach ($curve as $i => $pair) {
@@ -873,7 +873,7 @@ function rust_line_path($curve, $sx, $sy)
 }
 
 /** A closed path following $lower forward and $upper back, for the shaded band. */
-function rust_area_path($lower, $upper, $sx, $sy)
+function growth_area_path($lower, $upper, $sx, $sy)
 {
     if (!$lower || !$upper) {
         return '';
@@ -890,7 +890,7 @@ function rust_area_path($lower, $upper, $sx, $sy)
 }
 
 /** Round tick positions at a 1/2/5 x 10^n step, so labels read cleanly. */
-function rust_nice_ticks($min, $max, $target)
+function growth_nice_ticks($min, $max, $target)
 {
     $span = $max - $min;
     if ($span <= 0) {
@@ -917,12 +917,12 @@ function rust_nice_ticks($min, $max, $target)
     return $ticks;
 }
 
-function rust_tick_label($value)
+function growth_tick_label($value)
 {
     if (abs($value - round($value)) < 1e-9) {
         return (string)(int)round($value);
     }
-    /* Same locale-aware decimal separator as everywhere else - see rust_num()
+    /* Same locale-aware decimal separator as everywhere else - see growth_num()
        in data.inc. */
-    return rust_num($value, 1);
+    return growth_num($value, 1);
 }

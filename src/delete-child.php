@@ -11,7 +11,7 @@
 require_once __DIR__ . '/shell.inc';
 
 $childId = isset($_GET['id']) ? (int)$_GET['id'] : (isset($_POST['id']) ? (int)$_POST['id'] : 0);
-$child = rust_child($childId);
+$child = growth_child($childId);
 if (!$child) {
     header('Location: index.php');
     exit;
@@ -19,26 +19,26 @@ if (!$child) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    rust_csrf_check();
+    growth_csrf_check();
     $confirmName = trim((string)(isset($_POST['potvrzeni']) ? $_POST['potvrzeni'] : ''));
     if ($confirmName !== $child['jmeno']) {
         $error = t('error_name_mismatch');
     } else {
-        rust_child_delete($childId);
+        growth_child_delete($childId);
         header('Location: index.php?smazano=' . urlencode($child['jmeno']));
         exit;
     }
 }
 
-$measurementCount = count(rust_measurements($childId));
+$measurementCount = count(growth_measurements($childId));
 
-rust_head(t('page_title_delete_child'), $childId);
+growth_head(t('page_title_delete_child'), $childId);
 ?>
 
-<h1><?php echo t('heading_delete_child', array('name' => rust_h($child['jmeno']))); ?></h1>
+<h1><?php echo t('heading_delete_child', array('name' => growth_h($child['jmeno']))); ?></h1>
 <p>
   <?php echo t('confirm_delete_child', array(
-      'name' => '<strong>' . rust_h($child['jmeno']) . '</strong>',
+      'name' => '<strong>' . growth_h($child['jmeno']) . '</strong>',
       'n' => '<strong>' . (int)$measurementCount . '</strong>',
   )); ?>
 </p>
@@ -47,11 +47,11 @@ rust_head(t('page_title_delete_child'), $childId);
 </p>
 
 <?php if ($error !== ''): ?>
-  <p class="rust-chyba"><?php echo rust_h($error); ?></p>
+  <p class="rust-chyba"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
 <form method="post" class="rust-formular">
-  <?php echo rust_csrf_field(); ?>
+  <?php echo growth_csrf_field(); ?>
   <input type="hidden" name="id" value="<?php echo (int)$childId; ?>">
   <label><?php echo th('label_confirm_name'); ?>
     <input type="text" name="potvrzeni" required autocomplete="off">
@@ -63,4 +63,4 @@ rust_head(t('page_title_delete_child'), $childId);
   <a href="child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_back'); ?></a>
 </p>
 
-<?php rust_foot(); ?>
+<?php growth_foot(); ?>

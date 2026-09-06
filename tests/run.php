@@ -54,9 +54,9 @@ foreach ($files as $file) {
         if (strpos($fn, 'test_') !== 0) {
             continue;
         }
-        rust_test_reset_failures();
+        growth_test_reset_failures();
         $fn();
-        $failures = rust_test_failures();
+        $failures = growth_test_failures();
         if ($failures) {
             $totalFail++;
             echo "FAIL $fn\n";

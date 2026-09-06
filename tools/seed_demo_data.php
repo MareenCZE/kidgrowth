@@ -22,8 +22,8 @@ require_once __DIR__ . '/../src/growth.inc';
 
 function seed_measurements($childId, $sex, $birthDate, $ageYears, $targetZ)
 {
-    $heightRows = rust_reference_rows('cdc', 'height', $sex);
-    $weightRows = rust_reference_rows('cdc', 'weight', $sex);
+    $heightRows = growth_reference_rows('cdc', 'height', $sex);
+    $weightRows = growth_reference_rows('cdc', 'weight', $sex);
 
     $months = 0;
     while (true) {
@@ -33,19 +33,19 @@ function seed_measurements($childId, $sex, $birthDate, $ageYears, $targetZ)
         }
         $date = date('Y-m-d', strtotime($birthDate . " +{$months} months"));
 
-        $heightLms = rust_lms_at($heightRows, $age);
-        $weightLms = rust_lms_at($weightRows, $age);
+        $heightLms = growth_lms_at($heightRows, $age);
+        $weightLms = growth_lms_at($weightRows, $age);
 
         /* Height and weight are correlated but not identical, so they get
            independent jitter around the same underlying channel. */
         $heightZ = $targetZ + (mt_rand(-12, 12) / 100.0);
         $weightZ = $targetZ + (mt_rand(-18, 18) / 100.0);
 
-        $height = $heightLms ? round(rust_value_at_z($heightLms, $heightZ), 1) : null;
-        $weight = $weightLms ? round(rust_value_at_z($weightLms, $weightZ), 2) : null;
+        $height = $heightLms ? round(growth_value_at_z($heightLms, $heightZ), 1) : null;
+        $weight = $weightLms ? round(growth_value_at_z($weightLms, $weightZ), 2) : null;
 
         if ($height !== null || $weight !== null) {
-            rust_measurement_save($childId, $date, $height, $weight, null);
+            growth_measurement_save($childId, $date, $height, $weight, null);
         }
 
         /* Roughly every 2-3 months, irregularly - like an actual family, not
@@ -57,11 +57,11 @@ function seed_measurements($childId, $sex, $birthDate, $ageYears, $targetZ)
 mt_srand(20260101); /* fixed seed: the same "invented" data every time this runs */
 
 $alexBorn = date('Y-m-d', strtotime('-6 years -3 months'));
-$alexId = rust_child_upsert('Alex Demo', 'm', $alexBorn, 180.0, 165.0, 0);
+$alexId = growth_child_upsert('Alex Demo', 'm', $alexBorn, 180.0, 165.0, 0);
 seed_measurements($alexId, 'm', $alexBorn, 6.25, 0.3);
 fwrite(STDERR, "Seeded Alex Demo (id $alexId)\n");
 
 $samBorn = date('Y-m-d', strtotime('-20 months'));
-$samId = rust_child_upsert('Sam Demo', 'z', $samBorn, 172.0, 160.0, 1);
+$samId = growth_child_upsert('Sam Demo', 'z', $samBorn, 172.0, 160.0, 1);
 seed_measurements($samId, 'z', $samBorn, 20 / 12.0, -0.4);
 fwrite(STDERR, "Seeded Sam Demo (id $samId)\n");

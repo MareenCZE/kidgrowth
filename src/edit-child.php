@@ -5,7 +5,7 @@
 require_once __DIR__ . '/shell.inc';
 
 $childId = isset($_GET['id']) ? (int)$_GET['id'] : (isset($_POST['id']) ? (int)$_POST['id'] : 0);
-$child = rust_child($childId);
+$child = growth_child($childId);
 if (!$child) {
     header('Location: index.php');
     exit;
@@ -13,20 +13,20 @@ if (!$child) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    rust_csrf_check();
+    growth_csrf_check();
     $name = trim((string)$_POST['jmeno']);
     $sex = ($_POST['pohlavi'] === 'z') ? 'z' : 'm';
     $born = trim((string)$_POST['narozeni']);
-    $father = rust_parse_length_input($_POST['otec']);
-    $mother = rust_parse_length_input($_POST['matka']);
+    $father = growth_parse_length_input($_POST['otec']);
+    $mother = growth_parse_length_input($_POST['matka']);
     $breastfed = !empty($_POST['kojeno']);
 
-    if ($name === '' || !rust_valid_date($born)) {
+    if ($name === '' || !growth_valid_date($born)) {
         $error = t('error_name_and_birth_required');
     } elseif (strtotime($born) > time()) {
         $error = t('error_birth_in_future');
     } else {
-        rust_child_update($childId, $name, $sex, $born, $father, $mother, $breastfed);
+        growth_child_update($childId, $name, $sex, $born, $father, $mother, $breastfed);
         header('Location: child.php?id=' . $childId);
         exit;
     }
@@ -36,21 +36,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ));
 }
 
-rust_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
+growth_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
 ?>
 
 <h1><?php echo th('heading_edit_child'); ?></h1>
 
 <?php if ($error !== ''): ?>
-  <p class="rust-chyba"><?php echo rust_h($error); ?></p>
+  <p class="rust-chyba"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
 <form method="post" class="rust-formular">
-  <?php echo rust_csrf_field(); ?>
+  <?php echo growth_csrf_field(); ?>
   <input type="hidden" name="id" value="<?php echo (int)$childId; ?>">
   <label><?php echo th('label_name'); ?>
     <input type="text" name="jmeno" required maxlength="60"
-           value="<?php echo rust_h($child['jmeno']); ?>">
+           value="<?php echo growth_h($child['jmeno']); ?>">
   </label>
   <label><?php echo th('label_sex'); ?>
     <select name="pohlavi">
@@ -60,15 +60,15 @@ rust_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
   </label>
   <label><?php echo th('label_birth_date'); ?>
     <input type="date" name="narozeni" required max="<?php echo date('Y-m-d'); ?>"
-           value="<?php echo rust_h($child['datum_narozeni']); ?>">
+           value="<?php echo growth_h($child['datum_narozeni']); ?>">
   </label>
-  <label><?php echo th('label_father_height'); ?> (<?php echo rust_length_unit(); ?>)
+  <label><?php echo th('label_father_height'); ?> (<?php echo growth_length_unit(); ?>)
     <input type="text" inputmode="text" name="otec"
-           value="<?php echo rust_h(rust_num(rust_display_length($child['vyska_otce_cm']))); ?>">
+           value="<?php echo growth_h(growth_num(growth_display_length($child['vyska_otce_cm']))); ?>">
   </label>
-  <label><?php echo th('label_mother_height'); ?> (<?php echo rust_length_unit(); ?>)
+  <label><?php echo th('label_mother_height'); ?> (<?php echo growth_length_unit(); ?>)
     <input type="text" inputmode="text" name="matka"
-           value="<?php echo rust_h(rust_num(rust_display_length($child['vyska_matky_cm']))); ?>">
+           value="<?php echo growth_h(growth_num(growth_display_length($child['vyska_matky_cm']))); ?>">
   </label>
   <label class="rust-zaskrtnuti">
     <input type="checkbox" name="kojeno" value="1"<?php echo !empty($child['kojeno']) ? ' checked' : ''; ?>>
@@ -86,4 +86,4 @@ rust_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
   <a href="delete-child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_delete_child'); ?></a>
 </p>
 
-<?php rust_foot(); ?>
+<?php growth_foot(); ?>

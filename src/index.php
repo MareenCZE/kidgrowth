@@ -8,43 +8,43 @@
 require_once __DIR__ . '/shell.inc';
 
 $error = '';
-$reference = rust_selected_reference();
+$reference = growth_selected_reference();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['akce']) && $_POST['akce'] === 'nove_dite') {
-    rust_csrf_check();
+    growth_csrf_check();
     $name = trim((string)$_POST['jmeno']);
     $sex = ($_POST['pohlavi'] === 'z') ? 'z' : 'm';
     $born = trim((string)$_POST['narozeni']);
-    $father = rust_parse_length_input($_POST['otec']);
-    $mother = rust_parse_length_input($_POST['matka']);
+    $father = growth_parse_length_input($_POST['otec']);
+    $mother = growth_parse_length_input($_POST['matka']);
     $breastfed = !empty($_POST['kojeno']);
 
-    if ($name === '' || !rust_valid_date($born)) {
+    if ($name === '' || !growth_valid_date($born)) {
         $error = t('error_name_and_birth_required');
     } elseif (strtotime($born) > time()) {
         $error = t('error_birth_in_future');
     } else {
-        $id = rust_child_upsert($name, $sex, $born, $father, $mother, $breastfed);
+        $id = growth_child_upsert($name, $sex, $born, $father, $mother, $breastfed);
         header('Location: child.php?id=' . (int)$id);
         exit;
     }
 }
 
-$children = rust_children();
+$children = growth_children();
 
-rust_head('');
+growth_head('');
 ?>
 
 <h1><?php echo th('page_title_home'); ?></h1>
 
 <?php if (isset($_GET['smazano'])): ?>
   <p class="rust-poznamka">
-    <?php echo t('flash_moved_to_trash', array('name' => rust_h((string)$_GET['smazano']))); ?>
+    <?php echo t('flash_moved_to_trash', array('name' => growth_h((string)$_GET['smazano']))); ?>
   </p>
 <?php endif; ?>
 
 <?php if ($error !== ''): ?>
-  <p class="rust-chyba"><?php echo rust_h($error); ?></p>
+  <p class="rust-chyba"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
 <?php if (!$children): ?>
@@ -55,7 +55,7 @@ rust_head('');
   <ul class="rust-seznam">
     <?php foreach ($children as $child): ?>
       <?php
-        $measurements = rust_measurements($child['id']);
+        $measurements = growth_measurements($child['id']);
         $last = null;
         for ($i = count($measurements) - 1; $i >= 0; $i--) {
             if ($measurements[$i]['vyska_cm'] !== null || $measurements[$i]['hmotnost_kg'] !== null) {
@@ -63,21 +63,21 @@ rust_head('');
                 break;
             }
         }
-        $age = rust_decimal_age($child['datum_narozeni'], date('Y-m-d'));
+        $age = growth_decimal_age($child['datum_narozeni'], date('Y-m-d'));
       ?>
       <li>
         <a href="child.php?id=<?php echo (int)$child['id']; ?>">
-          <strong><?php echo rust_h($child['jmeno']); ?></strong>
-          <span class="rust-vek"><?php echo rust_h(rust_age_cz($age)); ?></span>
+          <strong><?php echo growth_h($child['jmeno']); ?></strong>
+          <span class="rust-vek"><?php echo growth_h(growth_format_age($age)); ?></span>
         </a>
         <?php if ($last): ?>
           <span class="rust-posledni">
-            <?php echo rust_h(rust_date_cz($last['datum'])); ?>:
+            <?php echo growth_h(growth_format_date($last['datum'])); ?>:
             <?php if ($last['vyska_cm'] !== null): ?>
-              <?php echo rust_h(rust_num(rust_display_length($last['vyska_cm']))); ?> <?php echo rust_length_unit(); ?><?php endif; ?>
+              <?php echo growth_h(growth_num(growth_display_length($last['vyska_cm']))); ?> <?php echo growth_length_unit(); ?><?php endif; ?>
             <?php if ($last['vyska_cm'] !== null && $last['hmotnost_kg'] !== null): ?>,<?php endif; ?>
             <?php if ($last['hmotnost_kg'] !== null): ?>
-              <?php echo rust_h(rust_num(rust_display_weight($last['hmotnost_kg']), rust_weight_decimals())); ?> <?php echo rust_weight_unit(); ?><?php endif; ?>
+              <?php echo growth_h(growth_num(growth_display_weight($last['hmotnost_kg']), growth_weight_decimals())); ?> <?php echo growth_weight_unit(); ?><?php endif; ?>
             <span class="rust-pocet"><?php echo th('count_measurements', array('n' => count($measurements))); ?></span>
           </span>
         <?php else: ?>
@@ -91,7 +91,7 @@ rust_head('');
 <details class="rust-panel"<?php echo $children ? '' : ' open'; ?>>
   <summary><?php echo th('add_child_summary'); ?></summary>
   <form method="post" class="rust-formular">
-    <?php echo rust_csrf_field(); ?>
+    <?php echo growth_csrf_field(); ?>
     <input type="hidden" name="akce" value="nove_dite">
     <label><?php echo th('label_name'); ?>
       <input type="text" name="jmeno" required maxlength="60">
@@ -105,11 +105,11 @@ rust_head('');
     <label><?php echo th('label_birth_date'); ?>
       <input type="date" name="narozeni" required max="<?php echo date('Y-m-d'); ?>">
     </label>
-    <?php $heightPlaceholder = (rust_units() === 'imperial') ? th('placeholder_optional_height_imperial') : th('placeholder_optional'); ?>
-    <label><?php echo th('label_father_height'); ?> (<?php echo rust_length_unit(); ?>)
+    <?php $heightPlaceholder = (growth_units() === 'imperial') ? th('placeholder_optional_height_imperial') : th('placeholder_optional'); ?>
+    <label><?php echo th('label_father_height'); ?> (<?php echo growth_length_unit(); ?>)
       <input type="text" inputmode="text" name="otec" placeholder="<?php echo $heightPlaceholder; ?>">
     </label>
-    <label><?php echo th('label_mother_height'); ?> (<?php echo rust_length_unit(); ?>)
+    <label><?php echo th('label_mother_height'); ?> (<?php echo growth_length_unit(); ?>)
       <input type="text" inputmode="text" name="matka" placeholder="<?php echo $heightPlaceholder; ?>">
     </label>
     <label class="rust-zaskrtnuti">
@@ -129,4 +129,4 @@ rust_head('');
   <a href="trash.php"><?php echo th('nav_trash'); ?></a>
 </p>
 
-<?php rust_foot(); ?>
+<?php growth_foot(); ?>

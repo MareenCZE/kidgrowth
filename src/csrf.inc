@@ -12,7 +12,7 @@
  * moot.
  */
 
-function rust_session_start()
+function growth_session_start()
 {
     if (session_status() === PHP_SESSION_NONE) {
         session_set_cookie_params(array(
@@ -30,30 +30,30 @@ function rust_session_start()
     }
 }
 
-function rust_csrf_token()
+function growth_csrf_token()
 {
-    rust_session_start();
-    if (empty($_SESSION['rust_csrf'])) {
-        $_SESSION['rust_csrf'] = bin2hex(random_bytes(32));
+    growth_session_start();
+    if (empty($_SESSION['growth_csrf'])) {
+        $_SESSION['growth_csrf'] = bin2hex(random_bytes(32));
     }
-    return $_SESSION['rust_csrf'];
+    return $_SESSION['growth_csrf'];
 }
 
 /** The hidden field every form that POSTs here needs. */
-function rust_csrf_field()
+function growth_csrf_field()
 {
-    return '<input type="hidden" name="csrf" value="' . rust_h(rust_csrf_token()) . '">';
+    return '<input type="hidden" name="csrf" value="' . growth_h(growth_csrf_token()) . '">';
 }
 
 /**
  * Verifies the token on a POST and stops the request with a 403 if it is
  * missing or wrong. Call this before reading anything else out of $_POST.
  */
-function rust_csrf_check()
+function growth_csrf_check()
 {
-    rust_session_start();
+    growth_session_start();
     $token = isset($_POST['csrf']) ? (string)$_POST['csrf'] : '';
-    $expected = isset($_SESSION['rust_csrf']) ? $_SESSION['rust_csrf'] : '';
+    $expected = isset($_SESSION['growth_csrf']) ? $_SESSION['growth_csrf'] : '';
     if ($expected === '' || !hash_equals($expected, $token)) {
         header('HTTP/1.1 403 Forbidden');
         header('Content-Type: text/plain; charset=utf-8');

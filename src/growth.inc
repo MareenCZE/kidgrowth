@@ -24,7 +24,7 @@ require_once __DIR__ . '/units.inc';
  * for their age is not thereby underweight - weight-for-age cannot tell those
  * apart and weight-for-height can.
  */
-function rust_metrics()
+function growth_metrics()
 {
     return array(
         /* 'noise' is the smallest disagreement worth treating as real, in the
@@ -49,19 +49,19 @@ function rust_metrics()
         ),
         'wfh' => array(
             'label' => t('metric_wfh'), 'unit' => 'kg', 'decimals' => 2,
-            'index' => 'height', 'index_label' => t('index_height', array('unit' => rust_length_unit())), 'noise' => 0.3,
+            'index' => 'height', 'index_label' => t('index_height', array('unit' => growth_length_unit())), 'noise' => 0.3,
         ),
     );
 }
 
-function rust_metric($id)
+function growth_metric($id)
 {
-    $metrics = rust_metrics();
+    $metrics = growth_metrics();
     return isset($metrics[$id]) ? $metrics[$id] : null;
 }
 
 /** BMI in kg/m² from a height in centimetres and a weight in kilograms. */
-function rust_bmi($heightCm, $weightKg)
+function growth_bmi($heightCm, $weightKg)
 {
     if (!$heightCm || !$weightKg || $heightCm <= 0) {
         return null;
@@ -80,9 +80,9 @@ function rust_bmi($heightCm, $weightKg)
  * then the two international sets.
  *
  * The breastfed reference only covers the first year, so it is offered only for
- * a child marked as breastfed - see rust_reference_ids_for().
+ * a child marked as breastfed - see growth_reference_ids_for().
  */
-function rust_reference_ids()
+function growth_reference_ids()
 {
     return array('cav', 'koj', 'pol', 'who', 'cdc');
 }
@@ -95,13 +95,13 @@ function rust_reference_ids()
  * `tools/build_reference_data.php` (see DATA-LICENCES.md for why), so a fresh
  * clone that has not run the build step has only CDC. Everything that decides
  * what to default to or offer in the picker goes through this rather than the
- * full catalogue in rust_reference_ids(), so the app degrades to "just CDC"
+ * full catalogue in growth_reference_ids(), so the app degrades to "just CDC"
  * instead of pointing at references that are not there.
  */
-function rust_installed_reference_ids()
+function growth_installed_reference_ids()
 {
-    return array_values(array_filter(rust_reference_ids(), function ($id) {
-        return rust_reference($id) !== null;
+    return array_values(array_filter(growth_reference_ids(), function ($id) {
+        return growth_reference($id) !== null;
     }));
 }
 
@@ -111,9 +111,9 @@ function rust_installed_reference_ids()
  * Hides the breastfed curves unless the child is marked as breastfed, since for
  * everyone else they are an option that can only ever show an empty chart.
  */
-function rust_reference_ids_for($child)
+function growth_reference_ids_for($child)
 {
-    $ids = rust_installed_reference_ids();
+    $ids = growth_installed_reference_ids();
     $breastfed = !empty($child['kojeno']);
     if ($breastfed) {
         return $ids;
@@ -132,10 +132,10 @@ function rust_reference_ids_for($child)
  * at all: they are looked up from the language files here, on every load,
  * which is what lets the same generated data file serve every locale.
  */
-function rust_reference($id)
+function growth_reference($id)
 {
     static $cache = array();
-    if (!in_array($id, rust_reference_ids(), true)) {
+    if (!in_array($id, growth_reference_ids(), true)) {
         return null;
     }
     if (!isset($cache[$id])) {
@@ -162,7 +162,7 @@ function rust_reference($id)
  * nested arrays on every request. The parsed form is memoised because a single
  * page draws several curves from the same table.
  */
-function rust_reference_rows($id, $metric, $sex)
+function growth_reference_rows($id, $metric, $sex)
 {
     static $cache = array();
     $key = $id . '/' . $metric . '/' . $sex;
@@ -170,7 +170,7 @@ function rust_reference_rows($id, $metric, $sex)
         return $cache[$key];
     }
 
-    $reference = rust_reference($id);
+    $reference = growth_reference($id);
     if (!$reference || !isset($reference['metrics'][$metric][$sex])) {
         return $cache[$key] = array();
     }
@@ -190,9 +190,9 @@ function rust_reference_rows($id, $metric, $sex)
 }
 
 /** The age span a reference covers for a metric, as array(min, max) or null. */
-function rust_reference_span($id, $metric, $sex)
+function growth_reference_span($id, $metric, $sex)
 {
-    $rows = rust_reference_rows($id, $metric, $sex);
+    $rows = growth_reference_rows($id, $metric, $sex);
     if (!$rows) {
         return null;
     }
@@ -208,7 +208,7 @@ function rust_reference_span($id, $metric, $sex)
  * calendar birthdays, which is what the reference tables themselves are built
  * on (SZU documents the same decimal-age convention, after Weiner and Lourie).
  */
-function rust_decimal_age($birthDate, $onDate)
+function growth_decimal_age($birthDate, $onDate)
 {
     $born = date_create_immutable($birthDate);
     $when = date_create_immutable($onDate);
@@ -241,7 +241,7 @@ function rust_decimal_age($birthDate, $onDate)
  * extrapolated, and a caller receiving null is expected to draw nothing rather
  * than invent a curve.
  */
-function rust_lms_at($rows, $age)
+function growth_lms_at($rows, $age)
 {
     $count = count($rows);
     if ($count === 0 || $age < $rows[0][0] || $age > $rows[$count - 1][0]) {
@@ -272,9 +272,9 @@ function rust_lms_at($rows, $age)
     }
 
     return array(
-        'l' => rust_pchip($rows, $lo, $age, 1),
-        'm' => rust_pchip($rows, $lo, $age, 2),
-        's' => rust_pchip($rows, $lo, $age, 3),
+        'l' => growth_pchip($rows, $lo, $age, 1),
+        'm' => growth_pchip($rows, $lo, $age, 2),
+        's' => growth_pchip($rows, $lo, $age, 3),
     );
 }
 
@@ -282,7 +282,7 @@ function rust_lms_at($rows, $age)
  * One monotone cubic Hermite step on column $col of $rows, over the interval
  * starting at index $i.
  */
-function rust_pchip($rows, $i, $x, $col)
+function growth_pchip($rows, $i, $x, $col)
 {
     $n = count($rows);
     $x0 = $rows[$i][0];
@@ -296,8 +296,8 @@ function rust_pchip($rows, $i, $x, $col)
     }
     $delta = ($y1 - $y0) / $h;
 
-    $slope0 = rust_pchip_slope($rows, $i, $col, $delta, $h);
-    $slope1 = rust_pchip_slope($rows, $i + 1, $col, $delta, $h);
+    $slope0 = growth_pchip_slope($rows, $i, $col, $delta, $h);
+    $slope1 = growth_pchip_slope($rows, $i + 1, $col, $delta, $h);
 
     $t = ($x - $x0) / $h;
     $t2 = $t * $t;
@@ -314,7 +314,7 @@ function rust_pchip($rows, $i, $x, $col)
  * neighbouring secant slopes, forced to zero at a local extremum so the curve
  * cannot overshoot.
  */
-function rust_pchip_slope($rows, $k, $col, $fallback, $fallbackH)
+function growth_pchip_slope($rows, $k, $col, $fallback, $fallbackH)
 {
     $n = count($rows);
 
@@ -343,7 +343,7 @@ function rust_pchip_slope($rows, $k, $col, $fallback, $fallbackH)
 }
 
 /** The z-score (SDS) of a measurement under an LMS triplet. */
-function rust_zscore($value, $lms)
+function growth_zscore($value, $lms)
 {
     if (!$lms || $value <= 0 || $lms['m'] <= 0 || $lms['s'] <= 0) {
         return null;
@@ -354,8 +354,8 @@ function rust_zscore($value, $lms)
     return (pow($value / $lms['m'], $lms['l']) - 1.0) / ($lms['l'] * $lms['s']);
 }
 
-/** The measurement at a given z under an LMS triplet. Inverse of rust_zscore. */
-function rust_value_at_z($lms, $z)
+/** The measurement at a given z under an LMS triplet. Inverse of growth_zscore. */
+function growth_value_at_z($lms, $z)
 {
     if (!$lms) {
         return null;
@@ -379,15 +379,15 @@ function rust_value_at_z($lms, $z)
  * has no erf() outside ext/stats and this needs to work on stock hosting.
  * Accuracy is far better than the single decimal place we ever display.
  */
-function rust_percentile($z)
+function growth_percentile($z)
 {
     if ($z === null) {
         return null;
     }
-    return 100.0 * 0.5 * (1.0 + rust_erf($z / M_SQRT2));
+    return 100.0 * 0.5 * (1.0 + growth_erf($z / M_SQRT2));
 }
 
-function rust_erf($x)
+function growth_erf($x)
 {
     $sign = $x < 0 ? -1.0 : 1.0;
     $x = abs($x);
@@ -403,7 +403,7 @@ function rust_erf($x)
 }
 
 /** Inverse standard normal CDF, for turning a percentile back into a z. */
-function rust_z_from_percentile($percent)
+function growth_z_from_percentile($percent)
 {
     $p = $percent / 100.0;
     if ($p <= 0.0 || $p >= 1.0) {
@@ -445,19 +445,19 @@ function rust_z_from_percentile($percent)
  * reference's published range, which is normal rather than exceptional (WHO
  * publishes no weight beyond 10 years, for instance).
  */
-function rust_evaluate($birthDate, $sex, $date, $metric, $value, $referenceId)
+function growth_evaluate($birthDate, $sex, $date, $metric, $value, $referenceId)
 {
-    $age = rust_decimal_age($birthDate, $date);
+    $age = growth_decimal_age($birthDate, $date);
     $result = array('age' => $age, 'value' => $value, 'z' => null, 'percentile' => null);
     if ($age === null || $value === null || $value <= 0) {
         return $result;
     }
-    $lms = rust_lms_at(rust_reference_rows($referenceId, $metric, $sex), $age);
+    $lms = growth_lms_at(growth_reference_rows($referenceId, $metric, $sex), $age);
     if (!$lms) {
         return $result;
     }
-    $result['z'] = rust_zscore($value, $lms);
-    $result['percentile'] = rust_percentile($result['z']);
+    $result['z'] = growth_zscore($value, $lms);
+    $result['percentile'] = growth_percentile($result['z']);
     return $result;
 }
 
@@ -472,7 +472,7 @@ function rust_evaluate($birthDate, $sex, $date, $metric, $value, $referenceId)
  * of children finish inside it, which is wide enough that it is a sanity check
  * on a prediction rather than a prediction in itself.
  */
-function rust_target_height($fatherCm, $motherCm, $sex)
+function growth_target_height($fatherCm, $motherCm, $sex)
 {
     if (!$fatherCm || !$motherCm) {
         return null;
@@ -496,9 +496,9 @@ function rust_target_height($fatherCm, $motherCm, $sex)
  *
  * Returns null before there is enough history to say anything.
  */
-function rust_channel_projection($birthDate, $sex, $measurements, $referenceId, $atAge = 18.0)
+function growth_channel_projection($birthDate, $sex, $measurements, $referenceId, $atAge = 18.0)
 {
-    $rows = rust_reference_rows($referenceId, 'height', $sex);
+    $rows = growth_reference_rows($referenceId, 'height', $sex);
     if (!$rows) {
         return null;
     }
@@ -518,12 +518,12 @@ function rust_channel_projection($birthDate, $sex, $measurements, $referenceId, 
         if ($m['vyska_cm'] === null) {
             continue;
         }
-        $age = rust_decimal_age($birthDate, $m['datum']);
-        $lms = rust_lms_at($rows, $age);
+        $age = growth_decimal_age($birthDate, $m['datum']);
+        $lms = growth_lms_at($rows, $age);
         if (!$lms) {
             continue;
         }
-        $z = rust_zscore((float)$m['vyska_cm'], $lms);
+        $z = growth_zscore((float)$m['vyska_cm'], $lms);
         if ($z === null) {
             continue;
         }
@@ -550,16 +550,16 @@ function rust_channel_projection($birthDate, $sex, $measurements, $referenceId, 
     /* a 0.25 SDS floor: even a perfectly consistent child is not this knowable */
     $spread = max($sd, 0.25);
 
-    $adultLms = rust_lms_at($rows, $atAge);
+    $adultLms = growth_lms_at($rows, $atAge);
     if (!$adultLms) {
         return null;
     }
 
     return array(
         'z' => $meanZ,
-        'mid' => rust_value_at_z($adultLms, $meanZ),
-        'low' => rust_value_at_z($adultLms, $meanZ - $spread),
-        'high' => rust_value_at_z($adultLms, $meanZ + $spread),
+        'mid' => growth_value_at_z($adultLms, $meanZ),
+        'low' => growth_value_at_z($adultLms, $meanZ - $spread),
+        'high' => growth_value_at_z($adultLms, $meanZ + $spread),
         'based_on' => count($recent),
         'youngest_age' => $recent[count($recent) - 1]['age'],
     );
@@ -602,7 +602,7 @@ function rust_channel_projection($birthDate, $sex, $measurements, $referenceId, 
  * residual in the metric's own unit), or null when there is too little data to
  * say anything.
  */
-function rust_smooth_series($points, $rows, $options = array())
+function growth_smooth_series($points, $rows, $options = array())
 {
     $span = isset($options['span']) ? $options['span'] : 0.4;
     $steps = isset($options['steps']) ? $options['steps'] : 120;
@@ -618,11 +618,11 @@ function rust_smooth_series($points, $rows, $options = array())
     $zs = array();
     $origin = array();
     foreach ($points as $index => $point) {
-        $lms = rust_lms_at($rows, $point['age']);
+        $lms = growth_lms_at($rows, $point['age']);
         if (!$lms) {
             continue;
         }
-        $z = rust_zscore($point['value'], $lms);
+        $z = growth_zscore($point['value'], $lms);
         if ($z === null) {
             continue;
         }
@@ -726,11 +726,11 @@ function rust_smooth_series($points, $rows, $options = array())
             continue;
         }
         $curveZ[] = array($age, $z);
-        $lms = rust_lms_at($rows, $age);
+        $lms = growth_lms_at($rows, $age);
         if (!$lms) {
             continue;
         }
-        $value = rust_value_at_z($lms, $z);
+        $value = growth_value_at_z($lms, $z);
         if ($value !== null) {
             $curve[] = array($age, $value);
         }
@@ -745,12 +745,12 @@ function rust_smooth_series($points, $rows, $options = array())
        point at the ones that look mis-recorded. */
     $deviation = array();
     foreach ($origin as $i => $index) {
-        $lms = rust_lms_at($rows, $xs[$i]);
+        $lms = growth_lms_at($rows, $xs[$i]);
         $z = $fit($xs[$i]);
         if (!$lms || $z === null) {
             continue;
         }
-        $expected = rust_value_at_z($lms, $z);
+        $expected = growth_value_at_z($lms, $z);
         if ($expected !== null) {
             $deviation[$index] = $points[$index]['value'] - $expected;
         }
@@ -811,7 +811,7 @@ function rust_smooth_series($points, $rows, $options = array())
  * Every result carries the interval it was actually measured over, because a
  * velocity without its window is not interpretable.
  */
-function rust_velocities($birthDate, $measurements)
+function growth_velocities($birthDate, $measurements)
 {
     $minSpan = 0.7;   /* years; below this the noise dominates the signal */
     $target = 1.0;    /* the window we would like, when the data allows */
@@ -822,7 +822,7 @@ function rust_velocities($birthDate, $measurements)
             continue;
         }
         $points[] = array(
-            'age' => rust_decimal_age($birthDate, $m['datum']),
+            'age' => growth_decimal_age($birthDate, $m['datum']),
             'date' => $m['datum'],
             'height' => (float)$m['vyska_cm'],
         );

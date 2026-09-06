@@ -8,7 +8,7 @@
  * before first use.
  */
 
-function rust_mysql_link()
+function growth_mysql_link()
 {
     static $link = null;
 
@@ -34,16 +34,16 @@ function rust_mysql_link()
 
 /* Connect on include: a page that cannot reach the database should fail here
  * rather than half-render and fail later. */
-rust_mysql_link();
+growth_mysql_link();
 
 /* ---------------------------------------------------------------- children */
 
-function rust_storage_children()
+function growth_storage_children()
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $result = mysqli_query($link,
         'SELECT id, jmeno, pohlavi, datum_narozeni, vyska_otce_cm, vyska_matky_cm, poradi, kojeno
-         FROM rust_deti WHERE smazano IS NULL ORDER BY poradi, datum_narozeni');
+         FROM growth_deti WHERE smazano IS NULL ORDER BY poradi, datum_narozeni');
     $rows = array();
     while ($result && ($row = mysqli_fetch_assoc($result))) {
         $rows[] = $row;
@@ -51,12 +51,12 @@ function rust_storage_children()
     return $rows;
 }
 
-function rust_storage_children_deleted()
+function growth_storage_children_deleted()
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $result = mysqli_query($link,
         'SELECT id, jmeno, pohlavi, datum_narozeni, vyska_otce_cm, vyska_matky_cm, poradi, kojeno, smazano
-         FROM rust_deti WHERE smazano IS NOT NULL ORDER BY smazano DESC');
+         FROM growth_deti WHERE smazano IS NOT NULL ORDER BY smazano DESC');
     $rows = array();
     while ($result && ($row = mysqli_fetch_assoc($result))) {
         $rows[] = $row;
@@ -64,12 +64,12 @@ function rust_storage_children_deleted()
     return $rows;
 }
 
-function rust_storage_child($id)
+function growth_storage_child($id)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
         'SELECT id, jmeno, pohlavi, datum_narozeni, vyska_otce_cm, vyska_matky_cm, poradi, kojeno
-         FROM rust_deti WHERE id = ? AND smazano IS NULL');
+         FROM growth_deti WHERE id = ? AND smazano IS NULL');
     mysqli_stmt_bind_param($stmt, 'i', $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -78,10 +78,10 @@ function rust_storage_child($id)
     return $row ?: null;
 }
 
-function rust_storage_child_deleted_at($id)
+function growth_storage_child_deleted_at($id)
 {
-    $link = rust_mysql_link();
-    $stmt = mysqli_prepare($link, 'SELECT smazano FROM rust_deti WHERE id = ?');
+    $link = growth_mysql_link();
+    $stmt = mysqli_prepare($link, 'SELECT smazano FROM growth_deti WHERE id = ?');
     mysqli_stmt_bind_param($stmt, 'i', $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -90,10 +90,10 @@ function rust_storage_child_deleted_at($id)
     return ($row && $row['smazano'] !== null) ? $row['smazano'] : null;
 }
 
-function rust_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $breastfed)
+function growth_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $breastfed)
 {
-    $link = rust_mysql_link();
-    $stmt = mysqli_prepare($link, 'SELECT id FROM rust_deti WHERE jmeno = ? AND smazano IS NULL');
+    $link = growth_mysql_link();
+    $stmt = mysqli_prepare($link, 'SELECT id FROM growth_deti WHERE jmeno = ? AND smazano IS NULL');
     mysqli_stmt_bind_param($stmt, 's', $name);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -105,7 +105,7 @@ function rust_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $br
     }
 
     $stmt = mysqli_prepare($link,
-        'INSERT INTO rust_deti (jmeno, pohlavi, datum_narozeni, vyska_otce_cm, vyska_matky_cm, kojeno)
+        'INSERT INTO growth_deti (jmeno, pohlavi, datum_narozeni, vyska_otce_cm, vyska_matky_cm, kojeno)
          VALUES (?, ?, ?, ?, ?, ?)');
     mysqli_stmt_bind_param($stmt, 'sssddi', $name, $sex, $born, $fatherCm, $motherCm, $breastfed);
     mysqli_stmt_execute($stmt);
@@ -114,11 +114,11 @@ function rust_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $br
     return (int)$id;
 }
 
-function rust_storage_child_update($id, $name, $sex, $born, $fatherCm, $motherCm, $breastfed)
+function growth_storage_child_update($id, $name, $sex, $born, $fatherCm, $motherCm, $breastfed)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
-        'UPDATE rust_deti SET jmeno = ?, pohlavi = ?, datum_narozeni = ?,
+        'UPDATE growth_deti SET jmeno = ?, pohlavi = ?, datum_narozeni = ?,
          vyska_otce_cm = ?, vyska_matky_cm = ?, kojeno = ? WHERE id = ? AND smazano IS NULL');
     mysqli_stmt_bind_param($stmt, 'sssddii', $name, $sex, $born, $fatherCm, $motherCm, $breastfed, $id);
     $ok = mysqli_stmt_execute($stmt);
@@ -126,10 +126,10 @@ function rust_storage_child_update($id, $name, $sex, $born, $fatherCm, $motherCm
     return $ok;
 }
 
-function rust_storage_child_delete($id, $when)
+function growth_storage_child_delete($id, $when)
 {
-    $link = rust_mysql_link();
-    $stmt = mysqli_prepare($link, 'UPDATE rust_deti SET smazano = ? WHERE id = ? AND smazano IS NULL');
+    $link = growth_mysql_link();
+    $stmt = mysqli_prepare($link, 'UPDATE growth_deti SET smazano = ? WHERE id = ? AND smazano IS NULL');
     mysqli_stmt_bind_param($stmt, 'si', $when, $id);
     $ok = mysqli_stmt_execute($stmt);
     $affected = mysqli_stmt_affected_rows($stmt);
@@ -137,10 +137,10 @@ function rust_storage_child_delete($id, $when)
     return $ok && $affected > 0;
 }
 
-function rust_storage_child_restore($id)
+function growth_storage_child_restore($id)
 {
-    $link = rust_mysql_link();
-    $stmt = mysqli_prepare($link, 'UPDATE rust_deti SET smazano = NULL WHERE id = ? AND smazano IS NOT NULL');
+    $link = growth_mysql_link();
+    $stmt = mysqli_prepare($link, 'UPDATE growth_deti SET smazano = NULL WHERE id = ? AND smazano IS NOT NULL');
     mysqli_stmt_bind_param($stmt, 'i', $id);
     $ok = mysqli_stmt_execute($stmt);
     $affected = mysqli_stmt_affected_rows($stmt);
@@ -150,12 +150,12 @@ function rust_storage_child_restore($id)
 
 /* ------------------------------------------------------------ measurements */
 
-function rust_storage_measurements($childId)
+function growth_storage_measurements($childId)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
         'SELECT id, datum, vyska_cm, hmotnost_kg, poznamka
-         FROM rust_mereni WHERE dite_id = ? AND smazano IS NULL ORDER BY datum');
+         FROM growth_mereni WHERE dite_id = ? AND smazano IS NULL ORDER BY datum');
     mysqli_stmt_bind_param($stmt, 'i', $childId);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -173,12 +173,12 @@ function rust_storage_measurements($childId)
     return $rows;
 }
 
-function rust_storage_measurements_deleted($childId)
+function growth_storage_measurements_deleted($childId)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
         'SELECT id, datum, vyska_cm, hmotnost_kg, poznamka, smazano
-         FROM rust_mereni WHERE dite_id = ? AND smazano IS NOT NULL ORDER BY smazano DESC');
+         FROM growth_mereni WHERE dite_id = ? AND smazano IS NOT NULL ORDER BY smazano DESC');
     mysqli_stmt_bind_param($stmt, 'i', $childId);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -197,11 +197,11 @@ function rust_storage_measurements_deleted($childId)
  * Inserts, updates, or revives the measurement for one child on one date -
  * regardless of the existing row's soft-delete state.
  */
-function rust_storage_measurement_save($childId, $date, $heightCm, $weightKg, $note)
+function growth_storage_measurement_save($childId, $date, $heightCm, $weightKg, $note)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
-        'INSERT INTO rust_mereni (dite_id, datum, vyska_cm, hmotnost_kg, poznamka, smazano)
+        'INSERT INTO growth_mereni (dite_id, datum, vyska_cm, hmotnost_kg, poznamka, smazano)
          VALUES (?, ?, ?, ?, ?, NULL)
          ON DUPLICATE KEY UPDATE vyska_cm = VALUES(vyska_cm),
                                  hmotnost_kg = VALUES(hmotnost_kg),
@@ -216,11 +216,11 @@ function rust_storage_measurement_save($childId, $date, $heightCm, $weightKg, $n
     return $ok;
 }
 
-function rust_storage_measurement_delete($childId, $id, $when)
+function growth_storage_measurement_delete($childId, $id, $when)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
-        'UPDATE rust_mereni SET smazano = ? WHERE id = ? AND dite_id = ? AND smazano IS NULL');
+        'UPDATE growth_mereni SET smazano = ? WHERE id = ? AND dite_id = ? AND smazano IS NULL');
     mysqli_stmt_bind_param($stmt, 'sii', $when, $id, $childId);
     $ok = mysqli_stmt_execute($stmt);
     $affected = mysqli_stmt_affected_rows($stmt);
@@ -228,11 +228,11 @@ function rust_storage_measurement_delete($childId, $id, $when)
     return $ok && $affected > 0;
 }
 
-function rust_storage_measurement_restore($childId, $id)
+function growth_storage_measurement_restore($childId, $id)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
-        'UPDATE rust_mereni SET smazano = NULL WHERE id = ? AND dite_id = ? AND smazano IS NOT NULL');
+        'UPDATE growth_mereni SET smazano = NULL WHERE id = ? AND dite_id = ? AND smazano IS NOT NULL');
     mysqli_stmt_bind_param($stmt, 'ii', $id, $childId);
     $ok = mysqli_stmt_execute($stmt);
     $affected = mysqli_stmt_affected_rows($stmt);
@@ -240,22 +240,22 @@ function rust_storage_measurement_restore($childId, $id)
     return $ok && $affected > 0;
 }
 
-function rust_storage_measurements_delete_for_child($childId, $when)
+function growth_storage_measurements_delete_for_child($childId, $when)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
-        'UPDATE rust_mereni SET smazano = ? WHERE dite_id = ? AND smazano IS NULL');
+        'UPDATE growth_mereni SET smazano = ? WHERE dite_id = ? AND smazano IS NULL');
     mysqli_stmt_bind_param($stmt, 'si', $when, $childId);
     $ok = mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
     return $ok;
 }
 
-function rust_storage_measurements_restore_for_child($childId, $when)
+function growth_storage_measurements_restore_for_child($childId, $when)
 {
-    $link = rust_mysql_link();
+    $link = growth_mysql_link();
     $stmt = mysqli_prepare($link,
-        'UPDATE rust_mereni SET smazano = NULL WHERE dite_id = ? AND smazano = ?');
+        'UPDATE growth_mereni SET smazano = NULL WHERE dite_id = ? AND smazano = ?');
     mysqli_stmt_bind_param($stmt, 'is', $childId, $when);
     $ok = mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);

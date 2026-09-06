@@ -20,7 +20,7 @@ require_once __DIR__ . '/units.inc';
 require_once __DIR__ . '/storage.inc';
 require_once __DIR__ . '/growth.inc';
 
-rust_require_auth();
+growth_require_auth();
 
 /* Started here, unconditionally, before any page has echoed a single byte -
  * not lazily on first use inside a form far down the page. session_start()
@@ -32,7 +32,7 @@ rust_require_auth();
  * therefore a fresh CSRF token - on every single request. Caught by actually
  * running the app against PHP's built-in server, not by the test suite.
  */
-rust_session_start();
+growth_session_start();
 
 /* This application is never meant to be framed by another site, and never
    serves anything a browser should try to sniff into a different content
@@ -43,7 +43,7 @@ header('X-Content-Type-Options: nosniff');
 /* ------------------------------------------------------------- view helpers */
 
 /** Escapes for HTML. Short name because it appears on nearly every output line. */
-function rust_h($value)
+function growth_h($value)
 {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
@@ -55,12 +55,12 @@ function rust_h($value)
  * needs a thousands separator here - nothing this application displays
  * (a height, a weight, a percentile, an SD) ever reaches four digits.
  */
-function rust_num($value, $decimals = 1)
+function growth_num($value, $decimals = 1)
 {
     if ($value === null || $value === '') {
         return '';
     }
-    $point = (rust_locale() === 'cs') ? ',' : '.';
+    $point = (growth_locale() === 'cs') ? ',' : '.';
     $text = number_format((float)$value, $decimals, $point, '');
     if (strpos($text, $point) !== false) {
         $text = rtrim(rtrim($text, '0'), $point);
@@ -69,14 +69,14 @@ function rust_num($value, $decimals = 1)
 }
 
 /** 2026-01-19 -> "19. 1. 2026" (cs) or "19 Jan 2026" (en). */
-function rust_date_cz($date)
+function growth_format_date($date)
 {
     $parts = explode('-', (string)$date);
     if (count($parts) !== 3) {
         return (string)$date;
     }
     list($year, $month, $day) = $parts;
-    if (rust_locale() === 'cs') {
+    if (growth_locale() === 'cs') {
         return (int)$day . '. ' . (int)$month . '. ' . $year;
     }
     $months = array('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -98,7 +98,7 @@ function rust_date_cz($date)
  * The sign is always shown, since "3 cm from the median" without it would be
  * ambiguous in exactly the case that matters.
  */
-function rust_median_diff_cz($value, $median, $decimals, $unit)
+function growth_format_median_diff($value, $median, $decimals, $unit)
 {
     if ($value === null || $median === null) {
         return '';
@@ -112,7 +112,7 @@ function rust_median_diff_cz($value, $median, $decimals, $unit)
     $sign = ($diff > 0) ? '+' : '-';
     return t('median_diff', array(
         'sign' => $sign,
-        'value' => rust_num(abs($diff), $decimals),
+        'value' => growth_num(abs($diff), $decimals),
         'unit' => $unit,
     ));
 }
@@ -121,16 +121,16 @@ function rust_median_diff_cz($value, $median, $decimals, $unit)
  * A number of years after the preposition "za" ("over"/"in"), which in
  * Czech takes the accusative: "za 1 rok", "za 2 roky", "za 5 let". A
  * fraction takes the genitive singular, "za 0,97 roku", which is why this
- * cannot simply reuse rust_years_cz(). English needs none of that - a
+ * cannot simply reuse growth_format_years(). English needs none of that - a
  * fractional year is just "0.97 years", the same plural as any other count
  * that isn't exactly one.
  */
-function rust_years_span_cz($years)
+function growth_format_years_span($years)
 {
     $rounded = round((float)$years, 2);
-    $text = rust_num($rounded, 2);
+    $text = growth_num($rounded, 2);
 
-    if (rust_locale() !== 'cs') {
+    if (growth_locale() !== 'cs') {
         return $text . ' ' . t(abs($rounded - 1.0) < 0.001 ? 'unit_year' : 'unit_years');
     }
 
@@ -153,12 +153,12 @@ function rust_years_span_cz($years)
  * inflects on the number, so "1 let" reads as plainly wrong to a native
  * speaker in the way "1 years" would in English.
  */
-function rust_years_cz($years)
+function growth_format_years($years)
 {
     $rounded = round((float)$years, 1);
-    $text = rust_num($rounded);
+    $text = growth_num($rounded);
 
-    if (rust_locale() !== 'cs') {
+    if (growth_locale() !== 'cs') {
         return $text . ' ' . t(abs($rounded - 1.0) < 0.001 ? 'unit_year' : 'unit_years');
     }
     if (abs($rounded - 1.0) < 0.001) {
@@ -168,7 +168,7 @@ function rust_years_cz($years)
 }
 
 /** "8 let 4 měsíce" / "8 years 4 months", for reading an age at a glance. */
-function rust_age_cz($years)
+function growth_format_age($years)
 {
     if ($years === null) {
         return '';
@@ -176,7 +176,7 @@ function rust_age_cz($years)
     $wholeYears = (int)floor($years);
     $months = (int)floor(($years - $wholeYears) * 12);
 
-    if (rust_locale() !== 'cs') {
+    if (growth_locale() !== 'cs') {
         $yearWord = t($wholeYears === 1 ? 'unit_year' : 'unit_years');
         $monthWord = t($months === 1 ? 'unit_month' : 'unit_months');
         if ($wholeYears === 0) {
@@ -225,7 +225,7 @@ function rust_age_cz($years)
  * So a height percentile is printed exactly however far out it lands, and only
  * an extrapolated weight is marked approximate.
  */
-function rust_percentile_cz($percentile, $z, $referenceId, $metric = 'height')
+function growth_format_percentile($percentile, $z, $referenceId, $metric = 'height')
 {
     if ($percentile === null) {
         return '–';
@@ -238,7 +238,7 @@ function rust_percentile_cz($percentile, $z, $referenceId, $metric = 'height')
     if ($percentile < 0.1 || $percentile > 99.9) {
         $decimals = 3;
     }
-    $text = rust_num($percentile, $decimals) . '.';
+    $text = growth_num($percentile, $decimals) . '.';
 
     $extrapolated = ($referenceId === 'cav')
         && ($metric === 'weight')
@@ -257,11 +257,11 @@ function rust_percentile_cz($percentile, $z, $referenceId, $metric = 'height')
 /**
  * The reference chosen in the picker, defaulting to the Czech one where it is
  * installed and falling back to CDC - the one reference the repository always
- * ships - where it is not (see rust_installed_reference_ids()).
+ * ships - where it is not (see growth_installed_reference_ids()).
  */
-function rust_selected_reference()
+function growth_selected_reference()
 {
-    $installed = rust_installed_reference_ids();
+    $installed = growth_installed_reference_ids();
     $default = in_array('cav', $installed, true) ? 'cav' : (reset($installed) ?: 'cdc');
     $id = isset($_GET['ref']) ? (string)$_GET['ref'] : $default;
     return in_array($id, $installed, true) ? $id : $default;
@@ -276,7 +276,7 @@ function rust_selected_reference()
  * an invalid date into a real but wrong one rather than reject it.
  * checkdate() actually validates the calendar.
  */
-function rust_valid_date($value)
+function growth_valid_date($value)
 {
     if (!preg_match('~^(\d{4})-(\d{2})-(\d{2})$~', (string)$value, $m)) {
         return false;
@@ -288,10 +288,10 @@ function rust_valid_date($value)
  * Turns a form field into a number or null.
  *
  * An empty field means "not measured" and must become NULL, never 0 - see the
- * note in rust_measurements(). Czech decimal commas are accepted because a
+ * note in growth_measurements(). Czech decimal commas are accepted because a
  * phone keyboard offers whichever separator it likes.
  */
-function rust_input_number($value)
+function growth_input_number($value)
 {
     $value = trim((string)$value);
     if ($value === '') {
@@ -306,7 +306,7 @@ function rust_input_number($value)
 }
 
 /** Guards against an open redirect on the return-to parameter. */
-function rust_safe_return($value, $fallback)
+function growth_safe_return($value, $fallback)
 {
     $value = (string)$value;
     if ($value === '' || $value[0] !== '/' || strpos($value, '//') === 0) {

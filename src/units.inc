@@ -12,13 +12,13 @@
  *
  * Unit choice is a per-visitor preference, independent of language - plenty
  * of people in the US want metric and vice versa - so it gets its own
- * cookie, set the same way rust_locale() sets rust_lang (see i18n.inc).
+ * cookie, set the same way growth_locale() sets growth_lang (see i18n.inc).
  */
 
-const RUST_CM_PER_INCH = 2.54;
-const RUST_KG_PER_LB = 0.45359237;
+const GROWTH_CM_PER_INCH = 2.54;
+const GROWTH_KG_PER_LB = 0.45359237;
 
-function rust_units()
+function growth_units()
 {
     static $units = null;
     if ($units !== null) {
@@ -26,11 +26,11 @@ function rust_units()
     }
     if (isset($_GET['units']) && in_array($_GET['units'], array('metric', 'imperial'), true)) {
         $units = $_GET['units'];
-        rust_set_preference_cookie('rust_units', $units);
+        growth_set_preference_cookie('growth_units', $units);
         return $units;
     }
-    if (isset($_COOKIE['rust_units']) && in_array($_COOKIE['rust_units'], array('metric', 'imperial'), true)) {
-        $units = $_COOKIE['rust_units'];
+    if (isset($_COOKIE['growth_units']) && in_array($_COOKIE['growth_units'], array('metric', 'imperial'), true)) {
+        $units = $_COOKIE['growth_units'];
         return $units;
     }
     $units = 'metric';
@@ -40,50 +40,50 @@ function rust_units()
 /* --------------------------------------------------------------- display */
 
 /** A stored length in cm to the active display unit (cm or in), unrounded. */
-function rust_display_length($cm)
+function growth_display_length($cm)
 {
     if ($cm === null) {
         return null;
     }
-    return (rust_units() === 'imperial') ? ((float)$cm / RUST_CM_PER_INCH) : (float)$cm;
+    return (growth_units() === 'imperial') ? ((float)$cm / GROWTH_CM_PER_INCH) : (float)$cm;
 }
 
 /** A stored weight in kg to the active display unit (kg or lb), unrounded. */
-function rust_display_weight($kg)
+function growth_display_weight($kg)
 {
     if ($kg === null) {
         return null;
     }
-    return (rust_units() === 'imperial') ? ((float)$kg / RUST_KG_PER_LB) : (float)$kg;
+    return (growth_units() === 'imperial') ? ((float)$kg / GROWTH_KG_PER_LB) : (float)$kg;
 }
 
-function rust_length_unit()
+function growth_length_unit()
 {
-    return (rust_units() === 'imperial') ? 'in' : 'cm';
+    return (growth_units() === 'imperial') ? 'in' : 'cm';
 }
 
-function rust_weight_unit()
+function growth_weight_unit()
 {
-    return (rust_units() === 'imperial') ? 'lb' : 'kg';
+    return (growth_units() === 'imperial') ? 'lb' : 'kg';
 }
 
 /** cm/year under metric, in/year under imperial. */
-function rust_velocity_unit()
+function growth_velocity_unit()
 {
-    return rust_length_unit() . '/' . t('unit_year_short');
+    return growth_length_unit() . '/' . t('unit_year_short');
 }
 
 /** A stored velocity in cm/year to the active display unit, unrounded. */
-function rust_display_velocity($cmPerYear)
+function growth_display_velocity($cmPerYear)
 {
-    return rust_display_length($cmPerYear);
+    return growth_display_length($cmPerYear);
 }
 
 /** How many decimals a displayed weight gets - kg needs two for an infant's
  *  weight to look right, but the equivalent precision in pounds is one. */
-function rust_weight_decimals()
+function growth_weight_decimals()
 {
-    return (rust_units() === 'imperial') ? 1 : 2;
+    return (growth_units() === 'imperial') ? 1 : 2;
 }
 
 /**
@@ -101,62 +101,62 @@ function rust_weight_decimals()
  * which is why this takes the index and the value separately rather than
  * assuming one unit for the whole row.
  */
-function rust_display_chart_rows($rows, $indexKind, $valueKind)
+function growth_display_chart_rows($rows, $indexKind, $valueKind)
 {
-    if (rust_units() !== 'imperial' || !$rows) {
+    if (growth_units() !== 'imperial' || !$rows) {
         return $rows;
     }
     $out = array();
     foreach ($rows as $row) {
         $out[] = array(
-            ($indexKind === 'length') ? rust_display_length($row[0]) : $row[0],
+            ($indexKind === 'length') ? growth_display_length($row[0]) : $row[0],
             $row[1],
-            rust_display_chart_scalar($row[2], $valueKind),
+            growth_display_chart_scalar($row[2], $valueKind),
             $row[3],
         );
     }
     return $out;
 }
 
-/** Converts one child measurement point the same way rust_display_chart_rows()
+/** Converts one child measurement point the same way growth_display_chart_rows()
  *  converts a reference row, so the two stay aligned on the same chart. */
-function rust_display_chart_points($points, $indexKind, $valueKind)
+function growth_display_chart_points($points, $indexKind, $valueKind)
 {
-    if (rust_units() !== 'imperial' || !$points) {
+    if (growth_units() !== 'imperial' || !$points) {
         return $points;
     }
     $out = array();
     foreach ($points as $point) {
         if ($indexKind === 'length') {
-            $point['age'] = rust_display_length($point['age']);
+            $point['age'] = growth_display_length($point['age']);
         }
-        $point['value'] = rust_display_chart_scalar($point['value'], $valueKind);
+        $point['value'] = growth_display_chart_scalar($point['value'], $valueKind);
         if (isset($point['suspect'])) {
-            $point['suspect'] = rust_display_chart_scalar($point['suspect'], $valueKind);
+            $point['suspect'] = growth_display_chart_scalar($point['suspect'], $valueKind);
         }
         $out[] = $point;
     }
     return $out;
 }
 
-function rust_display_chart_scalar($value, $kind)
+function growth_display_chart_scalar($value, $kind)
 {
     if ($kind === 'length') {
-        return rust_display_length($value);
+        return growth_display_length($value);
     }
     if ($kind === 'weight') {
-        return rust_display_weight($value);
+        return growth_display_weight($value);
     }
     return $value;
 }
 
 /**
- * Per-rust_metrics()-id conversion, for child.php and chart.inc: which physical
+ * Per-growth_metrics()-id conversion, for child.php and chart.inc: which physical
  * quantity a metric's value (or, for weight-for-height, its index) is, so
  * the right conversion applies without every call site special-casing 'wfh'
- * itself. bmi is never converted - see rust_display_rows()'s docblock.
+ * itself. bmi is never converted - see growth_display_rows()'s docblock.
  */
-function rust_metric_value_kind($metricId)
+function growth_metric_value_kind($metricId)
 {
     if ($metricId === 'height') {
         return 'length';
@@ -169,45 +169,45 @@ function rust_metric_value_kind($metricId)
 
 /** weight-for-height's index is a height; every other metric indexes by age,
  *  which is not a unit-converted quantity. */
-function rust_metric_index_kind($metricId)
+function growth_metric_index_kind($metricId)
 {
     return ($metricId === 'wfh') ? 'length' : null;
 }
 
-function rust_display_metric_value($metricId, $value)
+function growth_display_metric_value($metricId, $value)
 {
-    $kind = rust_metric_value_kind($metricId);
+    $kind = growth_metric_value_kind($metricId);
     if ($kind === 'length') {
-        return rust_display_length($value);
+        return growth_display_length($value);
     }
     if ($kind === 'weight') {
-        return rust_display_weight($value);
+        return growth_display_weight($value);
     }
     return $value;
 }
 
 /** null means "use $meta['unit'] unchanged" - true only for bmi. */
-function rust_display_metric_unit($metricId)
+function growth_display_metric_unit($metricId)
 {
-    $kind = rust_metric_value_kind($metricId);
+    $kind = growth_metric_value_kind($metricId);
     if ($kind === 'length') {
-        return rust_length_unit();
+        return growth_length_unit();
     }
     if ($kind === 'weight') {
-        return rust_weight_unit();
+        return growth_weight_unit();
     }
     return null;
 }
 
-function rust_display_metric_index_value($metricId, $value)
+function growth_display_metric_index_value($metricId, $value)
 {
-    return (rust_metric_index_kind($metricId) === 'length') ? rust_display_length($value) : $value;
+    return (growth_metric_index_kind($metricId) === 'length') ? growth_display_length($value) : $value;
 }
 
 /** null means the index is age, printed in years regardless of unit system. */
-function rust_display_metric_index_unit($metricId)
+function growth_display_metric_index_unit($metricId)
 {
-    return (rust_metric_index_kind($metricId) === 'length') ? rust_length_unit() : null;
+    return (growth_metric_index_kind($metricId) === 'length') ? growth_length_unit() : null;
 }
 
 /* ----------------------------------------------------------------- input */
@@ -215,21 +215,21 @@ function rust_display_metric_index_unit($metricId)
 /**
  * Parses a height field into centimetres, honouring the active unit.
  *
- * Under metric this is exactly rust_input_number(). Under imperial it also
+ * Under metric this is exactly growth_input_number(). Under imperial it also
  * accepts feet-and-inches: 4'3", 4' 3", 4'3, 4ft3in, 4 ft 3 in, or feet
  * alone (4' / 4 ft). A bare number with no feet marker is read as inches -
  * the input parsing this project's plan called the fiddly part, budgeted
  * more time than the display side, because none of these forms are
  * optional: a US parent will type whichever one is natural to them.
  */
-function rust_parse_length_input($value)
+function growth_parse_length_input($value)
 {
     $value = trim((string)$value);
     if ($value === '') {
         return null;
     }
-    if (rust_units() !== 'imperial') {
-        return rust_input_number($value);
+    if (growth_units() !== 'imperial') {
+        return growth_input_number($value);
     }
 
     if (preg_match('~^(\d+)\s*(?:\'|ft)\s*(?:(\d+(?:[.,]\d+)?)\s*(?:"|in)?)?$~i', $value, $m)) {
@@ -237,7 +237,7 @@ function rust_parse_length_input($value)
         $inches = isset($m[2]) && $m[2] !== '' ? (float)str_replace(',', '.', $m[2]) : 0.0;
         $totalInches = $feet * 12.0 + $inches;
     } else {
-        $totalInches = rust_input_number(str_ireplace('in', '', $value));
+        $totalInches = growth_input_number(str_ireplace('in', '', $value));
         if ($totalInches === null) {
             return null;
         }
@@ -245,7 +245,7 @@ function rust_parse_length_input($value)
     if ($totalInches <= 0) {
         return null;
     }
-    return $totalInches * RUST_CM_PER_INCH;
+    return $totalInches * GROWTH_CM_PER_INCH;
 }
 
 /**
@@ -253,18 +253,18 @@ function rust_parse_length_input($value)
  * imperial a bare number is read as pounds - there is no feet-and-inches
  * equivalent complication here, just a different scale.
  */
-function rust_parse_weight_input($value)
+function growth_parse_weight_input($value)
 {
     $value = trim((string)$value);
     if ($value === '') {
         return null;
     }
-    if (rust_units() !== 'imperial') {
-        return rust_input_number($value);
+    if (growth_units() !== 'imperial') {
+        return growth_input_number($value);
     }
-    $pounds = rust_input_number(str_ireplace('lb', '', $value));
+    $pounds = growth_input_number(str_ireplace('lb', '', $value));
     if ($pounds === null) {
         return null;
     }
-    return $pounds * RUST_KG_PER_LB;
+    return $pounds * GROWTH_KG_PER_LB;
 }

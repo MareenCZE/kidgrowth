@@ -8,26 +8,26 @@
  */
 require_once __DIR__ . '/shell.inc';
 
-const RUST_IMPORT_MAX_BYTES = 2 * 1024 * 1024; /* generous for a file this narrow - even 10 000 rows is a fraction of this */
-const RUST_IMPORT_MAX_ROWS = 10000;
+const GROWTH_IMPORT_MAX_BYTES = 2 * 1024 * 1024; /* generous for a file this narrow - even 10 000 rows is a fraction of this */
+const GROWTH_IMPORT_MAX_ROWS = 10000;
 
 $report = null;
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    rust_csrf_check();
+    growth_csrf_check();
     if (!isset($_FILES['soubor']) || $_FILES['soubor']['error'] !== UPLOAD_ERR_OK) {
         $error = t('import_error_upload_failed');
-    } elseif ($_FILES['soubor']['size'] > RUST_IMPORT_MAX_BYTES) {
-        $error = t('import_error_too_large', array('mb' => RUST_IMPORT_MAX_BYTES / 1024 / 1024));
+    } elseif ($_FILES['soubor']['size'] > GROWTH_IMPORT_MAX_BYTES) {
+        $error = t('import_error_too_large', array('mb' => GROWTH_IMPORT_MAX_BYTES / 1024 / 1024));
     } else {
         $handle = fopen($_FILES['soubor']['tmp_name'], 'r');
         if (!$handle) {
             $error = t('import_error_cannot_open');
-        } elseif (!rust_looks_like_text($_FILES['soubor']['tmp_name'])) {
+        } elseif (!growth_looks_like_text($_FILES['soubor']['tmp_name'])) {
             $error = t('import_error_not_text');
         } else {
-            $report = rust_import_csv($handle);
+            $report = growth_import_csv($handle);
             fclose($handle);
         }
     }
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  * format (images, the old .rcz format, a mistakenly attached spreadsheet
  * file) does within the first few bytes almost without exception.
  */
-function rust_looks_like_text($path)
+function growth_looks_like_text($path)
 {
     $sample = @file_get_contents($path, false, null, 0, 8192);
     return $sample !== false && strpos($sample, "\0") === false;
@@ -53,7 +53,7 @@ function rust_looks_like_text($path)
  * would be read back as a real measurement of 0 cm and would wreck every chart
  * and trend built on it.
  */
-function rust_import_csv($handle)
+function growth_import_csv($handle)
 {
     $report = array('children' => array(), 'rows' => 0, 'skipped' => 0, 'errors' => array());
 
@@ -80,8 +80,8 @@ function rust_import_csv($handle)
     $line = 1;
     while (($row = fgetcsv($handle)) !== false) {
         $line++;
-        if ($line - 1 > RUST_IMPORT_MAX_ROWS) {
-            $report['errors'][] = t('import_error_too_many_rows', array('max' => RUST_IMPORT_MAX_ROWS));
+        if ($line - 1 > GROWTH_IMPORT_MAX_ROWS) {
+            $report['errors'][] = t('import_error_too_many_rows', array('max' => GROWTH_IMPORT_MAX_ROWS));
             break;
         }
         if (count($row) === 1 && trim((string)$row[0]) === '') {
@@ -98,7 +98,7 @@ function rust_import_csv($handle)
 
         $name = trim((string)$data['dite']);
         $date = trim((string)$data['datum']);
-        if ($name === '' || !rust_valid_date($date)) {
+        if ($name === '' || !growth_valid_date($date)) {
             $report['skipped']++;
             continue;
         }
@@ -106,40 +106,40 @@ function rust_import_csv($handle)
         if (!isset($childIds[$name])) {
             $sex = (trim((string)$data['pohlavi']) === 'z') ? 'z' : 'm';
             $born = trim((string)$data['narozeni']);
-            if (!rust_valid_date($born)) {
+            if (!growth_valid_date($born)) {
                 $report['errors'][] = t('import_error_invalid_birth', array('line' => $line));
                 continue;
             }
-            $childIds[$name] = rust_child_upsert(
+            $childIds[$name] = growth_child_upsert(
                 $name, $sex, $born,
-                rust_input_number(isset($data['otec_cm']) ? $data['otec_cm'] : ''),
-                rust_input_number(isset($data['matka_cm']) ? $data['matka_cm'] : '')
+                growth_input_number(isset($data['otec_cm']) ? $data['otec_cm'] : ''),
+                growth_input_number(isset($data['matka_cm']) ? $data['matka_cm'] : '')
             );
             $report['children'][$name] = 0;
         }
 
-        $height = rust_input_number(isset($data['vyska_cm']) ? $data['vyska_cm'] : '');
-        $weight = rust_input_number(isset($data['hmotnost_kg']) ? $data['hmotnost_kg'] : '');
+        $height = growth_input_number(isset($data['vyska_cm']) ? $data['vyska_cm'] : '');
+        $weight = growth_input_number(isset($data['hmotnost_kg']) ? $data['hmotnost_kg'] : '');
         if ($height === null && $weight === null) {
             $report['skipped']++;
             continue;
         }
 
         $note = isset($data['poznamka']) ? trim((string)$data['poznamka']) : '';
-        rust_measurement_save($childIds[$name], $date, $height, $weight, $note !== '' ? $note : null);
+        growth_measurement_save($childIds[$name], $date, $height, $weight, $note !== '' ? $note : null);
         $report['rows']++;
         $report['children'][$name]++;
     }
     return $report;
 }
 
-rust_head(t('page_title_import'));
+growth_head(t('page_title_import'));
 ?>
 
 <h1><?php echo th('heading_import'); ?></h1>
 
 <?php if ($error !== ''): ?>
-  <p class="rust-chyba"><?php echo rust_h($error); ?></p>
+  <p class="rust-chyba"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
 <?php if ($report !== null): ?>
@@ -147,7 +147,7 @@ rust_head(t('page_title_import'));
     <p><strong><?php echo th('import_summary', array('n' => (int)$report['rows'])); ?></strong></p>
     <ul>
       <?php foreach ($report['children'] as $name => $count): ?>
-        <li><?php echo rust_h($name); ?>: <?php echo th('count_measurements', array('n' => (int)$count)); ?></li>
+        <li><?php echo growth_h($name); ?>: <?php echo th('count_measurements', array('n' => (int)$count)); ?></li>
       <?php endforeach; ?>
     </ul>
     <?php if ($report['skipped']): ?>
@@ -156,14 +156,14 @@ rust_head(t('page_title_import'));
       </p>
     <?php endif; ?>
     <?php foreach ($report['errors'] as $message): ?>
-      <p class="rust-chyba"><?php echo rust_h($message); ?></p>
+      <p class="rust-chyba"><?php echo growth_h($message); ?></p>
     <?php endforeach; ?>
     <p><a href="index.php"><?php echo th('nav_back_to_children'); ?></a></p>
   </div>
 <?php endif; ?>
 
 <form method="post" enctype="multipart/form-data" class="rust-formular">
-  <?php echo rust_csrf_field(); ?>
+  <?php echo growth_csrf_field(); ?>
   <label><?php echo th('label_csv_file'); ?>
     <input type="file" name="soubor" accept=".csv,text/csv" required>
   </label>
@@ -185,4 +185,4 @@ rust_head(t('page_title_import'));
 
 <p class="rust-odkazy"><a href="index.php"><?php echo th('nav_back'); ?></a></p>
 
-<?php rust_foot(); ?>
+<?php growth_foot(); ?>

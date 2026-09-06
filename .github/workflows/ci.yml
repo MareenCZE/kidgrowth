@@ -25,4 +25,10 @@ jobs:
             | xargs -0 -n1 php -l
 
       - name: Test suite (includes the no-personal-data guard)
+        # The denylist of personal tokens is never stored in this public
+        # repository. It comes from a repository secret, which is empty for
+        # pull requests from forks - the guard then runs its structural
+        # checks only, rather than failing on a list a contributor cannot have.
+        env:
+          KIDGROWTH_DENYLIST: ${{ secrets.PII_DENYLIST }}
         run: php tests/run.php

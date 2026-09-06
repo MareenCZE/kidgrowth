@@ -20,3 +20,9 @@ storage/rust.sqlite
 
 # Local scratch
 .DS_Store
+
+# The personal-data denylist for tests/no_personal_data_test.php. The list
+# names the very things that must never appear in this repository, so it
+# lives outside it: keep it here only as a local, never-committed file (or
+# pass it via KIDGROWTH_DENYLIST / KIDGROWTH_DENYLIST_FILE instead).
+tests/denylist.local.txt

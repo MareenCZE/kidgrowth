@@ -7,7 +7,7 @@
 # "Install" section for a real deployment (Basic Auth in front of it, a
 # storage backend of your choice).
 services:
-  rust:
+  kidgrowth:
     image: php:8.3-cli
     working_dir: /app
     volumes:

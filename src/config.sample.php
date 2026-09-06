@@ -29,7 +29,7 @@ $SQLITE_STORAGE_PATH = __DIR__ . '/../storage/growth.sqlite';
 /* Used only when $STORAGE_BACKEND is 'mysql'. Load db/schema.sql into this
  * database before first use. */
 $DB_HOST = 'localhost';
-$DB_USER = 'rust';
+$DB_USER = 'kidgrowth';
 $DB_PASS = 'change-me';
-$DB_NAME = 'rust';
+$DB_NAME = 'kidgrowth';
 $DB_PORT = 3306;

@@ -49,6 +49,27 @@ so it is useful well outside the Czech Republic.
   there. Deleting a child asks you to retype their name first - it takes
   every one of their measurements with it.
 
+## What it looks like
+
+Every image below is the seeded demo - two invented children, never a real
+family's measurements (`tools/seed_demo_data.php`).
+
+A growth chart: the child's own measurements against the Czech CAV
+percentiles, with P50 emphasised and the 3rd/97th dashed.
+
+![Height plotted against the Czech CAV percentile curves](docs/img/growth-chart.png)
+
+The SD chart answers what the growth charts alone cannot - whether the child
+is holding their channel. Three series, separated by hue and by dash pattern
+so neither has to carry it alone.
+
+![Height, weight and BMI as standard deviations over six years](docs/img/sd-chart.png)
+
+The measurement table, with percentile and SD beside each value, annualised
+growth velocity, and the optional note.
+
+![The measurement table, showing ten entries with percentiles, SD, velocity and a note](docs/img/measurements.png)
+
 ## Try it
 
 The fastest way to see it working, no install and nobody else's data involved:

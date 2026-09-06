@@ -23,17 +23,18 @@ if (!extension_loaded('pdo_sqlite')) {
 require_once __DIR__ . '/asserts.php';
 require_once __DIR__ . '/../src/storage/sqlite.inc';
 
-function growth_test_sqlite_fixture()
-{
-    global $SQLITE_STORAGE_PATH;
-    $SQLITE_STORAGE_PATH = tempnam(sys_get_temp_dir(), 'growth-test-') . '.sqlite';
-    return $SQLITE_STORAGE_PATH;
-}
+/*
+ * One database for the whole file, not one per test: growth_sqlite_pdo()
+ * caches its handle in a static, so pointing $SQLITE_STORAGE_PATH somewhere
+ * new between tests leaves the backend writing to the connection it already
+ * opened - and, once the first test deleted that file, writing to a database
+ * SQLite reports as readonly. Each test uses a child of its own instead.
+ */
+$SQLITE_STORAGE_PATH = tempnam(sys_get_temp_dir(), 'growth-test-') . '.sqlite';
 
 function test_sqlite_measurement_update_can_correct_the_date()
 {
-    $path = growth_test_sqlite_fixture();
-    $id = growth_storage_child_upsert('Petr Svoboda', 'm', '2018-01-01', null, null, 0);
+    $id = growth_storage_child_upsert('Date Correction', 'm', '2018-01-01', null, null, 0);
     growth_storage_measurement_save($id, '2018-06-01', 65.0, 7.0, null);
     $rowId = growth_storage_measurements($id)[0]['id'];
 
@@ -44,13 +45,11 @@ function test_sqlite_measurement_update_can_correct_the_date()
     assert_equals(1, count($rows), 'still exactly one measurement');
     assert_equals('2018-06-08', $rows[0]['date'], 'the date moved');
     assert_equals('after sickness', $rows[0]['note'], 'the note came with it');
-    @unlink($path);
 }
 
 function test_sqlite_measurement_update_refuses_to_collide()
 {
-    $path = growth_test_sqlite_fixture();
-    $id = growth_storage_child_upsert('Petr Svoboda', 'm', '2018-01-01', null, null, 0);
+    $id = growth_storage_child_upsert('Collision Check', 'm', '2018-01-01', null, null, 0);
     growth_storage_measurement_save($id, '2018-06-01', 65.0, 7.0, null);
     growth_storage_measurement_save($id, '2018-12-01', 70.0, 8.0, null);
     $rows = growth_storage_measurements($id);
@@ -58,13 +57,11 @@ function test_sqlite_measurement_update_refuses_to_collide()
     $ok = growth_storage_measurement_update($id, $rows[0]['id'], '2018-12-01', 65.0, 7.0, null);
     assert_equals(false, $ok, 'the collision was refused');
     assert_equals(2, count(growth_storage_measurements($id)), 'both measurements survive');
-    @unlink($path);
 }
 
 function test_sqlite_measurement_update_ignores_a_deleted_row()
 {
-    $path = growth_test_sqlite_fixture();
-    $id = growth_storage_child_upsert('Petr Svoboda', 'm', '2018-01-01', null, null, 0);
+    $id = growth_storage_child_upsert('Trash Check', 'm', '2018-01-01', null, null, 0);
     growth_storage_measurement_save($id, '2018-06-01', 65.0, 7.0, null);
     $rowId = growth_storage_measurements($id)[0]['id'];
     growth_storage_measurement_delete($id, $rowId, date('Y-m-d H:i:s'));
@@ -72,7 +69,6 @@ function test_sqlite_measurement_update_ignores_a_deleted_row()
     $ok = growth_storage_measurement_update($id, $rowId, '2018-06-02', 66.0, 7.2, null);
     assert_equals(false, $ok, 'a deleted row is not editable');
     assert_equals(1, count(growth_storage_measurements_deleted($id)), 'it is still in the trash');
-    @unlink($path);
 }
 
 /* Its own miniature runner, since run.php only collects test_*() functions
@@ -97,4 +93,6 @@ foreach (get_defined_functions()['user'] as $function) {
     }
 }
 echo "storage_sqlite_test: $passed passed, $failed failed\n";
+
+@unlink($SQLITE_STORAGE_PATH);
 exit($failed > 0 ? 1 : 0);

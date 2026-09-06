@@ -227,9 +227,9 @@ return array(
     'ref_cav_note' => 'Výška podle CAV 2001, hmotnost podle CAV 1991. Česká národní reference.',
     'ref_cav_source' => 'Státní zdravotní ústav, 6. celostátní antropologický výzkum (CAV 2001 / 1991).',
 
-    'ref_koj_label' => 'ČR – kojené děti',
-    'ref_koj_note' => 'Reference pro kojené děti, 0–1 rok. Kojenci přibývají jinak než nekojení.',
-    'ref_koj_source' => 'SZÚ / 3. LF UK (4/2008), referenční grafy kojených dětí, odečteno z publikovaných grafů.',
+    'ref_breastfed_label' => 'ČR – kojené děti',
+    'ref_breastfed_note' => 'Reference pro kojené děti, 0–1 rok. Kojenci přibývají jinak než nekojení.',
+    'ref_breastfed_source' => 'SZÚ / 3. LF UK (4/2008), referenční grafy kojených dětí, odečteno z publikovaných grafů.',
 
     'ref_pol_label' => 'Polsko',
     'ref_pol_note' => 'Polská národní reference, 3–18 let. Sousední populace, bližší než WHO či CDC.',

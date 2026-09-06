@@ -4,8 +4,8 @@
  * Everything works without this file: pages are server-rendered, the charts are
  * inline SVG, and every mark on them - measurement dots and the two adult-height
  * predictions - carries a <title> that browsers show as a native tooltip.
- * The rule throughout: feature detect, and bail out
- * silently rather than breaking what already works.
+ * The rule throughout: feature detect, and bail out silently rather than
+ * breaking what already works.
  */
 (function () {
     'use strict';

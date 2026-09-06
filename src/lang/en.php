@@ -226,9 +226,9 @@ return array(
     'ref_cav_note' => 'Height from CAV 2001, weight from CAV 1991. Czech national reference.',
     'ref_cav_source' => 'Statní zdravotní ústav, 6th Nationwide Anthropological Survey (CAV 2001 / 1991).',
 
-    'ref_koj_label' => 'Czechia – breastfed infants',
-    'ref_koj_note' => 'Reference for breastfed infants, 0-1 year. Breastfed infants gain differently than non-breastfed ones.',
-    'ref_koj_source' => 'SZÚ / 3rd Faculty of Medicine, Charles University (4/2008), breastfed-infant reference charts, digitised from the published charts.',
+    'ref_breastfed_label' => 'Czechia – breastfed infants',
+    'ref_breastfed_note' => 'Reference for breastfed infants, 0-1 year. Breastfed infants gain differently than non-breastfed ones.',
+    'ref_breastfed_source' => 'SZÚ / 3rd Faculty of Medicine, Charles University (4/2008), breastfed-infant reference charts, digitised from the published charts.',
 
     'ref_pol_label' => 'Poland',
     'ref_pol_note' => 'Polish national reference, ages 3-18. A neighbouring population, closer than WHO or CDC.',

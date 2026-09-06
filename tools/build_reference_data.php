@@ -11,7 +11,7 @@
  *
  * Usage:  php tools/build_reference_data.php [--cache-dir=DIR]
  *
- * Writes src/data/{cav,cdc,koj,pol,who}.php, each a PHP array of
+ * Writes src/data/{breastfed,cav,cdc,pol,who}.php, each a PHP array of
  * LMS rows so that the runtime has exactly one kind of maths to do.
  */
 
@@ -135,7 +135,7 @@ const EXPECTED_AGE_SPAN = [
         'bmi' => [[2.9, 3.1], [17.5, 18.5]],
     ],
     /* The breastfed charts run birth to one year and no further. */
-    'koj' => [
+    'breastfed' => [
         'height' => [[0.0, 0.1], [0.95, 1.05]],
         'weight' => [[0.0, 0.1], [0.95, 1.05]],
         'wfh' => [[48.0, 56.0], [75.0, 90.0]],
@@ -1377,7 +1377,7 @@ foreach (['height', 'weight'] as $metric) {
     }
 }
 
-$koj = [];
+$breastfed = [];
 $worstCalibration = 0.0;
 foreach (BREASTFED_CHARTS as $metric => $bySex) {
     foreach ($bySex as $sex => $url) {
@@ -1404,7 +1404,7 @@ foreach (BREASTFED_CHARTS as $metric => $bySex) {
                 's' => round($fit['s'], 6),
             ];
         }
-        $koj[$metric][$sex] = normalise_rows($rows);
+        $breastfed[$metric][$sex] = normalise_rows($rows);
         fwrite(STDERR, sprintf(
             "  %-6s %s: %2d months, CAV calibration check %.3f, LMS fit %.3f\n",
             $metric, $sex, count($rows), $chart['cav_error'], $worstFit
@@ -1421,8 +1421,8 @@ if ($worstCalibration > 0.15) {
 }
 
 export_reference(
-    $outDir . '/koj.php',
-    'koj',
+    $outDir . '/breastfed.php',
+    'breastfed',
     <<<TXT
  Czech reference for breastfed infants, birth to one year.
 
@@ -1447,7 +1447,7 @@ export_reference(
  GENERATED FILE - do not edit by hand. Re-run:
      php tools/build_reference_data.php
 TXT,
-    $koj
+    $breastfed
 );
 
 fwrite(STDERR, "done.\n");

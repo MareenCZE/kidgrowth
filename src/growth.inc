@@ -84,7 +84,7 @@ function growth_bmi($heightCm, $weightKg)
  */
 function growth_reference_ids()
 {
-    return array('cav', 'koj', 'pol', 'who', 'cdc');
+    return array('cav', 'breastfed', 'pol', 'who', 'cdc');
 }
 
 /**
@@ -119,7 +119,7 @@ function growth_reference_ids_for($child)
         return $ids;
     }
     return array_values(array_filter($ids, function ($id) {
-        return $id !== 'koj';
+        return $id !== 'breastfed';
     }));
 }
 

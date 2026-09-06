@@ -256,6 +256,45 @@ function growth_storage_measurement_save($childId, $date, $heightCm, $weightKg, 
     return true;
 }
 
+/**
+ * Rewrites one measurement, identified by its id rather than its date.
+ *
+ * growth_storage_measurement_save() is keyed on (child, date), which makes a
+ * wrong date impossible to correct: saving with the right one leaves the
+ * original row behind. This is what "edit this row" needs instead.
+ *
+ * Returns false rather than merging when the new date already belongs to
+ * another row of the same child - deleted or not, matching the unique index
+ * the SQL backends carry. Silently collapsing two measurements into one is
+ * never what someone correcting a typo meant.
+ */
+function growth_storage_measurement_update($childId, $id, $date, $heightCm, $weightKg, $note)
+{
+    $ok = false;
+    growth_json_write(function ($data) use ($childId, $id, $date, $heightCm, $weightKg, $note, &$ok) {
+        foreach ($data['measurements'] as $other) {
+            if ((int)$other['id'] !== $id
+                && (int)$other['child_id'] === $childId
+                && $other['date'] === $date) {
+                return $data;
+            }
+        }
+        foreach ($data['measurements'] as &$row) {
+            if ((int)$row['id'] === $id && (int)$row['child_id'] === $childId && empty($row['deleted_at'])) {
+                $row['date'] = $date;
+                $row['height_cm'] = $heightCm;
+                $row['weight_kg'] = $weightKg;
+                $row['note'] = $note;
+                $ok = true;
+                break;
+            }
+        }
+        unset($row);
+        return $data;
+    });
+    return $ok;
+}
+
 function growth_storage_measurement_delete($childId, $id, $when)
 {
     $ok = false;

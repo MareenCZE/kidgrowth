@@ -216,6 +216,44 @@ function growth_storage_measurement_save($childId, $date, $heightCm, $weightKg, 
     return $ok;
 }
 
+/** See growth_storage_measurement_update() in storage/json.inc for the
+ *  contract. The row is looked up before the UPDATE rather than trusting
+ *  affected_rows, which MySQL reports as 0 when someone saves a row without
+ *  actually changing any of its values. */
+function growth_storage_measurement_update($childId, $id, $date, $heightCm, $weightKg, $note)
+{
+    $link = growth_mysql_link();
+
+    $stmt = mysqli_prepare($link,
+        'SELECT id FROM growth_measurements
+         WHERE child_id = ? AND (id = ? AND deleted_at IS NULL OR date = ? AND id <> ?)');
+    if (!$stmt) {
+        return false;
+    }
+    mysqli_stmt_bind_param($stmt, 'iisi', $childId, $id, $date, $id);
+    mysqli_stmt_execute($stmt);
+    $found = array();
+    mysqli_stmt_bind_result($stmt, $foundId);
+    while (mysqli_stmt_fetch($stmt)) {
+        $found[] = (int)$foundId;
+    }
+    mysqli_stmt_close($stmt);
+    if (!in_array($id, $found, true) || count($found) > 1) {
+        return false;
+    }
+
+    $stmt = mysqli_prepare($link,
+        'UPDATE growth_measurements SET date = ?, height_cm = ?, weight_kg = ?, note = ?
+         WHERE id = ? AND child_id = ? AND deleted_at IS NULL');
+    if (!$stmt) {
+        return false;
+    }
+    mysqli_stmt_bind_param($stmt, 'sddsii', $date, $heightCm, $weightKg, $note, $id, $childId);
+    $ok = mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    return $ok;
+}
+
 function growth_storage_measurement_delete($childId, $id, $when)
 {
     $link = growth_mysql_link();

@@ -155,6 +155,20 @@ function growth_measurement_save($childId, $date, $heightCm, $weightKg, $note)
     return growth_storage_measurement_save((int)$childId, $date, $heightCm, $weightKg, $note);
 }
 
+/**
+ * Rewrites one existing measurement, including its date.
+ *
+ * The date is what growth_measurement_save() keys on, so it cannot correct
+ * one: saving with the right date leaves the wrong row behind. Editing a row
+ * has to address it by id, which is what this does. False means the change
+ * was refused - the only reason being another measurement of the same child
+ * already on the target date.
+ */
+function growth_measurement_update($childId, $id, $date, $heightCm, $weightKg, $note)
+{
+    return growth_storage_measurement_update((int)$childId, (int)$id, $date, $heightCm, $weightKg, $note);
+}
+
 function growth_measurement_delete($childId, $id)
 {
     return growth_storage_measurement_delete((int)$childId, (int)$id, growth_storage_now());

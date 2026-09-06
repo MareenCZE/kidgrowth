@@ -126,3 +126,58 @@ function test_json_measurement_delete_revival_via_save()
     assert_equals(0, count(growth_storage_measurements_deleted($id)), 'nothing left in the trash for this child');
     growth_test_json_cleanup($path);
 }
+
+function test_json_measurement_update_can_correct_the_date()
+{
+    $path = growth_test_json_fixture();
+    $id = growth_storage_child_upsert('Petr Svoboda', 'm', '2018-01-01', null, null, 0);
+    growth_storage_measurement_save($id, '2018-06-01', 65.0, 7.0, null);
+    $rowId = growth_storage_measurements($id)[0]['id'];
+
+    /* The date typed wrong is the case save() cannot fix: it would leave the
+       original row behind and add a second one. */
+    $ok = growth_storage_measurement_update($id, $rowId, '2018-06-08', 65.5, 7.1, 'after sickness');
+    assert_equals(true, $ok, 'the update was accepted');
+
+    $rows = growth_storage_measurements($id);
+    assert_equals(1, count($rows), 'still exactly one measurement');
+    assert_equals('2018-06-08', $rows[0]['date'], 'the date moved');
+    assert_close(65.5, $rows[0]['height_cm'], 1e-9);
+    assert_equals('after sickness', $rows[0]['note'], 'the note came with it');
+    growth_test_json_cleanup($path);
+}
+
+function test_json_measurement_update_refuses_to_collide()
+{
+    $path = growth_test_json_fixture();
+    $id = growth_storage_child_upsert('Petr Svoboda', 'm', '2018-01-01', null, null, 0);
+    growth_storage_measurement_save($id, '2018-06-01', 65.0, 7.0, null);
+    growth_storage_measurement_save($id, '2018-12-01', 70.0, 8.0, null);
+    $rows = growth_storage_measurements($id);
+
+    /* Moving one row onto the other's date would silently merge two visits
+       into one. Refused, and nothing is written. */
+    $ok = growth_storage_measurement_update($id, $rows[0]['id'], '2018-12-01', 65.0, 7.0, null);
+    assert_equals(false, $ok, 'the collision was refused');
+
+    $after = growth_storage_measurements($id);
+    assert_equals(2, count($after), 'both measurements survive');
+    assert_equals('2018-06-01', $after[0]['date'], 'the first row kept its date');
+    growth_test_json_cleanup($path);
+}
+
+function test_json_measurement_update_ignores_a_deleted_row()
+{
+    $path = growth_test_json_fixture();
+    $id = growth_storage_child_upsert('Petr Svoboda', 'm', '2018-01-01', null, null, 0);
+    growth_storage_measurement_save($id, '2018-06-01', 65.0, 7.0, null);
+    $rowId = growth_storage_measurements($id)[0]['id'];
+    growth_storage_measurement_delete($id, $rowId, date('Y-m-d H:i:s'));
+
+    /* Editing something that is in the trash is not an edit - it is a
+       restore, and that has its own operation. */
+    $ok = growth_storage_measurement_update($id, $rowId, '2018-06-02', 66.0, 7.2, null);
+    assert_equals(false, $ok, 'a deleted row is not editable');
+    assert_equals(1, count(growth_storage_measurements_deleted($id)), 'it is still in the trash');
+    growth_test_json_cleanup($path);
+}

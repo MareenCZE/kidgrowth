@@ -169,6 +169,26 @@ function growth_storage_measurement_save($childId, $date, $heightCm, $weightKg, 
     return $stmt->execute([$childId, $date, $heightCm, $weightKg, $note]);
 }
 
+/** See growth_storage_measurement_update() in storage/json.inc for the
+ *  contract; the unique index on (child_id, date) is what the collision check
+ *  here is protecting, so the caller gets false instead of a PDO exception. */
+function growth_storage_measurement_update($childId, $id, $date, $heightCm, $weightKg, $note)
+{
+    $pdo = growth_sqlite_pdo();
+    $stmt = $pdo->prepare(
+        'SELECT id FROM growth_measurements WHERE child_id = ? AND date = ? AND id <> ?');
+    $stmt->execute([$childId, $date, $id]);
+    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+        return false;
+    }
+
+    $stmt = $pdo->prepare(
+        'UPDATE growth_measurements SET date = ?, height_cm = ?, weight_kg = ?, note = ?
+         WHERE id = ? AND child_id = ? AND deleted_at IS NULL');
+    $stmt->execute([$date, $heightCm, $weightKg, $note, $id, $childId]);
+    return $stmt->rowCount() > 0;
+}
+
 function growth_storage_measurement_delete($childId, $id, $when)
 {
     $stmt = growth_sqlite_pdo()->prepare(

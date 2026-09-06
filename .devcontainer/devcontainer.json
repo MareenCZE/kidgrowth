@@ -5,11 +5,11 @@
   "portsAttributes": {
     "8080": {
       "label": "Růst",
-      "onAutoForward": "openBrowser"
+      "onAutoForward": "notify"
     }
   },
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
-  "postStartCommand": "nohup php -S 0.0.0.0:8080 -t src > /tmp/rust-server.log 2>&1 & disown",
+  "postStartCommand": "bash .devcontainer/start-server.sh",
   "customizations": {
     "vscode": {
       "extensions": ["bmewburn.vscode-intelephense-client"]

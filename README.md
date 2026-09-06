@@ -47,10 +47,13 @@ so it is useful well outside the Czech Republic.
 
 The fastest way to see it working, no install and nobody else's data involved:
 
-- **GitHub Codespaces.** Once this repository is on GitHub: **Code → Create
-  codespace on main**. `.devcontainer/` seeds two synthetic children
-  (`tools/seed_demo_data.php` - entirely invented measurement histories, never
-  a real family's) and starts the app on the forwarded port automatically.
+- **GitHub Codespaces.** **Code → Codespaces → Create codespace on main**.
+  `.devcontainer/` seeds two synthetic children (`tools/seed_demo_data.php` -
+  entirely invented measurement histories, never a real family's) and starts
+  the app on port 8080. To open it, use the **Ports** panel beside the
+  terminal: find port 8080 ("Růst") and click the globe icon. The editor also
+  offers a notification when the port comes up, though in the browser-based
+  editor that is easy to miss.
   Each Codespace is its own throwaway instance; nothing you enter is shared
   with anyone else, and it disappears when the Codespace does. A banner in
   the header says so, and CSV export is turned off there - there is nothing

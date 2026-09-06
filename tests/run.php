@@ -20,12 +20,11 @@ $files = glob(__DIR__ . '/*_test.php');
 sort($files);
 
 foreach ($files as $file) {
-    /* Some test files cannot share this process. no_personal_data_test.php is
-       a script with its own exit code rather than a set of test_*() functions,
-       and a storage backend's tests load storage/<backend>.inc - two of those
-       in one process redeclare every growth_storage_*() function and take the
-       whole run down with a fatal. Both kinds say so with an @standalone
-       marker in their header and are run as subprocesses instead. */
+    /* A test file that loads a storage backend cannot share this process:
+       two backends in one run redeclare every growth_storage_*() function
+       and take the whole suite down with a fatal. Such a file says so with an
+       @standalone marker in its header, brings its own exit code, and is run
+       as a subprocess instead. */
     if (strpos(file_get_contents($file), '@standalone') !== false) {
         /* Run as a subprocess so it still gates the suite. */
         $out = array();
@@ -33,10 +32,9 @@ foreach ($files as $file) {
         exec('php ' . escapeshellarg($file) . ' 2>&1', $out, $code);
         if ($code === 0) {
             $totalPass++;
-            /* Echoed even on success, deliberately: the guard reports whether
-               it actually had a denylist to check against, and a silent skip
-               that looks exactly like a clean run is the failure mode this
-               whole check exists to avoid. */
+            /* Echoed even on success: a subprocess reports its own count, and
+               a skipped file that looks exactly like a clean run is the thing
+               worth seeing. */
             foreach ($out as $line) {
                 echo "$line\n";
             }

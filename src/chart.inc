@@ -401,6 +401,14 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
                 ));
             }
 
+            /* A note is why a reading looks the way it does - "after
+               sickness" beside a dip is the whole reason for writing one -
+               so it belongs on the point, not only in the table. */
+            if (!empty($point['note'])) {
+                $class .= ' growth-has-note';
+                $parts[] = $point['note'];
+            }
+
             $svg[] = sprintf(
                 '<circle class="%s" cx="%.1f" cy="%.1f" r="2.8"'
                 . ' tabindex="0" role="img"><title>%s</title></circle>',

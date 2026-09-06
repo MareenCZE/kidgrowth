@@ -44,6 +44,7 @@ return array(
     'note_breastfed_reference' => 'Unlocks the SZÚ reference for breastfed infants (0-1 year). Breastfed infants gain differently - faster up to about three months, slower afterwards.',
     'button_add' => 'Add',
     'button_save' => 'Save',
+    'button_cancel' => 'Cancel',
     'error_name_and_birth_required' => 'Enter a name and a date of birth.',
     'error_birth_in_future' => 'The date of birth cannot be in the future.',
 
@@ -119,6 +120,18 @@ return array(
     'unit_year_short' => 'year',
     'note_velocity_table' => "Growth velocity is annualised and measured over roughly the preceding year, not since the previous measurement – hover over a value to see the exact period. A short gap would magnify measurement error along with growth: {small} {unit} of imprecision over four months comes out as an extra {large} {velocity_unit}, so even a steadily-growing child would appear to speed up and slow down.",
     'button_delete' => 'Delete',
+
+    /* ------------------------------------------------- edit a measurement */
+    'page_title_edit_measurement' => 'Edit measurement',
+    'heading_edit_measurement' => 'Edit this measurement',
+    'note_edit_measurement' => 'Correcting a measurement of {name}. Changing the date moves this entry rather than adding another one.',
+    'nav_edit_measurement' => 'Edit',
+    'nav_delete_measurement' => 'Delete this measurement',
+    'label_note' => 'Note',
+    'placeholder_note' => 'after sickness, at the paediatrician…',
+    'th_note' => 'Note',
+    'error_measurement_collision' => 'That date already has a measurement for this child. Edit that one, or pick another date.',
+    'error_measurement_invalid' => 'Enter a date within this child’s life and at least one of height or weight.',
 
     /* -------------------------------------------------------- delete/trash */
     'page_title_delete_measurement' => 'Delete measurement',

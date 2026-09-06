@@ -31,6 +31,68 @@
         });
     });
 
+    /* ------------------------------------------- edit and delete dialogs */
+
+    /* The row's edit and delete controls are ordinary links to ordinary
+       pages, and stay that way if any of this is missing: the dialogs are
+       server-rendered forms posting the same fields to the same endpoint, so
+       nothing here is the only way to reach a behaviour. */
+    var editDialog = document.querySelector('[data-growth-dialog="edit"]');
+    var deleteDialog = document.querySelector('[data-growth-dialog="delete"]');
+    var dialogsUsable = editDialog && deleteDialog
+        && typeof editDialog.showModal === 'function';
+
+    if (dialogsUsable) {
+        var closeButtons = document.querySelectorAll('[data-growth-dialog-close]');
+        Array.prototype.forEach.call(closeButtons, function (button) {
+            button.addEventListener('click', function () {
+                var dialog = button.closest ? button.closest('dialog') : null;
+                if (dialog) {
+                    dialog.close();
+                }
+            });
+        });
+
+        /* One listener on the table rather than one per row: the rows are
+           rewritten on every save, and this way nothing has to be re-bound. */
+        document.addEventListener('click', function (event) {
+            var link = event.target.closest ? event.target.closest('a.growth-edit, a.growth-delete') : null;
+            if (!link) {
+                return;
+            }
+            var row = link.closest('tr');
+            if (!row || !row.getAttribute('data-measurement')) {
+                return;
+            }
+
+            var editing = link.classList.contains('growth-edit');
+            var dialog = editing ? editDialog : deleteDialog;
+            var form = dialog.querySelector('form');
+            form.elements.id.value = row.getAttribute('data-measurement');
+
+            if (editing) {
+                form.elements.date.value = row.getAttribute('data-date') || '';
+                form.elements.height.value = row.getAttribute('data-height') || '';
+                form.elements.weight.value = row.getAttribute('data-weight') || '';
+                form.elements.note.value = row.getAttribute('data-note') || '';
+            } else {
+                var line = dialog.querySelector('[data-growth-confirm]');
+                /* The sentence was translated server-side with {date} left in
+                   it, so the row's own date can be dropped into it here. */
+                line.textContent = line.getAttribute('data-growth-confirm')
+                    .replace('{date}', row.cells[0].textContent.trim());
+            }
+
+            event.preventDefault();
+            dialog.showModal();
+            var first = dialog.querySelector('input:not([type="hidden"]), button');
+            if (first) {
+                first.focus();
+            }
+        });
+    }
+
+
     /* ------------------------------------------------ charts: readout + full screen */
 
     var charts = document.querySelectorAll('[data-growth-chart]');

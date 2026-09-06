@@ -249,6 +249,8 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--growth-muted); font-weight: 
 @media (min-width: 620px) {
   .growth-row { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
   .growth-row label { flex: 1 1 140px; }
+  /* The note is free text, so it takes the slack the numeric fields do not. */
+  .growth-row .growth-note-field { flex: 2 1 220px; }
 }
 
 /* ------------------------------------------------------------ predictions */
@@ -586,3 +588,52 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--growth-muted); font-weight: 
 .growth-legend.growth-sds-2 { color: var(--growth-sds-2); }
 .growth-legend.growth-sds-3 { color: var(--growth-sds-3); }
 
+
+/* ------------------------------------------------------------- dialogs */
+
+/* Editing and deleting a measurement. Both have a page behind them, so this
+   styles an enhancement, not the only way in. */
+.growth-dialog {
+  border: 1px solid var(--growth-rule);
+  border-radius: 8px;
+  background: var(--growth-panel);
+  color: var(--growth-text);
+  padding: 18px 20px;
+  max-width: min(30rem, calc(100vw - 32px));
+  width: 100%;
+}
+.growth-dialog::backdrop { background: rgba(16, 22, 26, .45); }
+.growth-dialog h2 { margin: 0 0 4px; font-size: 18px; }
+.growth-dialog .growth-form { gap: 10px; }
+.growth-dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 4px 0 0;
+}
+.growth-dialog-actions button[type="button"] {
+  background: none;
+  border: 1px solid var(--growth-rule);
+  color: var(--growth-text);
+}
+
+/* The note is free text of unpredictable length: it gets a column that can
+   shrink, with the whole of it in the cell's title. */
+.growth-note-cell {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--growth-muted);
+}
+.growth-row-actions { white-space: nowrap; }
+.growth-edit { text-decoration: none; margin-right: 6px; }
+
+/* A measurement with a note gets a ring, so the explanation for a dip is
+   findable on the curve and not only in the table. */
+.growth-child-dot.growth-has-note {
+  stroke: var(--growth-measurement);
+  stroke-width: 1.4;
+  stroke-opacity: .45;
+}

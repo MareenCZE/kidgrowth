@@ -46,11 +46,38 @@ $valid = growth_valid_date($date)
     && $date <= date('Y-m-d')
     && ($height !== null || $weight !== null);
 
-if ($valid) {
-    growth_measurement_save($childId, $date, $height, $weight, $note !== '' ? $note : null);
-} else {
-    $back .= '&error=1';
+if (!$valid) {
+    header('Location: ' . $back . '&error=1');
+    exit;
 }
 
+/* An edit addresses one row by id, so it can move the date; a plain save is
+   keyed on the date itself and would leave the original row behind. */
+if ($action === 'update') {
+    $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+
+    /* A row that is not this child's, or is already in the trash, means a
+       stale page rather than a conflict - send them back to a fresh one
+       instead of explaining a collision that did not happen. */
+    $exists = false;
+    foreach (growth_measurements($childId) as $row) {
+        if ((int)$row['id'] === $id) {
+            $exists = true;
+            break;
+        }
+    }
+    if (!$exists) {
+        header('Location: ' . $back);
+        exit;
+    }
+
+    if (!growth_measurement_update($childId, $id, $date, $height, $weight, $note !== '' ? $note : null)) {
+        $back .= '&error=collision';
+    }
+    header('Location: ' . $back);
+    exit;
+}
+
+growth_measurement_save($childId, $date, $height, $weight, $note !== '' ? $note : null);
 header('Location: ' . $back);
 exit;

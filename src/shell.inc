@@ -11,7 +11,7 @@
 
 require_once __DIR__ . '/data.inc';
 
-const GROWTH_ASSET_VERSION = '20260906-13';
+const GROWTH_ASSET_VERSION = '20260906-14';
 
 function growth_head($title, $childId = null)
 {

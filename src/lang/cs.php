@@ -45,6 +45,7 @@ return array(
     'note_breastfed_reference' => 'Zpřístupní referenci SZÚ pro kojené děti (0–1 rok). Kojenci přibývají jinak – rychleji do zhruba tří měsíců, pomaleji potom.',
     'button_add' => 'Přidat',
     'button_save' => 'Uložit',
+    'button_cancel' => 'Zrušit',
     'error_name_and_birth_required' => 'Vyplňte jméno a datum narození.',
     'error_birth_in_future' => 'Datum narození nemůže být v budoucnosti.',
 
@@ -120,6 +121,18 @@ return array(
     'unit_year_short' => 'rok',
     'note_velocity_table' => 'Rychlost růstu je přepočtena na rok a měřena zhruba za poslední rok, ne od předchozího měření – najeďte na hodnotu a uvidíte přesné období. Krátký odstup by chybu měření zvětšil spolu s růstem: {small} {unit} nepřesnosti za čtyři měsíce vyjde jako {large} {velocity_unit} navíc, takže by i rovnoměrně rostoucí dítě zdánlivě zrychlovalo a zpomalovalo.',
     'button_delete' => 'Smazat',
+
+    /* ------------------------------------------------- edit a measurement */
+    'page_title_edit_measurement' => 'Upravit měření',
+    'heading_edit_measurement' => 'Upravit měření',
+    'note_edit_measurement' => 'Úprava měření dítěte {name}. Změna data přesune tento záznam, nepřidá další.',
+    'nav_edit_measurement' => 'Upravit',
+    'nav_delete_measurement' => 'Smazat toto měření',
+    'label_note' => 'Poznámka',
+    'placeholder_note' => 'po nemoci, u pediatra…',
+    'th_note' => 'Poznámka',
+    'error_measurement_collision' => 'K tomuto datu už měření existuje. Upravte je, nebo zvolte jiné datum.',
+    'error_measurement_invalid' => 'Zadejte datum ze života dítěte a alespoň jednu z hodnot výška nebo hmotnost.',
 
     /* -------------------------------------------------------- delete/trash */
     'page_title_delete_measurement' => 'Smazat měření',

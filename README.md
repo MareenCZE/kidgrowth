@@ -28,6 +28,12 @@ so it is useful well outside the Czech Republic.
   growth-velocity chart.
 - A predicted adult-height channel, projected from the reference the
   measurements are tracking.
+- An optional note on any measurement - "after sickness", "at the
+  paediatrician" - shown in the table and on the chart point itself, so the
+  explanation for a dip sits where the dip is.
+- Measurements can be corrected in place, including the date. Editing and
+  deleting open in a dialog where the browser supports one, and fall back to
+  their own pages where it does not.
 - CSV import/export, including a converter for RůstCZ's own database format
   (`tools/import_rustcz.php`).
 - Installable as a PWA (works from a phone's home screen).

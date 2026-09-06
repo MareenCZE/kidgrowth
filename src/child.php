@@ -37,20 +37,21 @@ $series = array('height' => array(), 'weight' => array(), 'bmi' => array(), 'wfh
 foreach ($measurements as $row) {
     $age = growth_decimal_age($born, $row['date']);
     if ($row['height_cm'] !== null) {
-        $series['height'][] = array('age' => $age, 'value' => $row['height_cm'], 'date' => $row['date']);
+        $series['height'][] = array('age' => $age, 'value' => $row['height_cm'], 'date' => $row['date'], 'note' => $row['note']);
     }
     if ($row['weight_kg'] !== null) {
-        $series['weight'][] = array('age' => $age, 'value' => $row['weight_kg'], 'date' => $row['date']);
+        $series['weight'][] = array('age' => $age, 'value' => $row['weight_kg'], 'date' => $row['date'], 'note' => $row['note']);
     }
     if ($row['height_cm'] !== null && $row['weight_kg'] !== null) {
         $bmi = growth_bmi($row['height_cm'], $row['weight_kg']);
         if ($bmi !== null) {
-            $series['bmi'][] = array('age' => $age, 'value' => $bmi, 'date' => $row['date']);
+            $series['bmi'][] = array('age' => $age, 'value' => $bmi, 'date' => $row['date'], 'note' => $row['note']);
         }
         $series['wfh'][] = array(
             'age' => (float)$row['height_cm'],   /* the index here is the height */
             'value' => $row['weight_kg'],
             'date' => $row['date'],
+            'note' => $row['note'],
         );
     }
 }
@@ -362,6 +363,13 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
 <section class="growth-section">
   <h2><?php echo th('heading_measurements'); ?></h2>
 
+  <?php $saveError = isset($_GET['error']) ? (string)$_GET['error'] : ''; ?>
+  <?php if ($saveError === 'collision'): ?>
+    <p class="growth-error"><?php echo th('error_measurement_collision'); ?></p>
+  <?php elseif ($saveError !== ''): ?>
+    <p class="growth-error"><?php echo th('error_measurement_invalid'); ?></p>
+  <?php endif; ?>
+
   <form method="post" action="save-measurement.php" class="growth-form growth-row">
     <?php echo growth_csrf_field(); ?>
     <input type="hidden" name="child_id" value="<?php echo (int)$childId; ?>">
@@ -378,6 +386,10 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
     <label><?php echo th('label_weight_kg'); ?> (<?php echo growth_weight_unit(); ?>)
       <input type="text" inputmode="decimal" name="weight"
              placeholder="<?php echo $imperial ? th('placeholder_example_weight_imperial') : th('placeholder_example_weight'); ?>">
+    </label>
+    <label class="growth-note-field"><?php echo th('label_note'); ?>
+      <input type="text" name="note" maxlength="255"
+             placeholder="<?php echo th('placeholder_note'); ?>">
     </label>
     <button type="submit"><?php echo th('button_save'); ?></button>
   </form>
@@ -401,7 +413,7 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
           <th><?php echo th('th_height'); ?></th><th><?php echo th('th_percentile_short'); ?></th><th>SD</th>
           <th><?php echo th('th_weight'); ?></th><th><?php echo th('th_percentile_short'); ?></th><th>SD</th>
           <th>BMI</th><th><?php echo th('th_percentile_short'); ?></th>
-          <th><?php echo th('th_velocity'); ?></th><th></th>
+          <th><?php echo th('th_velocity'); ?></th><th><?php echo th('th_note'); ?></th><th></th>
         </tr>
       </thead>
       <tbody>
@@ -413,7 +425,11 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
           $bmiValue = growth_bmi($row['height_cm'], $row['weight_kg']);
           $b = growth_evaluate($born, $sex, $row['date'], 'bmi', $bmiValue, $referenceId);
         ?>
-        <tr>
+        <tr data-measurement="<?php echo (int)$row['id']; ?>"
+            data-date="<?php echo growth_h($row['date']); ?>"
+            data-height="<?php echo $row['height_cm'] === null ? '' : growth_h(growth_num(growth_display_length($row['height_cm']))); ?>"
+            data-weight="<?php echo $row['weight_kg'] === null ? '' : growth_h(growth_num(growth_display_weight($row['weight_kg']), growth_weight_decimals())); ?>"
+            data-note="<?php echo growth_h((string)$row['note']); ?>">
           <td><?php echo growth_h(growth_format_date($row['date'])); ?></td>
           <td class="growth-muted"><?php echo growth_h(growth_format_age($age)); ?></td>
 
@@ -438,7 +454,11 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
               </span>
             <?php endif; ?>
           </td>
-          <td>
+          <td class="growth-note-cell"<?php echo $row['note'] === null || $row['note'] === '' ? '' : ' title="' . growth_h($row['note']) . '"'; ?>><?php
+            echo growth_h((string)$row['note']); ?></td>
+          <td class="growth-row-actions">
+            <a href="edit-measurement.php?child_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo growth_h($referenceId); ?>"
+               class="growth-edit" title="<?php echo th('nav_edit_measurement'); ?>">&#9998;</a>
             <a href="delete-measurement.php?child_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo growth_h($referenceId); ?>"
                class="growth-delete" title="<?php echo th('button_delete'); ?>">&times;</a>
           </td>
@@ -453,6 +473,59 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
         'large' => growth_h(growth_num(growth_display_velocity(1.5))),
         'velocity_unit' => growth_velocity_unit(),
     )); ?></p>
+
+  <?php /* Both dialogs are enhancements of the pages the row's links point
+           at: growth.js fills one from the row's data attributes and opens
+           it, and without JavaScript the link is followed instead. The forms
+           post exactly what those pages post. */ ?>
+  <dialog class="growth-dialog" data-growth-dialog="edit">
+    <form method="post" action="save-measurement.php" class="growth-form">
+      <?php echo growth_csrf_field(); ?>
+      <input type="hidden" name="action" value="update">
+      <input type="hidden" name="child_id" value="<?php echo (int)$childId; ?>">
+      <input type="hidden" name="ref" value="<?php echo growth_h($referenceId); ?>">
+      <input type="hidden" name="id" value="">
+      <h2><?php echo th('heading_edit_measurement'); ?></h2>
+      <label><?php echo th('label_date'); ?>
+        <input type="date" name="date" required
+               min="<?php echo growth_h($born); ?>" max="<?php echo date('Y-m-d'); ?>">
+      </label>
+      <label><?php echo th('label_height_cm'); ?> (<?php echo growth_length_unit(); ?>)
+        <input type="text" inputmode="<?php echo $imperial ? 'text' : 'decimal'; ?>" name="height">
+      </label>
+      <label><?php echo th('label_weight_kg'); ?> (<?php echo growth_weight_unit(); ?>)
+        <input type="text" inputmode="decimal" name="weight">
+      </label>
+      <label><?php echo th('label_note'); ?>
+        <input type="text" name="note" maxlength="255"
+               placeholder="<?php echo th('placeholder_note'); ?>">
+      </label>
+      <p class="growth-dialog-actions">
+        <button type="button" data-growth-dialog-close><?php echo th('button_cancel'); ?></button>
+        <button type="submit"><?php echo th('button_save'); ?></button>
+      </p>
+    </form>
+  </dialog>
+
+  <dialog class="growth-dialog" data-growth-dialog="delete">
+    <form method="post" action="save-measurement.php" class="growth-form">
+      <?php echo growth_csrf_field(); ?>
+      <input type="hidden" name="action" value="delete">
+      <input type="hidden" name="child_id" value="<?php echo (int)$childId; ?>">
+      <input type="hidden" name="ref" value="<?php echo growth_h($referenceId); ?>">
+      <input type="hidden" name="id" value="">
+      <h2><?php echo th('heading_delete_measurement'); ?></h2>
+      <?php /* {date} survives translation so the script can put the row's own
+               date into the sentence a translator wrote. */ ?>
+      <p data-growth-confirm="<?php echo growth_h(t('confirm_delete_measurement', array(
+             'name' => $child['name'], 'date' => '{date}'))); ?>"></p>
+      <p class="growth-note"><?php echo t('note_recoverable_from_trash'); ?></p>
+      <p class="growth-dialog-actions">
+        <button type="button" data-growth-dialog-close><?php echo th('button_cancel'); ?></button>
+        <button type="submit"><?php echo th('button_delete'); ?></button>
+      </p>
+    </form>
+  </dialog>
   <?php endif; ?>
 </section>
 

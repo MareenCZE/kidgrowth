@@ -42,19 +42,19 @@ growth_head(t('nav_trash'));
 ?>
 
 <h1><?php echo th('nav_trash'); ?></h1>
-<p class="rust-poznamka">
+<p class="growth-note">
   <?php echo th('trash_intro'); ?>
 </p>
 
 <h2><?php echo th('trash_children_heading'); ?></h2>
 <?php if (!$deletedChildren): ?>
-  <p class="rust-nodata"><?php echo th('trash_none'); ?></p>
+  <p class="growth-nodata"><?php echo th('trash_none'); ?></p>
 <?php else: ?>
-  <ul class="rust-seznam">
+  <ul class="growth-list">
     <?php foreach ($deletedChildren as $child): ?>
       <li>
         <?php echo growth_h($child['jmeno']); ?>
-        <span class="rust-slabe"><?php echo th('trash_deleted_at', array('when' => growth_h($child['smazano']))); ?></span>
+        <span class="growth-muted"><?php echo th('trash_deleted_at', array('when' => growth_h($child['smazano']))); ?></span>
         <form method="post">
           <?php echo growth_csrf_field(); ?>
           <input type="hidden" name="akce" value="obnovit_dite">
@@ -68,15 +68,15 @@ growth_head(t('nav_trash'));
 
 <h2><?php echo th('trash_measurements_heading'); ?></h2>
 <?php if (!$deletedMeasurements): ?>
-  <p class="rust-nodata"><?php echo th('trash_none'); ?></p>
+  <p class="growth-nodata"><?php echo th('trash_none'); ?></p>
 <?php else: ?>
   <?php foreach ($deletedMeasurements as $group): ?>
     <h3><?php echo growth_h($group['child']['jmeno']); ?></h3>
-    <ul class="rust-seznam">
+    <ul class="growth-list">
       <?php foreach ($group['rows'] as $row): ?>
         <li>
           <?php echo growth_h(growth_format_date($row['datum'])); ?>
-          <span class="rust-slabe"><?php echo th('trash_deleted_at', array('when' => growth_h($row['smazano']))); ?></span>
+          <span class="growth-muted"><?php echo th('trash_deleted_at', array('when' => growth_h($row['smazano']))); ?></span>
           <form method="post">
             <?php echo growth_csrf_field(); ?>
             <input type="hidden" name="akce" value="obnovit_mereni">
@@ -90,7 +90,7 @@ growth_head(t('nav_trash'));
   <?php endforeach; ?>
 <?php endif; ?>
 
-<p class="rust-odkazy">
+<p class="growth-links">
   <a href="index.php"><?php echo th('nav_back_to_children'); ?></a>
 </p>
 

@@ -15,7 +15,7 @@ require_once __DIR__ . '/../src/storage/json.inc';
 function growth_test_json_fixture()
 {
     global $JSON_STORAGE_PATH;
-    $JSON_STORAGE_PATH = tempnam(sys_get_temp_dir(), 'rust-test-') . '.json';
+    $JSON_STORAGE_PATH = tempnam(sys_get_temp_dir(), 'growth-test-') . '.json';
     return $JSON_STORAGE_PATH;
 }
 

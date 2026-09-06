@@ -7,17 +7,17 @@
  */
 
 :root {
-  --rust-pozadi: #f7f7f4;
-  --rust-panel: #ffffff;
-  --rust-text: #23282c;
+  --growth-bg: #f7f7f4;
+  --growth-panel: #ffffff;
+  --growth-text: #23282c;
   /* 5.75:1 on the panel, 5.36:1 on the page background - the original
      #6d757c scraped past text-contrast on the panel (4.68:1) but failed
      against the page background (4.36:1, below the 4.5:1 AA floor). */
-  --rust-slabe: #5f676e;
-  --rust-linka: #dcdfe1;
-  --rust-akcent: #3c6e8f;
-  --rust-akcent-svetly: #e8f0f5;
-  --rust-chyba: #a3352b;
+  --growth-muted: #5f676e;
+  --growth-rule: #dcdfe1;
+  --growth-accent: #3c6e8f;
+  --growth-accent-light: #e8f0f5;
+  --growth-error: #a3352b;
   /* Chart colours. The reference is deliberately neutral grey and the child's
      own data is the only saturated thing on the chart - the two used to be
      shades of one blue-grey, so the measurement competed with the curves it
@@ -25,100 +25,100 @@
      1.4.11 floor for non-text graphics against its own panel (ratios noted),
      and the categorical sets were checked for colour-blind separation in
      OKLab: worst adjacent pair 24.6 dE protan, 26.6 dE normal vision. */
-  --rust-krivka: #8d9497;      /* 3.08:1 - percentile curves, recessive */
-  --rust-p50: #6f7679;         /* 4.62:1 - the emphasised median */
-  --rust-mereni: #dc3e1f;      /* 4.42:1 - the child's measured line */
-  --rust-vyrovnani: #8259d6;   /* 4.83:1 - the smoothed trend */
-  --rust-cil: #0f9b7d;         /* 3.50:1 - adult-height prediction */
-  --rust-sds-1: #2f85d1;       /* 3.89:1 - height on the SDS chart */
-  --rust-sds-2: #d66d16;       /* 3.47:1 - weight */
-  --rust-sds-3: #9560cc;       /* 4.35:1 - BMI */
-  --rust-pasmo: #eef2f4;
+  --growth-curve: #8d9497;      /* 3.08:1 - percentile curves, recessive */
+  --growth-p50: #6f7679;         /* 4.62:1 - the emphasised median */
+  --growth-measurement: #dc3e1f;      /* 4.42:1 - the child's measured line */
+  --growth-smooth: #8259d6;   /* 4.83:1 - the smoothed trend */
+  --growth-target: #0f9b7d;         /* 3.50:1 - adult-height prediction */
+  --growth-sds-1: #2f85d1;       /* 3.89:1 - height on the SDS chart */
+  --growth-sds-2: #d66d16;       /* 3.47:1 - weight */
+  --growth-sds-3: #9560cc;       /* 4.35:1 - BMI */
+  --growth-band-fill: #eef2f4;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--rust-pozadi);
-  color: var(--rust-text);
+  background: var(--growth-bg);
+  color: var(--growth-text);
   font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   /* keeps content clear of the notch when installed to the home screen */
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-a { color: var(--rust-akcent); }
+a { color: var(--growth-accent); }
 
 /* ------------------------------------------------------------------ header */
 
-.rust-hlavicka {
+.growth-header {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
   padding: 12px 16px;
-  background: var(--rust-panel);
-  border-bottom: 1px solid var(--rust-linka);
+  background: var(--growth-panel);
+  border-bottom: 1px solid var(--growth-rule);
   position: sticky;
   top: 0;
   z-index: 5;
 }
 
-.rust-logo {
+.growth-logo {
   font-weight: 700;
   font-size: 18px;
   text-decoration: none;
-  color: var(--rust-akcent);
+  color: var(--growth-accent);
 }
 
-.rust-deti { display: flex; gap: 6px; flex-wrap: wrap; }
+.growth-children { display: flex; gap: 6px; flex-wrap: wrap; }
 
-.rust-dite-odkaz {
+.growth-child-link {
   padding: 4px 10px;
   border-radius: 999px;
   text-decoration: none;
   font-size: 14px;
-  background: var(--rust-pozadi);
+  background: var(--growth-bg);
 }
 
-.rust-dite-odkaz.rust-aktivni {
-  background: var(--rust-akcent);
+.growth-child-link.growth-active {
+  background: var(--growth-accent);
   color: #fff;
 }
 
 /* The language and units switchers - same pill style as the child links,
    pushed to the far end of the header by the auto margin on the first one. */
-.rust-jazyk, .rust-jednotky { display: flex; gap: 4px; }
-.rust-jazyk { margin-left: auto; }
+.growth-language, .growth-units { display: flex; gap: 4px; }
+.growth-language { margin-left: auto; }
 
-.rust-volba-jazyka, .rust-volba-jednotek {
+.growth-option-language, .growth-option-units {
   padding: 4px 10px;
   border-radius: 999px;
   text-decoration: none;
   font-size: 13px;
-  color: var(--rust-slabe);
-  background: var(--rust-pozadi);
+  color: var(--growth-muted);
+  background: var(--growth-bg);
 }
 
-.rust-volba-jazyka.rust-aktivni, .rust-volba-jednotek.rust-aktivni {
-  background: var(--rust-akcent);
+.growth-option-language.growth-active, .growth-option-units.growth-active {
+  background: var(--growth-accent);
   color: #fff;
 }
 
 /* A throwaway demo instance (tools/seed_demo_data.php) - loud enough that
    nobody mistakes invented data for their own. */
-.rust-demo {
+.growth-demo {
   margin: 0;
   padding: 8px 16px;
-  background: var(--rust-akcent-svetly);
-  color: var(--rust-akcent);
+  background: var(--growth-accent-light);
+  color: var(--growth-accent);
   font-size: 13px;
   text-align: center;
 }
 
 /* ----------------------------------------------------------------- layout */
 
-.rust-obsah {
+.growth-content {
   /* Sized for a 1024px screen: 1000 of content plus 10 of padding each
      side leaves room for a scrollbar without the page ever scrolling
      sideways. Wider than a text column would want, but these are charts. */
@@ -129,175 +129,175 @@ a { color: var(--rust-akcent); }
 
 h1 { font-size: 24px; margin: 8px 0 4px; }
 h2 { font-size: 18px; margin: 0 0 12px; }
-h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 600; }
+h3 { font-size: 15px; margin: 0 0 6px; color: var(--growth-muted); font-weight: 600; }
 
-.rust-podtitul { margin: 0 0 16px; color: var(--rust-slabe); }
+.growth-subtitle { margin: 0 0 16px; color: var(--growth-muted); }
 
-.rust-sekce {
-  background: var(--rust-panel);
-  border: 1px solid var(--rust-linka);
+.growth-section {
+  background: var(--growth-panel);
+  border: 1px solid var(--growth-rule);
   border-radius: 10px;
   /* modest side padding, which the charts then bleed back into - see
-     .rust-graf-obal - so the plots get the width without cramping the text */
+     .growth-chart-wrap - so the plots get the width without cramping the text */
   padding: 12px 10px;
   margin: 0 0 12px;
 }
 
-.rust-panel {
-  background: var(--rust-panel);
-  border: 1px solid var(--rust-linka);
+.growth-panel {
+  background: var(--growth-panel);
+  border: 1px solid var(--growth-rule);
   border-radius: 10px;
   padding: 12px 16px;
   margin: 0 0 16px;
 }
 
-.rust-panel summary { cursor: pointer; font-weight: 600; }
-.rust-panel pre {
+.growth-panel summary { cursor: pointer; font-weight: 600; }
+.growth-panel pre {
   overflow-x: auto;
-  background: var(--rust-pozadi);
+  background: var(--growth-bg);
   padding: 10px;
   border-radius: 6px;
   font-size: 13px;
 }
 
-.rust-poznamka { color: var(--rust-slabe); font-size: 13px; margin: 8px 0 0; }
-.rust-chyba { color: var(--rust-chyba); font-weight: 600; }
-.rust-nodata { color: var(--rust-slabe); font-style: italic; }
-.rust-odkazy { margin: 16px 0; font-size: 14px; }
-.rust-rozsah { margin: 0 0 12px; font-size: 14px; }
+.growth-note { color: var(--growth-muted); font-size: 13px; margin: 8px 0 0; }
+.growth-error { color: var(--growth-error); font-weight: 600; }
+.growth-nodata { color: var(--growth-muted); font-style: italic; }
+.growth-links { margin: 16px 0; font-size: 14px; }
+.growth-range { margin: 0 0 12px; font-size: 14px; }
 
 /* ------------------------------------------------------------------- list */
 
-.rust-seznam { list-style: none; padding: 0; margin: 0 0 16px; }
+.growth-list { list-style: none; padding: 0; margin: 0 0 16px; }
 
-.rust-seznam li {
-  background: var(--rust-panel);
-  border: 1px solid var(--rust-linka);
+.growth-list li {
+  background: var(--growth-panel);
+  border: 1px solid var(--growth-rule);
   border-radius: 10px;
   padding: 12px 16px;
   margin-bottom: 8px;
 }
 
-.rust-seznam a { text-decoration: none; font-size: 18px; }
-.rust-vek { color: var(--rust-slabe); font-size: 14px; margin-left: 8px; }
-.rust-posledni { display: block; color: var(--rust-slabe); font-size: 14px; margin-top: 4px; }
-.rust-pocet { margin-left: 4px; }
+.growth-list a { text-decoration: none; font-size: 18px; }
+.growth-age { color: var(--growth-muted); font-size: 14px; margin-left: 8px; }
+.growth-latest { display: block; color: var(--growth-muted); font-size: 14px; margin-top: 4px; }
+.growth-count { margin-left: 4px; }
 
 /* ------------------------------------------------------------ the picker */
 
-.rust-prepinac { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
+.growth-switch { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
 
-.rust-volba {
+.growth-option {
   padding: 6px 12px;
-  border: 1px solid var(--rust-linka);
+  border: 1px solid var(--growth-rule);
   border-radius: 999px;
-  background: var(--rust-panel);
+  background: var(--growth-panel);
   text-decoration: none;
   font-size: 14px;
 }
 
-.rust-volba.rust-aktivni {
-  background: var(--rust-akcent);
-  border-color: var(--rust-akcent);
+.growth-option.growth-active {
+  background: var(--growth-accent);
+  border-color: var(--growth-accent);
   color: #fff;
 }
 
 /* ------------------------------------------------------------------ forms */
 
-.rust-formular { display: flex; flex-direction: column; gap: 12px; }
+.growth-form { display: flex; flex-direction: column; gap: 12px; }
 
-.rust-formular label {
+.growth-form label {
   display: flex;
   flex-direction: column;
   gap: 4px;
   font-size: 14px;
-  color: var(--rust-slabe);
+  color: var(--growth-muted);
 }
 
-.rust-formular input,
-.rust-formular select {
+.growth-form input,
+.growth-form select {
   /* 16px keeps iOS Safari from zooming the page when a field is focused */
   font-size: 16px;
   padding: 9px 10px;
-  border: 1px solid var(--rust-linka);
+  border: 1px solid var(--growth-rule);
   border-radius: 8px;
   background: #fff;
-  color: var(--rust-text);
+  color: var(--growth-text);
 }
 
-.rust-formular button {
+.growth-form button {
   font-size: 16px;
   padding: 10px 18px;
   border: 0;
   border-radius: 8px;
-  background: var(--rust-akcent);
+  background: var(--growth-accent);
   color: #fff;
   cursor: pointer;
   align-self: flex-start;
 }
 
 @media (min-width: 620px) {
-  .rust-radek { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
-  .rust-radek label { flex: 1 1 140px; }
+  .growth-row { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
+  .growth-row label { flex: 1 1 140px; }
 }
 
 /* ------------------------------------------------------------ predictions */
 
-.rust-predpoved { display: grid; gap: 12px; grid-template-columns: 1fr; }
+.growth-prediction { display: grid; gap: 12px; grid-template-columns: 1fr; }
 
 @media (min-width: 620px) {
-  .rust-predpoved { grid-template-columns: 1fr 1fr; }
+  .growth-prediction { grid-template-columns: 1fr 1fr; }
 }
 
-.rust-karta {
-  border: 1px solid var(--rust-linka);
+.growth-card {
+  border: 1px solid var(--growth-rule);
   border-radius: 8px;
   padding: 12px;
-  background: var(--rust-pozadi);
+  background: var(--growth-bg);
 }
 
-.rust-cislo { font-size: 26px; font-weight: 700; margin: 0; }
-.rust-rozptyl { margin: 2px 0 0; color: var(--rust-slabe); font-size: 14px; }
+.growth-number { font-size: 26px; font-weight: 700; margin: 0; }
+.growth-scatter { margin: 2px 0 0; color: var(--growth-muted); font-size: 14px; }
 
 /* ------------------------------------------------------------------ table */
 
 /* The table is wider than a phone; it scrolls inside its own box so the page
    itself never scrolls sideways. */
-.rust-tabulka-obal { overflow-x: auto; margin-top: 16px; }
+.growth-table-wrap { overflow-x: auto; margin-top: 16px; }
 
-.rust-tabulka { border-collapse: collapse; width: 100%; font-size: 14px; }
+.growth-table { border-collapse: collapse; width: 100%; font-size: 14px; }
 
-.rust-tabulka th,
-.rust-tabulka td {
+.growth-table th,
+.growth-table td {
   padding: 6px 8px;
   text-align: right;
-  border-bottom: 1px solid var(--rust-linka);
+  border-bottom: 1px solid var(--growth-rule);
   white-space: nowrap;
 }
 
-.rust-tabulka th { text-align: right; color: var(--rust-slabe); font-weight: 600; }
-.rust-tabulka th:first-child,
-.rust-tabulka td:first-child { text-align: left; }
-.rust-tabulka .rust-slabe { color: var(--rust-slabe); }
+.growth-table th { text-align: right; color: var(--growth-muted); font-weight: 600; }
+.growth-table th:first-child,
+.growth-table td:first-child { text-align: left; }
+.growth-table .growth-muted { color: var(--growth-muted); }
 
-.rust-smazat { display: inline; }
-.rust-smazat button {
+.growth-delete { display: inline; }
+.growth-delete button {
   border: 0;
   background: none;
-  color: var(--rust-slabe);
+  color: var(--growth-muted);
   font-size: 18px;
   cursor: pointer;
   padding: 0 4px;
 }
-.rust-smazat button:hover { color: var(--rust-chyba); }
+.growth-delete button:hover { color: var(--growth-error); }
 
 /* ------------------------------------------------------------------ chart */
 
 /* Bleeds into the section padding so the plot gets the full width, while the
    heading and the notes around it keep their breathing room. */
-.rust-graf-obal { margin: 0 -6px; position: relative; }
+.growth-chart-wrap { margin: 0 -6px; position: relative; }
 
-.rust-graf-lista {
+.growth-chart-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -308,17 +308,17 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 
 /* Reserves its line even when empty, so pointing at a dot does not shift the
    chart down and slide the next dot out from under the cursor. */
-.rust-graf-hodnota {
+.growth-chart-value {
   font-size: 13px;
-  color: var(--rust-text);
+  color: var(--growth-text);
   font-variant-numeric: tabular-nums;
   min-height: 1.4em;
 }
 
-.rust-graf-full {
-  border: 1px solid var(--rust-linka);
-  background: var(--rust-panel);
-  color: var(--rust-slabe);
+.growth-chart-full {
+  border: 1px solid var(--growth-rule);
+  background: var(--growth-panel);
+  color: var(--growth-muted);
   border-radius: 6px;
   font-size: 15px;
   line-height: 1;
@@ -327,24 +327,24 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
   flex: none;
 }
 
-.rust-graf { width: 100%; height: auto; display: block; }
+.growth-chart { width: 100%; height: auto; display: block; }
 
-.rust-child-dot { cursor: pointer; }
+.growth-child-dot { cursor: pointer; }
 /* A generous invisible hit area: the dot is 3.4 units across in a 760-unit
    viewBox, which on a phone is far smaller than a fingertip. */
-.rust-child-dot { stroke: transparent; stroke-width: 14; }
-.rust-child-dot.rust-vybrany { stroke: var(--rust-akcent); stroke-width: 3; stroke-opacity: .35; }
+.growth-child-dot { stroke: transparent; stroke-width: 14; }
+.growth-child-dot.growth-selected { stroke: var(--growth-measurement); stroke-width: 3; stroke-opacity: .35; }
 
 /* Full screen, both the real thing and the CSS fallback for iOS Safari, which
    has no Fullscreen API for anything but video. */
-.rust-graf-obal:fullscreen,
-.rust-graf-obal.rust-celaobrazovka {
+.growth-chart-wrap:fullscreen,
+.growth-chart-wrap.growth-fullscreen {
   position: fixed;
   inset: 0;
   z-index: 50;
   margin: 0;
   padding: 12px;
-  background: var(--rust-panel);
+  background: var(--growth-panel);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -352,44 +352,44 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 
 /* Room for the toolbar above and the legend below, both of which now travel
    into full screen with the chart. */
-.rust-graf-obal:fullscreen .rust-graf,
-.rust-graf-obal.rust-celaobrazovka .rust-graf {
+.growth-chart-wrap:fullscreen .growth-chart,
+.growth-chart-wrap.growth-fullscreen .growth-chart {
   max-height: calc(100vh - 92px);
 }
 
 /* Landscape is the natural way to hold a phone for a wide chart, and there the
    toolbar would otherwise eat most of the height. */
 @media (max-height: 480px) {
-  .rust-graf-obal.rust-celaobrazovka { padding: 6px; }
-  .rust-graf-obal.rust-celaobrazovka .rust-graf { max-height: calc(100vh - 66px); }
+  .growth-chart-wrap.growth-fullscreen { padding: 6px; }
+  .growth-chart-wrap.growth-fullscreen .growth-chart { max-height: calc(100vh - 66px); }
 }
 
-.rust-grid { stroke: var(--rust-linka); stroke-width: 1; }
-.rust-axis { fill: var(--rust-slabe); font-size: 11px; }
-.rust-axis-unit { font-size: 11px; }
+.growth-grid { stroke: var(--growth-rule); stroke-width: 1; }
+.growth-axis { fill: var(--growth-muted); font-size: 11px; }
+.growth-axis-unit { font-size: 11px; }
 
-.rust-band { fill: var(--rust-pasmo); stroke: none; }
-.rust-p { fill: none; stroke: var(--rust-krivka); stroke-width: 1; }
-.rust-p-outer { stroke-dasharray: 4 3; }
+.growth-band { fill: var(--growth-band-fill); stroke: none; }
+.growth-p { fill: none; stroke: var(--growth-curve); stroke-width: 1; }
+.growth-p-outer { stroke-dasharray: 4 3; }
 /* 4.94:1 on the panel (was #8fa4b0 at 2.59:1) - the emphasised P50 line
    needs to clear the same 3:1 floor as the others, and by more of a margin
    since it carries the most weight visually. */
-.rust-p50 { stroke: var(--rust-p50); stroke-width: 1.6; }
-.rust-plabel { fill: var(--rust-slabe); font-size: 9px; }
+.growth-p50 { stroke: var(--growth-p50); stroke-width: 1.6; }
+.growth-plabel { fill: var(--growth-muted); font-size: 9px; }
 
-.rust-child-line { fill: none; stroke: var(--rust-mereni); stroke-width: 2.2; }
-.rust-child-dot { fill: var(--rust-mereni); }
+.growth-child-line { fill: none; stroke: var(--growth-measurement); stroke-width: 2.2; }
+.growth-child-dot { fill: var(--growth-measurement); }
 
-.rust-target { stroke: var(--rust-cil); stroke-width: 3; stroke-linecap: round; opacity: .6; }
-.rust-target-dot { fill: var(--rust-cil); }
+.growth-target { stroke: var(--growth-target); stroke-width: 3; stroke-linecap: round; opacity: .6; }
+.growth-target-dot { fill: var(--growth-target); }
 
 /* ---------------------------------------------------------------- footer */
 
-.rust-paticka {
+.growth-footer {
   max-width: 1000px;
   margin: 0 auto;
   padding: 8px 10px 32px;
-  color: var(--rust-slabe);
+  color: var(--growth-muted);
   font-size: 12px;
 }
 
@@ -397,114 +397,116 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --rust-pozadi: #191c1e;
-    --rust-panel: #23272a;
-    --rust-text: #e8eaec;
-    --rust-slabe: #9aa3aa;
-    --rust-linka: #363b3f;
-    --rust-akcent: #7fb2d1;
-    --rust-akcent-svetly: #2a353d;
-    --rust-chyba: #e8897f;
+    --growth-bg: #191c1e;
+    --growth-panel: #23272a;
+    --growth-text: #e8eaec;
+    --growth-muted: #9aa3aa;
+    --growth-rule: #363b3f;
+    --growth-accent: #7fb2d1;
+    --growth-accent-light: #2a353d;
+    --growth-error: #e8897f;
     /* Stepped for this surface rather than flipped from the light values:
        same roles, own ratios against the dark panel, same OKLab separation
        check (worst adjacent pair 25.0 dE protan, 26.9 dE normal vision). */
-    --rust-krivka: #7c8589;      /* 3.99:1 */
-    --rust-p50: #98a1a5;         /* 5.72:1 */
-    --rust-mereni: #e05f42;      /* 4.22:1 */
-    --rust-vyrovnani: #9b74e0;   /* 4.28:1 */
-    --rust-cil: #1fa98a;         /* 5.09:1 */
-    --rust-sds-1: #3d99e0;       /* 4.90:1 */
-    --rust-sds-2: #d47a20;       /* 4.73:1 */
-    --rust-sds-3: #a86ce0;       /* 4.22:1 */
-    --rust-pasmo: #22292e;
+    --growth-curve: #7c8589;      /* 3.99:1 */
+    --growth-p50: #98a1a5;         /* 5.72:1 */
+    --growth-measurement: #e05f42;      /* 4.22:1 */
+    --growth-smooth: #9b74e0;   /* 4.28:1 */
+    --growth-target: #1fa98a;         /* 5.09:1 */
+    --growth-sds-1: #3d99e0;       /* 4.90:1 */
+    --growth-sds-2: #d47a20;       /* 4.73:1 */
+    --growth-sds-3: #a86ce0;       /* 4.22:1 */
+    --growth-band-fill: #22292e;
   }
 
-  .rust-formular input,
-  .rust-formular select { background: #1c1f22; }
-  .rust-formular button { color: #10161a; }
-  .rust-dite-odkaz.rust-aktivni,
-  .rust-volba.rust-aktivni { color: #10161a; }
+  .growth-form input,
+  .growth-form select { background: #1c1f22; }
+  .growth-form button { color: #10161a; }
+  .growth-child-link.growth-active,
+  .growth-option.growth-active { color: #10161a; }
 }
 
 /* An extrapolated value: shown, but visibly marked as an estimate. */
-.rust-odhad { color: var(--rust-slabe); border-bottom: 1px dotted var(--rust-slabe); cursor: help; }
+.growth-estimate { color: var(--growth-muted); border-bottom: 1px dotted var(--growth-muted); cursor: help; }
 
 /* The measurement-based prediction leads, so it gets the accent border. */
-.rust-karta-hlavni { border-color: var(--rust-akcent); }
+.growth-card-main { border-color: var(--growth-accent); }
 
-.rust-zaskrtnuti {
+.growth-checkbox {
   flex-direction: row !important;
   align-items: center;
   gap: 8px !important;
-  color: var(--rust-text) !important;
+  color: var(--growth-text) !important;
 }
-.rust-zaskrtnuti input { width: auto; }
+.growth-checkbox input { width: auto; }
 
-/* Adult-height predictions, drawn side by side at 18 years. */
-.rust-projection { stroke: var(--rust-akcent); stroke-width: 3; stroke-linecap: round; opacity: .55; }
-.rust-projection-dot { fill: var(--rust-akcent); }
-.rust-projection-line {
+/* Adult-height predictions, drawn side by side at 18 years. The projection
+   continues the child's own measured channel, so it wears the measurement
+   colour; the mid-parental target is a different claim and keeps its own. */
+.growth-projection { stroke: var(--growth-measurement); stroke-width: 3; stroke-linecap: round; opacity: .55; }
+.growth-projection-dot { fill: var(--growth-measurement); }
+.growth-projection-line {
   fill: none;
-  stroke: var(--rust-akcent);
+  stroke: var(--growth-measurement);
   stroke-width: 1.4;
   stroke-dasharray: 5 4;
   opacity: .5;
 }
 
 /* Anything with a readable value: measurement dots and the two predictions. */
-.rust-ukazatel { cursor: pointer; }
-.rust-ukazatel:focus { outline: none; }
+.growth-marker { cursor: pointer; }
+.growth-marker:focus { outline: none; }
 
 /* Circles get a generous invisible hit area - they are the primary target on a
    phone, where the drawn 3.5-unit radius is far smaller than a fingertip. */
-.rust-projection-dot,
-.rust-target-dot { stroke: transparent; stroke-width: 14; }
+.growth-projection-dot,
+.growth-target-dot { stroke: transparent; stroke-width: 14; }
 
-.rust-projection-dot.rust-vybrany { stroke: var(--rust-akcent); stroke-width: 3; stroke-opacity: .35; }
-.rust-target-dot.rust-vybrany { stroke: var(--rust-cil); stroke-width: 3; stroke-opacity: .35; }
-.rust-projection.rust-vybrany,
-.rust-target.rust-vybrany { opacity: 1; }
+.growth-projection-dot.growth-selected { stroke: var(--growth-measurement); stroke-width: 3; stroke-opacity: .35; }
+.growth-target-dot.growth-selected { stroke: var(--growth-target); stroke-width: 3; stroke-opacity: .35; }
+.growth-projection.growth-selected,
+.growth-target.growth-selected { opacity: 1; }
 
 /* --------------------------------------------------------------- smoothing */
 
 /* With smoothing on the raw line stays, but recedes behind the trend. */
-.rust-child-line-tlum { stroke-width: 1; opacity: .35; }
+.growth-child-line-dim { stroke-width: 1; opacity: .35; }
 
 /* A colour of its own rather than the accent: sharing it with the raw line and
    the dots made the two hard to tell apart, which defeats the point of drawing
    both. Violet is the one hue not already carrying meaning here - blue is the
    child's own measurements, brown the mid-parental target, grey the reference
    percentiles, red a suspect reading. */
-.rust-smooth-line {
+.growth-smooth-line {
   fill: none;
-  stroke: var(--rust-vyrovnani);
+  stroke: var(--growth-smooth);
   stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 /* A measurement the smoother could not reconcile with its neighbours. */
-.rust-child-dot.rust-podezrely { fill: var(--rust-chyba); }
-.rust-child-dot.rust-podezrely.rust-vybrany { stroke: var(--rust-chyba); }
+.growth-child-dot.growth-suspect { fill: var(--growth-error); }
+.growth-child-dot.growth-suspect.growth-selected { stroke: var(--growth-error); }
 
 /* Swatches naming each line, drawn inside the figure so they stay visible in
    full screen. */
-.rust-legenda-vyrovnani { color: var(--rust-vyrovnani); }
-.rust-legenda-mereni { color: var(--rust-akcent); }
-.rust-legenda-mereni::before { height: 1px; opacity: .55; }
-.rust-legenda-predpoved { color: var(--rust-akcent); }
-.rust-legenda-predpoved::before { height: 3px; opacity: .55; }
-.rust-legenda-cil { color: var(--rust-cil); }
-.rust-legenda-cil::before { height: 3px; opacity: .55; }
-.rust-legenda-tempo { color: var(--rust-slabe); }
-.rust-legenda-tempo::before { height: 2px; }
+.growth-legend-smooth { color: var(--growth-smooth); }
+.growth-legend-measured { color: var(--growth-measurement); }
+.growth-legend-measured::before { height: 1px; opacity: .55; }
+.growth-legend-prediction { color: var(--growth-measurement); }
+.growth-legend-prediction::before { height: 3px; opacity: .55; }
+.growth-legend-target { color: var(--growth-target); }
+.growth-legend-target::before { height: 3px; opacity: .55; }
+.growth-legend-velocity { color: var(--growth-muted); }
+.growth-legend-velocity::before { height: 2px; }
 
 /* The pace of the median curve on the velocity chart. Grey and dashed, like
    the reference percentiles elsewhere, because it is a reference rather than
    something measured. */
-.rust-tempo-line {
+.growth-velocity-line {
   fill: none;
-  stroke: var(--rust-slabe);
+  stroke: var(--growth-muted);
   stroke-width: 1.6;
   stroke-dasharray: 5 4;
   opacity: .8;
@@ -512,12 +514,12 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
 
 /* ------------------------------------------------------------- SDS trend */
 
-.rust-sds-nula { stroke: var(--rust-slabe); stroke-width: 1.4; }
-.rust-sds-line { fill: none; stroke-width: 1.6; }
+.growth-sds-zero { stroke: var(--growth-muted); stroke-width: 1.4; }
+.growth-sds-line { fill: none; stroke-width: 1.6; }
 
 /* With smoothing on, the raw SDS lines recede behind the smoothed ones. */
-.rust-sds-line-tlum { stroke-width: 1; opacity: .3; }
-.rust-sds-smooth {
+.growth-sds-line-dim { stroke-width: 1; opacity: .3; }
+.growth-sds-smooth {
   fill: none;
   stroke-width: 2.2;
   stroke-linecap: round;
@@ -539,22 +541,22 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
  *    adjacent pair in each case, while every line still clears 3:1 against
  *    its own panel (ratios beside the tokens at the top of this file).
  */
-.rust-sds-line.rust-sds-1, .rust-sds-smooth.rust-sds-1 { stroke: var(--rust-sds-1); }
-.rust-sds-line.rust-sds-2, .rust-sds-smooth.rust-sds-2 { stroke: var(--rust-sds-2); stroke-dasharray: 7 4; }
-.rust-sds-line.rust-sds-3, .rust-sds-smooth.rust-sds-3 { stroke: var(--rust-sds-3); stroke-linecap: round; stroke-dasharray: 1 5; }
+.growth-sds-line.growth-sds-1, .growth-sds-smooth.growth-sds-1 { stroke: var(--growth-sds-1); }
+.growth-sds-line.growth-sds-2, .growth-sds-smooth.growth-sds-2 { stroke: var(--growth-sds-2); stroke-dasharray: 7 4; }
+.growth-sds-line.growth-sds-3, .growth-sds-smooth.growth-sds-3 { stroke: var(--growth-sds-3); stroke-linecap: round; stroke-dasharray: 1 5; }
 
-.rust-sds-dot { stroke: transparent; stroke-width: 14; }
-.rust-sds-dot.rust-sds-1 { fill: var(--rust-sds-1); }
-.rust-sds-dot.rust-sds-2 { fill: var(--rust-sds-2); }
-.rust-sds-dot.rust-sds-3 { fill: var(--rust-sds-3); }
-.rust-sds-dot.rust-vybrany { stroke-opacity: .3; stroke-width: 10; }
-.rust-sds-dot.rust-vybrany.rust-sds-1 { stroke: var(--rust-sds-1); }
-.rust-sds-dot.rust-vybrany.rust-sds-2 { stroke: var(--rust-sds-2); }
-.rust-sds-dot.rust-vybrany.rust-sds-3 { stroke: var(--rust-sds-3); }
+.growth-sds-dot { stroke: transparent; stroke-width: 14; }
+.growth-sds-dot.growth-sds-1 { fill: var(--growth-sds-1); }
+.growth-sds-dot.growth-sds-2 { fill: var(--growth-sds-2); }
+.growth-sds-dot.growth-sds-3 { fill: var(--growth-sds-3); }
+.growth-sds-dot.growth-selected { stroke-opacity: .3; stroke-width: 10; }
+.growth-sds-dot.growth-selected.growth-sds-1 { stroke: var(--growth-sds-1); }
+.growth-sds-dot.growth-selected.growth-sds-2 { stroke: var(--growth-sds-2); }
+.growth-sds-dot.growth-selected.growth-sds-3 { stroke: var(--growth-sds-3); }
 
-.rust-legenda-radek { margin: 6px 0 0; font-size: 13px; flex: none; }
-.rust-legenda { margin-right: 14px; }
-.rust-legenda::before {
+.growth-legend-row { margin: 6px 0 0; font-size: 13px; flex: none; }
+.growth-legend { margin-right: 14px; }
+.growth-legend::before {
   content: "";
   display: inline-block;
   width: 14px;
@@ -564,13 +566,13 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--rust-slabe); font-weight: 60
   background: currentColor;
 }
 /* The swatch echoes each line's own dash pattern, not just its colour. */
-.rust-legenda.rust-sds-2::before {
+.growth-legend.growth-sds-2::before {
   background: repeating-linear-gradient(to right, currentColor 0 5px, transparent 5px 8px);
 }
-.rust-legenda.rust-sds-3::before {
+.growth-legend.growth-sds-3::before {
   background: repeating-linear-gradient(to right, currentColor 0 2px, transparent 2px 5px);
 }
-.rust-legenda.rust-sds-1 { color: var(--rust-sds-1); }
-.rust-legenda.rust-sds-2 { color: var(--rust-sds-2); }
-.rust-legenda.rust-sds-3 { color: var(--rust-sds-3); }
+.growth-legend.growth-sds-1 { color: var(--growth-sds-1); }
+.growth-legend.growth-sds-2 { color: var(--growth-sds-2); }
+.growth-legend.growth-sds-3 { color: var(--growth-sds-3); }
 

@@ -161,7 +161,7 @@ const PCT_Z = [
 const CAV_CANARY = ['age' => 0.0, 'p' => [45.9, 47.5, 49.0, 50.6, 52.1, 53.4, 54.6]];
 
 $opts = getopt('', ['cache-dir::']);
-$cacheDir = $opts['cache-dir'] ?? sys_get_temp_dir() . '/rust-reference-cache';
+$cacheDir = $opts['cache-dir'] ?? sys_get_temp_dir() . '/growth-reference-cache';
 @mkdir($cacheDir, 0777, true);
 
 $root = dirname(__DIR__);

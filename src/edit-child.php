@@ -42,10 +42,10 @@ growth_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
 <h1><?php echo th('heading_edit_child'); ?></h1>
 
 <?php if ($error !== ''): ?>
-  <p class="rust-chyba"><?php echo growth_h($error); ?></p>
+  <p class="growth-error"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
-<form method="post" class="rust-formular">
+<form method="post" class="growth-form">
   <?php echo growth_csrf_field(); ?>
   <input type="hidden" name="id" value="<?php echo (int)$childId; ?>">
   <label><?php echo th('label_name'); ?>
@@ -70,17 +70,17 @@ growth_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
     <input type="text" inputmode="text" name="matka"
            value="<?php echo growth_h(growth_num(growth_display_length($child['vyska_matky_cm']))); ?>">
   </label>
-  <label class="rust-zaskrtnuti">
+  <label class="growth-checkbox">
     <input type="checkbox" name="kojeno" value="1"<?php echo !empty($child['kojeno']) ? ' checked' : ''; ?>>
     <?php echo th('label_breastfed'); ?>
   </label>
-  <p class="rust-poznamka">
+  <p class="growth-note">
     <?php echo th('note_breastfed_reference'); ?>
   </p>
   <button type="submit"><?php echo th('button_save'); ?></button>
 </form>
 
-<p class="rust-odkazy">
+<p class="growth-links">
   <a href="child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_back'); ?></a>
   &middot;
   <a href="delete-child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_delete_child'); ?></a>

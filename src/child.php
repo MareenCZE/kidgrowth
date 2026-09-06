@@ -94,7 +94,7 @@ growth_head($child['jmeno'], $childId);
 ?>
 
 <h1><?php echo growth_h($child['jmeno']); ?></h1>
-<p class="rust-podtitul">
+<p class="growth-subtitle">
   <?php echo th($sex === 'z' ? 'subtitle_born_f' : 'subtitle_born_m'); ?>
   <?php echo growth_h(growth_format_date($born)); ?>,
   <?php echo th('subtitle_now'); ?> <?php echo growth_h(growth_format_age($currentAge)); ?>
@@ -109,7 +109,7 @@ growth_head($child['jmeno'], $childId);
   $smoothLink = $baseLink; if ($fullRange) { $smoothLink['rozsah'] = 'vse'; }
   if (!$smoothing) { $smoothLink['vyhlazeni'] = '1'; }
 ?>
-<p class="rust-rozsah">
+<p class="growth-range">
   <a href="?<?php echo growth_h(http_build_query($rangeLink)); ?>"><?php
     echo $fullRange ? th('link_show_measured_range') : th('link_show_full_range');
   ?></a>
@@ -143,14 +143,14 @@ foreach (growth_metrics() as $metric => $meta):
         && $currentAge >= $span[0] && $currentAge <= $span[1]);
     $indexWord = ($meta['index'] === 'age') ? th('index_word_age') : th('index_word_height');
     ?>
-    <section class="rust-sekce">
+    <section class="growth-section">
       <h2><?php echo growth_h($meta['label']); ?></h2>
       <?php if (!$span): ?>
-        <p class="rust-nodata">
+        <p class="growth-nodata">
           <?php echo t('nodata_metric_not_in_reference', array('reference' => growth_h($reference['label']))); ?>
         </p>
       <?php elseif (!$pointsInSpan && !$childCovered): ?>
-        <p class="rust-nodata">
+        <p class="growth-nodata">
           <?php echo t('nodata_no_measurements_in_span', array(
               'reference' => growth_h($reference['label']),
               'index' => $indexWord,
@@ -170,7 +170,7 @@ foreach (growth_metrics() as $metric => $meta):
         ?>
         <?php if (isset($smooth[$metric])): ?>
           <?php $fit = $smooth[$metric]; ?>
-          <p class="rust-poznamka">
+          <p class="growth-note">
             <?php
               $scatterDecimals = (growth_metric_value_kind($metric) === 'weight')
                   ? growth_weight_decimals() : $meta['decimals'];
@@ -185,16 +185,16 @@ foreach (growth_metrics() as $metric => $meta):
           </p>
         <?php endif; ?>
         <?php if ($metric === 'bmi'): ?>
-          <details class="rust-panel">
+          <details class="growth-panel">
             <summary><?php echo th('bmi_explainer_summary'); ?></summary>
             <p><?php echo t('bmi_explainer_p1'); ?></p>
             <p><?php echo t('bmi_explainer_p2'); ?></p>
             <p><?php echo t('bmi_explainer_p3'); ?></p>
-            <p class="rust-poznamka"><?php echo t('bmi_explainer_p4'); ?></p>
+            <p class="growth-note"><?php echo t('bmi_explainer_p4'); ?></p>
           </details>
         <?php endif; ?>
         <?php if ($metric === 'weight' && $span[1] < 17.5): ?>
-          <p class="rust-poznamka">
+          <p class="growth-note">
             <?php echo t('note_weight_ceiling', array(
                 'reference' => growth_h($reference['label']),
                 'age' => growth_h(growth_format_years($span[1])),
@@ -208,7 +208,7 @@ foreach (growth_metrics() as $metric => $meta):
           $hidden = count($series[$metric]) - $pointsInSpan;
         ?>
         <?php if ($hidden > 0): ?>
-          <p class="rust-poznamka">
+          <p class="growth-note">
             <?php echo t('note_hidden_measurements', array(
                 'reference' => growth_h($reference['label']),
                 'index' => $indexWord,
@@ -259,40 +259,40 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
 ));
 ?>
 <?php if ($velocityChart !== ''): ?>
-  <section class="rust-sekce">
+  <section class="growth-section">
     <h2><?php echo th('heading_velocity'); ?></h2>
     <?php echo $velocityChart; ?>
-    <p class="rust-poznamka"><?php echo t('velocity_explainer_p1'); ?></p>
-    <p class="rust-poznamka"><?php echo t('velocity_explainer_p2'); ?></p>
+    <p class="growth-note"><?php echo t('velocity_explainer_p1'); ?></p>
+    <p class="growth-note"><?php echo t('velocity_explainer_p2'); ?></p>
   </section>
 <?php endif; ?>
 
 <?php if ($sdsChart !== ''): ?>
-  <section class="rust-sekce">
+  <section class="growth-section">
     <h2><?php echo th('heading_sds'); ?></h2>
     <?php echo $sdsChart; ?>
-    <p class="rust-poznamka"><?php echo t('sds_explainer_p1'); ?></p>
+    <p class="growth-note"><?php echo t('sds_explainer_p1'); ?></p>
   </section>
 <?php endif; ?>
 
-<section class="rust-sekce">
+<section class="growth-section">
   <h2><?php echo th('heading_prediction'); ?></h2>
-  <div class="rust-predpoved">
+  <div class="growth-prediction">
     <?php /* Measured first: it is built from this child's own growth, whereas
              the mid-parental target is a ~17 cm band that says the same thing
              for every child of the same two parents. */ ?>
-    <div class="rust-karta rust-karta-hlavni">
+    <div class="growth-card growth-card-main">
       <h3><?php echo th('heading_measured_prediction'); ?></h3>
       <?php if ($projection): ?>
-        <p class="rust-cislo"><?php echo growth_h(growth_num(growth_display_length($projection['mid']))); ?> <?php echo growth_length_unit(); ?></p>
-        <p class="rust-rozptyl">
+        <p class="growth-number"><?php echo growth_h(growth_num(growth_display_length($projection['mid']))); ?> <?php echo growth_length_unit(); ?></p>
+        <p class="growth-scatter">
           <?php echo t('range_cm', array(
               'low' => growth_h(growth_num(growth_display_length($projection['low']))),
               'high' => growth_h(growth_num(growth_display_length($projection['high']))),
               'unit' => growth_length_unit(),
           )); ?>
         </p>
-        <p class="rust-poznamka">
+        <p class="growth-note">
           <?php echo t('note_projection', array(
               'z' => growth_h(growth_num($projection['z'], 2)),
               'n' => (int)$projection['based_on'],
@@ -307,30 +307,30 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
           $reachesAdulthood = $heightSpan && $heightSpan[1] >= 17.5;
         ?>
         <?php if (!$reachesAdulthood): ?>
-          <p class="rust-nodata">
+          <p class="growth-nodata">
             <?php echo t('nodata_reference_too_short', array(
                 'reference' => growth_h($reference['label']),
                 'age' => growth_h(growth_format_years($heightSpan[1])),
             )); ?>
           </p>
         <?php else: ?>
-          <p class="rust-nodata"><?php echo th('nodata_need_two_measurements'); ?></p>
+          <p class="growth-nodata"><?php echo th('nodata_need_two_measurements'); ?></p>
         <?php endif; ?>
       <?php endif; ?>
     </div>
 
-    <div class="rust-karta">
+    <div class="growth-card">
       <h3><?php echo th('heading_target_height'); ?></h3>
       <?php if ($target): ?>
-        <p class="rust-cislo"><?php echo growth_h(growth_num(growth_display_length($target['mid']))); ?> <?php echo growth_length_unit(); ?></p>
-        <p class="rust-rozptyl">
+        <p class="growth-number"><?php echo growth_h(growth_num(growth_display_length($target['mid']))); ?> <?php echo growth_length_unit(); ?></p>
+        <p class="growth-scatter">
           <?php echo t('range_cm', array(
               'low' => growth_h(growth_num(growth_display_length($target['low']))),
               'high' => growth_h(growth_num(growth_display_length($target['high']))),
               'unit' => growth_length_unit(),
           )); ?>
         </p>
-        <p class="rust-poznamka">
+        <p class="growth-note">
           <?php echo t('note_target_height', array(
               'father' => growth_h(growth_num(growth_display_length($child['vyska_otce_cm']))),
               'mother' => growth_h(growth_num(growth_display_length($child['vyska_matky_cm']))),
@@ -339,7 +339,7 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
           )); ?>
         </p>
       <?php else: ?>
-        <p class="rust-nodata">
+        <p class="growth-nodata">
           <?php echo t('nodata_need_parent_heights', array(
               'link_open' => '<a href="edit-child.php?id=' . (int)$childId . '">',
               'link_close' => '</a>',
@@ -348,21 +348,21 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
       <?php endif; ?>
     </div>
   </div>
-  <p class="rust-poznamka"><?php echo t('note_bone_age'); ?></p>
+  <p class="growth-note"><?php echo t('note_bone_age'); ?></p>
 </section>
 
-<details class="rust-panel">
+<details class="growth-panel">
   <summary><?php echo th('summary_percentile_sd'); ?></summary>
   <p><?php echo t('percentile_sd_p1'); ?></p>
   <p><?php echo t('percentile_sd_p2'); ?></p>
   <p><?php echo t('percentile_sd_p3'); ?></p>
-  <p class="rust-poznamka"><?php echo t('percentile_sd_p4'); ?></p>
+  <p class="growth-note"><?php echo t('percentile_sd_p4'); ?></p>
 </details>
 
-<section class="rust-sekce">
+<section class="growth-section">
   <h2><?php echo th('heading_measurements'); ?></h2>
 
-  <form method="post" action="save-measurement.php" class="rust-formular rust-radek">
+  <form method="post" action="save-measurement.php" class="growth-form growth-row">
     <?php echo growth_csrf_field(); ?>
     <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
     <input type="hidden" name="ref" value="<?php echo growth_h($referenceId); ?>">
@@ -381,7 +381,7 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
     </label>
     <button type="submit"><?php echo th('button_save'); ?></button>
   </form>
-  <p class="rust-poznamka">
+  <p class="growth-note">
     <?php echo th('note_measurement_save'); ?>
   </p>
 
@@ -393,8 +393,8 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
           $velocityByDate[$velocity['date']] = $velocity;
       }
     ?>
-    <div class="rust-tabulka-obal">
-    <table class="rust-tabulka">
+    <div class="growth-table-wrap">
+    <table class="growth-table">
       <thead>
         <tr>
           <th><?php echo th('th_date'); ?></th><th><?php echo th('th_age'); ?></th>
@@ -415,20 +415,20 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
         ?>
         <tr>
           <td><?php echo growth_h(growth_format_date($row['datum'])); ?></td>
-          <td class="rust-slabe"><?php echo growth_h(growth_format_age($age)); ?></td>
+          <td class="growth-muted"><?php echo growth_h(growth_format_age($age)); ?></td>
 
           <td><?php echo $row['vyska_cm'] === null ? '' : growth_h(growth_num(growth_display_length($row['vyska_cm']))) . '&nbsp;' . growth_length_unit(); ?></td>
           <td><?php echo $row['vyska_cm'] === null ? '' : growth_format_percentile($h['percentile'], $h['z'], $referenceId, 'height'); ?></td>
-          <td class="rust-slabe"><?php echo $h['z'] === null ? '' : growth_h(growth_num($h['z'], 2)); ?></td>
+          <td class="growth-muted"><?php echo $h['z'] === null ? '' : growth_h(growth_num($h['z'], 2)); ?></td>
 
           <td><?php echo $row['hmotnost_kg'] === null ? '' : growth_h(growth_num(growth_display_weight($row['hmotnost_kg']), growth_weight_decimals())) . '&nbsp;' . growth_weight_unit(); ?></td>
           <td><?php echo $row['hmotnost_kg'] === null ? '' : growth_format_percentile($w['percentile'], $w['z'], $referenceId, 'weight'); ?></td>
-          <td class="rust-slabe"><?php echo $w['z'] === null ? '' : growth_h(growth_num($w['z'], 2)); ?></td>
+          <td class="growth-muted"><?php echo $w['z'] === null ? '' : growth_h(growth_num($w['z'], 2)); ?></td>
 
           <td><?php echo $bmiValue === null ? '' : growth_h(growth_num($bmiValue, 1)); ?></td>
           <td><?php echo $bmiValue === null ? '' : growth_format_percentile($b['percentile'], $b['z'], $referenceId, 'bmi'); ?></td>
 
-          <td class="rust-slabe">
+          <td class="growth-muted">
             <?php if (isset($velocityByDate[$row['datum']])): $v = $velocityByDate[$row['datum']]; ?>
               <span title="<?php echo th('velocity_since', array(
                   'date' => growth_h(growth_format_date($v['from_date'])),
@@ -440,14 +440,14 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
           </td>
           <td>
             <a href="delete-measurement.php?dite_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo growth_h($referenceId); ?>"
-               class="rust-smazat" title="<?php echo th('button_delete'); ?>">&times;</a>
+               class="growth-delete" title="<?php echo th('button_delete'); ?>">&times;</a>
           </td>
         </tr>
       <?php endforeach; ?>
       </tbody>
     </table>
     </div>
-    <p class="rust-poznamka"><?php echo t('note_velocity_table', array(
+    <p class="growth-note"><?php echo t('note_velocity_table', array(
         'small' => growth_h(growth_num(growth_display_length(0.5), 2)),
         'unit' => growth_length_unit(),
         'large' => growth_h(growth_num(growth_display_velocity(1.5))),
@@ -456,7 +456,7 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
   <?php endif; ?>
 </section>
 
-<p class="rust-odkazy">
+<p class="growth-links">
   <a href="edit-child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_edit_child'); ?></a>
   &middot;
   <a href="export.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_export_csv'); ?></a>

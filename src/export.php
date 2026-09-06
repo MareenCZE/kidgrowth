@@ -11,8 +11,8 @@ require_once __DIR__ . '/data.inc';
 if (growth_demo_mode()) {
     require_once __DIR__ . '/shell.inc';
     growth_head(t('nav_export_csv'));
-    echo '<h1>' . th('nav_export_csv') . '</h1><p class="rust-nodata">' . th('demo_export_disabled') . '</p>';
-    echo '<p class="rust-odkazy"><a href="index.php">' . th('nav_back_to_children') . '</a></p>';
+    echo '<h1>' . th('nav_export_csv') . '</h1><p class="growth-nodata">' . th('demo_export_disabled') . '</p>';
+    echo '<p class="growth-links"><a href="index.php">' . th('nav_back_to_children') . '</a></p>';
     growth_foot();
     exit;
 }

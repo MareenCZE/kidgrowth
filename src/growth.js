@@ -33,17 +33,17 @@
 
     /* ------------------------------------------------ charts: readout + full screen */
 
-    var charts = document.querySelectorAll('[data-rust-graf]');
+    var charts = document.querySelectorAll('[data-growth-chart]');
     if (!charts.length || !document.querySelector) {
         return;
     }
 
     Array.prototype.forEach.call(charts, function (figure) {
-        var readout = figure.querySelector('.rust-graf-hodnota');
-        var button = figure.querySelector('.rust-graf-full');
+        var readout = figure.querySelector('.growth-chart-value');
+        var button = figure.querySelector('.growth-chart-full');
         /* Measurement dots and the two adult-height predictions alike: anything
            carrying a <title> is worth reading out. */
-        var marks = figure.querySelectorAll('.rust-ukazatel');
+        var marks = figure.querySelectorAll('.growth-marker');
 
         /* --- the readout ------------------------------------------------ */
 
@@ -60,7 +60,7 @@
                 readout.textContent = describe(mark);
             }
             Array.prototype.forEach.call(marks, function (other) {
-                other.classList.toggle('rust-vybrany', other === mark);
+                other.classList.toggle('growth-selected', other === mark);
             });
         }
 
@@ -69,7 +69,7 @@
                 readout.textContent = '';
             }
             Array.prototype.forEach.call(marks, function (other) {
-                other.classList.remove('rust-vybrany');
+                other.classList.remove('growth-selected');
             });
         }
 
@@ -109,12 +109,12 @@
             var isNative = document.fullscreenElement === figure
                 || document.webkitFullscreenElement === figure;
 
-            if (canNative && !isNative && !figure.classList.contains('rust-celaobrazovka')) {
+            if (canNative && !isNative && !figure.classList.contains('growth-fullscreen')) {
                 var request = figure.requestFullscreen || figure.webkitRequestFullscreen;
                 var result = request.call(figure);
                 if (result && typeof result.catch === 'function') {
                     result.catch(function () {
-                        figure.classList.add('rust-celaobrazovka');
+                        figure.classList.add('growth-fullscreen');
                     });
                 }
                 return;
@@ -123,7 +123,7 @@
                 (document.exitFullscreen || document.webkitExitFullscreen).call(document);
                 return;
             }
-            figure.classList.toggle('rust-celaobrazovka');
+            figure.classList.toggle('growth-fullscreen');
         });
     });
 
@@ -133,9 +133,9 @@
         if (event.key !== 'Escape') {
             return;
         }
-        var open = document.querySelector('.rust-celaobrazovka');
+        var open = document.querySelector('.growth-fullscreen');
         if (open) {
-            open.classList.remove('rust-celaobrazovka');
+            open.classList.remove('growth-fullscreen');
         }
     });
 }());

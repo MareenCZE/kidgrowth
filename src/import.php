@@ -139,11 +139,11 @@ growth_head(t('page_title_import'));
 <h1><?php echo th('heading_import'); ?></h1>
 
 <?php if ($error !== ''): ?>
-  <p class="rust-chyba"><?php echo growth_h($error); ?></p>
+  <p class="growth-error"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
 <?php if ($report !== null): ?>
-  <div class="rust-panel">
+  <div class="growth-panel">
     <p><strong><?php echo th('import_summary', array('n' => (int)$report['rows'])); ?></strong></p>
     <ul>
       <?php foreach ($report['children'] as $name => $count): ?>
@@ -151,18 +151,18 @@ growth_head(t('page_title_import'));
       <?php endforeach; ?>
     </ul>
     <?php if ($report['skipped']): ?>
-      <p class="rust-poznamka">
+      <p class="growth-note">
         <?php echo th('import_skipped', array('n' => (int)$report['skipped'])); ?>
       </p>
     <?php endif; ?>
     <?php foreach ($report['errors'] as $message): ?>
-      <p class="rust-chyba"><?php echo growth_h($message); ?></p>
+      <p class="growth-error"><?php echo growth_h($message); ?></p>
     <?php endforeach; ?>
     <p><a href="index.php"><?php echo th('nav_back_to_children'); ?></a></p>
   </div>
 <?php endif; ?>
 
-<form method="post" enctype="multipart/form-data" class="rust-formular">
+<form method="post" enctype="multipart/form-data" class="growth-form">
   <?php echo growth_csrf_field(); ?>
   <label><?php echo th('label_csv_file'); ?>
     <input type="file" name="soubor" accept=".csv,text/csv" required>
@@ -170,12 +170,12 @@ growth_head(t('page_title_import'));
   <button type="submit"><?php echo th('button_import'); ?></button>
 </form>
 
-<div class="rust-panel">
+<div class="growth-panel">
   <h2><?php echo th('import_format_heading'); ?></h2>
   <p><?php echo th('import_format_intro'); ?></p>
   <pre>dite,pohlavi,narozeni,otec_cm,matka_cm,datum,vyska_cm,hmotnost_kg
 "Novak Jan",m,2018-03-14,180,165,2018-05-20,58,4.2</pre>
-  <p class="rust-poznamka">
+  <p class="growth-note">
     <?php echo t('import_format_note'); ?>
   </p>
   <h2><?php echo th('import_from_rustcz_heading'); ?></h2>
@@ -183,6 +183,6 @@ growth_head(t('page_title_import'));
   <pre>php tools/import_rustcz.php meda.rcz export-child1.txt export-child2.txt &gt; rust.csv</pre>
 </div>
 
-<p class="rust-odkazy"><a href="index.php"><?php echo th('nav_back'); ?></a></p>
+<p class="growth-links"><a href="index.php"><?php echo th('nav_back'); ?></a></p>
 
 <?php growth_foot(); ?>

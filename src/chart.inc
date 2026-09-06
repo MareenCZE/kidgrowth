@@ -51,7 +51,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
     }
     $rows = growth_reference_rows($referenceId, $metric, $sex);
     if (!$rows) {
-        return '<p class="rust-nodata">' . th('nodata_reference_missing') . '</p>';
+        return '<p class="growth-nodata">' . th('nodata_reference_missing') . '</p>';
     }
 
     /* Unit conversion, once, here: everything below operates on whatever
@@ -131,7 +131,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
         $curves[$percentile] = $curve;
     }
     if (empty($curves[50])) {
-        return '<p class="rust-nodata">' . th('nodata_no_reference_for_age') . '</p>';
+        return '<p class="growth-nodata">' . th('nodata_no_reference_for_age') . '</p>';
     }
 
     /* --- vertical range ------------------------------------------------- */
@@ -158,7 +158,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
         }
     }
     if (!is_finite($yMin) || !is_finite($yMax)) {
-        return '<p class="rust-nodata">' . th('nodata_no_reference_for_age') . '</p>';
+        return '<p class="growth-nodata">' . th('nodata_no_reference_for_age') . '</p>';
     }
     $pad = max(($yMax - $yMin) * 0.06, 0.5);
     $yMin -= $pad;
@@ -188,14 +188,14 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
     $svg = array();
     /* The figure wrapper is what goes full screen, so the readout and the
        button travel with the chart rather than being left behind on the page. */
-    $svg[] = '<figure class="rust-graf-obal" data-rust-graf>';
-    $svg[] = '<figcaption class="rust-graf-lista">'
-        . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
-        . '<button type="button" class="rust-graf-full" hidden'
+    $svg[] = '<figure class="growth-chart-wrap" data-growth-chart>';
+    $svg[] = '<figcaption class="growth-chart-bar">'
+        . '<output class="growth-chart-value" aria-live="polite"></output>'
+        . '<button type="button" class="growth-chart-full" hidden'
         . ' aria-label="' . th('button_fullscreen') . '">' . GROWTH_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
-        '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
+        '<svg class="growth-chart" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
         $width, $height, growth_h($title)
     );
 
@@ -205,36 +205,36 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
 
     foreach ($xTicks as $tick) {
         $x = $sx($tick);
-        $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
+        $svg[] = sprintf('<line class="growth-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $x, $top, $x, $top + $plotH);
-        $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
+        $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
             $x, $top + $plotH + 20, growth_h(growth_tick_label($tick)));
     }
     foreach ($yTicks as $tick) {
         $y = $sy($tick);
-        $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
+        $svg[] = sprintf('<line class="growth-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $left, $y, $left + $plotW, $y);
-        $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
+        $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
             $left - 6, $y + 4, growth_h(growth_tick_label($tick)));
     }
-    $svg[] = sprintf('<text class="rust-axis rust-axis-unit" x="%.1f" y="%.1f">%s</text>',
+    $svg[] = sprintf('<text class="growth-axis growth-axis-unit" x="%.1f" y="%.1f">%s</text>',
         4, $top + 4, growth_h($unit));
-    $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
+    $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
         $left + $plotW, $top + $plotH + 32, growth_h($meta['index_label']));
 
     /* --- the band between P3 and P97 ------------------------------------ */
     $band = growth_area_path($curves[3], $curves[97], $sx, $sy);
     if ($band !== '') {
-        $svg[] = '<path class="rust-band" d="' . $band . '"/>';
+        $svg[] = '<path class="growth-band" d="' . $band . '"/>';
     }
 
     /* --- percentile curves ---------------------------------------------- */
     foreach ($curves as $percentile => $curve) {
-        $class = 'rust-p';
+        $class = 'growth-p';
         if ($percentile === 50) {
-            $class .= ' rust-p50';
+            $class .= ' growth-p50';
         } elseif ($percentile === 3 || $percentile === 97) {
-            $class .= ' rust-p-outer';
+            $class .= ' growth-p-outer';
         }
         $path = growth_line_path($curve, $sx, $sy);
         if ($path === '') {
@@ -244,7 +244,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
 
         $last = $curve[count($curve) - 1];
         $svg[] = sprintf(
-            '<text class="rust-plabel" x="%.1f" y="%.1f">%d</text>',
+            '<text class="growth-plabel" x="%.1f" y="%.1f">%d</text>',
             $sx($last[0]) + 3, $sy($last[1]) + 3, $percentile
         );
     }
@@ -268,12 +268,12 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
                 'unit' => $unit,
             ));
             $svg[] = sprintf(
-                '<line class="rust-projection rust-ukazatel" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"'
+                '<line class="growth-projection growth-marker" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"'
                 . ' tabindex="0" role="img"><title>%s</title></line>',
                 $x, $sy($projection['high']), $x, $sy($projection['low']), growth_h($label)
             );
             $svg[] = sprintf(
-                '<circle class="rust-projection-dot rust-ukazatel" cx="%.1f" cy="%.1f" r="3"'
+                '<circle class="growth-projection-dot growth-marker" cx="%.1f" cy="%.1f" r="3"'
                 . ' tabindex="0" role="img"><title>%s</title></circle>',
                 $x, $sy($projection['mid']), growth_h($label)
             );
@@ -283,7 +283,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
             if ($points) {
                 $last = $points[count($points) - 1];
                 $svg[] = sprintf(
-                    '<path class="rust-projection-line" d="M%.1f %.1f L%.1f %.1f"/>',
+                    '<path class="growth-projection-line" d="M%.1f %.1f L%.1f %.1f"/>',
                     $sx($last['age']), $sy($last['value']), $x, $sy($projection['mid'])
                 );
             }
@@ -299,12 +299,12 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
                 'unit' => $unit,
             ));
             $svg[] = sprintf(
-                '<line class="rust-target rust-ukazatel" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"'
+                '<line class="growth-target growth-marker" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"'
                 . ' tabindex="0" role="img"><title>%s</title></line>',
                 $x, $sy($target['high']), $x, $sy($target['low']), growth_h($label)
             );
             $svg[] = sprintf(
-                '<circle class="rust-target-dot rust-ukazatel" cx="%.1f" cy="%.1f" r="3"'
+                '<circle class="growth-target-dot growth-marker" cx="%.1f" cy="%.1f" r="3"'
                 . ' tabindex="0" role="img"><title>%s</title></circle>',
                 $x, $sy($target['mid']), growth_h($label)
             );
@@ -328,7 +328,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
         if ($childPath !== '') {
             /* With smoothing on, the raw line stays but recedes: the point is to
                show the trend without hiding what was actually measured. */
-            $class = $smoothed ? 'rust-child-line rust-child-line-tlum' : 'rust-child-line';
+            $class = $smoothed ? 'growth-child-line growth-child-line-dim' : 'growth-child-line';
             $svg[] = sprintf('<path class="%s" d="%s"/>', $class, $childPath);
         }
 
@@ -341,7 +341,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
             }
             $smoothPath = growth_line_path($within, $sx, $sy);
             if ($smoothPath !== '') {
-                $svg[] = '<path class="rust-smooth-line" d="' . $smoothPath . '"/>';
+                $svg[] = '<path class="growth-smooth-line" d="' . $smoothPath . '"/>';
             }
         }
         foreach ($inRange as $point) {
@@ -387,9 +387,9 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
             /* A measurement the smoother could not reconcile with its
                neighbours. Flagged rather than dropped: only the person who
                recorded it can say whether it is a typo or a real event. */
-            $class = 'rust-child-dot rust-ukazatel';
+            $class = 'growth-child-dot growth-marker';
             if (isset($point['suspect'])) {
-                $class .= ' rust-podezrely';
+                $class .= ' growth-suspect';
                 /* growth_num() already carries its own "-" for a negative deviation;
                    "%+s" cannot add the matching "+" for a positive one (PHP's sign
                    flag has no effect on a string conversion), so it is prepended
@@ -417,26 +417,26 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
        chart is biggest and most worth reading. */
     $legend = array();
     if ($inRange) {
-        $legend[] = array('mereni', t('legend_measured'));
+        $legend[] = array('measured', t('legend_measured'));
     }
     if (!empty($options['smooth'])) {
-        $legend[] = array('vyrovnani', t('legend_smoothed'));
+        $legend[] = array('smooth', t('legend_smoothed'));
     }
     if ($meta['index'] === 'age' && $xMax >= 17.5) {
         if (!empty($options['projection'])) {
-            $legend[] = array('predpoved', t('legend_projection'));
+            $legend[] = array('prediction', t('legend_projection'));
         }
         if (!empty($options['target'])) {
-            $legend[] = array('cil', t('legend_target'));
+            $legend[] = array('target', t('legend_target'));
         }
     }
     if (count($legend) > 1) {
         $items = array();
         foreach ($legend as $entry) {
-            $items[] = sprintf('<span class="rust-legenda rust-legenda-%s">%s</span>',
+            $items[] = sprintf('<span class="growth-legend growth-legend-%s">%s</span>',
                 $entry[0], growth_h($entry[1]));
         }
-        $svg[] = '<p class="rust-legenda-radek">' . implode(' ', $items) . '</p>';
+        $svg[] = '<p class="growth-legend-row">' . implode(' ', $items) . '</p>';
     }
 
     $svg[] = '</figure>';
@@ -498,38 +498,38 @@ function growth_sds_chart_svg($seriesByMetric, $options = array())
     };
 
     $svg = array();
-    $svg[] = '<figure class="rust-graf-obal" data-rust-graf>';
-    $svg[] = '<figcaption class="rust-graf-lista">'
-        . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
-        . '<button type="button" class="rust-graf-full" hidden'
+    $svg[] = '<figure class="growth-chart-wrap" data-growth-chart>';
+    $svg[] = '<figcaption class="growth-chart-bar">'
+        . '<output class="growth-chart-value" aria-live="polite"></output>'
+        . '<button type="button" class="growth-chart-full" hidden'
         . ' aria-label="' . th('button_fullscreen') . '">' . GROWTH_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
-        '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
+        '<svg class="growth-chart" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
         $width, $height, th('heading_sds')
     );
 
     /* the range two thirds of children sit in, then the 95% range */
-    $svg[] = sprintf('<rect class="rust-band" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>',
+    $svg[] = sprintf('<rect class="growth-band" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>',
         $left, $sy(2.0), $plotW, $sy(-2.0) - $sy(2.0));
 
     foreach (array(-3, -2, -1, 0, 1, 2, 3) as $line) {
         $y = $sy($line);
-        $class = ($line === 0) ? 'rust-grid rust-sds-nula' : 'rust-grid';
+        $class = ($line === 0) ? 'growth-grid growth-sds-zero' : 'growth-grid';
         $svg[] = sprintf('<line class="%s" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $class, $left, $y, $left + $plotW, $y);
-        $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%+d</text>',
+        $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="end">%+d</text>',
             $left - 6, $y + 4, $line);
     }
     foreach (growth_nice_ticks($xMin, $xMax, 9) as $tick) {
         $x = $sx($tick);
-        $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
+        $svg[] = sprintf('<line class="growth-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $x, $top, $x, $top + $plotH);
-        $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
+        $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
             $x, $top + $plotH + 20, growth_h(growth_tick_label($tick)));
     }
-    $svg[] = sprintf('<text class="rust-axis rust-axis-unit" x="%.1f" y="%.1f">SD</text>', 4, $top + 4);
-    $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
+    $svg[] = sprintf('<text class="growth-axis growth-axis-unit" x="%.1f" y="%.1f">SD</text>', 4, $top + 4);
+    $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
         $left + $plotW, $top + $plotH + 32, th('index_age'));
 
     $smoothing = !empty($options['smooth']) ? $options['smooth'] : array();
@@ -549,9 +549,9 @@ function growth_sds_chart_svg($seriesByMetric, $options = array())
             /* With smoothing on the raw line recedes here too, so the three
                smoothed lines are what the eye follows - which is the whole
                point of this chart: is each one flat, or sloping? */
-            $class = 'rust-sds-line rust-sds-' . $n;
+            $class = 'growth-sds-line growth-sds-' . $n;
             if (isset($smoothing[$metricId])) {
-                $class .= ' rust-sds-line-tlum';
+                $class .= ' growth-sds-line-dim';
             }
             $svg[] = sprintf('<path class="%s" d="%s"/>', $class, $path);
         }
@@ -559,7 +559,7 @@ function growth_sds_chart_svg($seriesByMetric, $options = array())
         if (isset($smoothing[$metricId]['curve_z'])) {
             $smoothPath = growth_line_path($smoothing[$metricId]['curve_z'], $sx, $sy);
             if ($smoothPath !== '') {
-                $svg[] = sprintf('<path class="rust-sds-smooth rust-sds-%d" d="%s"/>', $n, $smoothPath);
+                $svg[] = sprintf('<path class="growth-sds-smooth growth-sds-%d" d="%s"/>', $n, $smoothPath);
             }
         }
         $sdsKind = growth_metric_value_kind($metricId);
@@ -581,7 +581,7 @@ function growth_sds_chart_svg($seriesByMetric, $options = array())
             $bits[] = t('tooltip_age', array('age' => growth_format_age($point['age'])));
             $label = implode(' · ', $bits);
             $svg[] = sprintf(
-                '<circle class="rust-sds-dot rust-sds-%d rust-ukazatel" cx="%.1f" cy="%.1f" r="2.5"'
+                '<circle class="growth-sds-dot growth-sds-%d growth-marker" cx="%.1f" cy="%.1f" r="2.5"'
                 . ' tabindex="0" role="img"><title>%s</title></circle>',
                 $n, $sx($point['age']), $sy($point['z']), growth_h($label)
             );
@@ -596,11 +596,11 @@ function growth_sds_chart_svg($seriesByMetric, $options = array())
         if (!$points || !isset($colours[$metricId])) {
             continue;
         }
-        $legend[] = sprintf('<span class="rust-legenda rust-sds-%d">%s</span>',
+        $legend[] = sprintf('<span class="growth-legend growth-sds-%d">%s</span>',
             $colours[$metricId], growth_h($metrics[$metricId]['label']));
     }
     if ($legend) {
-        $svg[] = '<p class="rust-legenda-radek">' . implode(' ', $legend) . '</p>';
+        $svg[] = '<p class="growth-legend-row">' . implode(' ', $legend) . '</p>';
     }
     $svg[] = '</figure>';
 
@@ -762,39 +762,39 @@ function growth_velocity_chart_svg($referenceId, $sex, $velocities, $options = a
     };
 
     $svg = array();
-    $svg[] = '<figure class="rust-graf-obal" data-rust-graf>';
-    $svg[] = '<figcaption class="rust-graf-lista">'
-        . '<output class="rust-graf-hodnota" aria-live="polite"></output>'
-        . '<button type="button" class="rust-graf-full" hidden'
+    $svg[] = '<figure class="growth-chart-wrap" data-growth-chart>';
+    $svg[] = '<figcaption class="growth-chart-bar">'
+        . '<output class="growth-chart-value" aria-live="polite"></output>'
+        . '<button type="button" class="growth-chart-full" hidden'
         . ' aria-label="' . th('button_fullscreen') . '">' . GROWTH_FULLSCREEN_ICON . '</button>'
         . '</figcaption>';
     $svg[] = sprintf(
-        '<svg class="rust-graf" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
+        '<svg class="growth-chart" viewBox="0 0 %d %d" role="img" preserveAspectRatio="xMidYMid meet" aria-label="%s">',
         $width, $height, th('heading_velocity')
     );
 
     foreach (growth_nice_ticks($yMin, $yMax, 6) as $tick) {
         $y = $sy($tick);
-        $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
+        $svg[] = sprintf('<line class="growth-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $left, $y, $left + $plotW, $y);
-        $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
+        $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
             $left - 6, $y + 4, growth_h(growth_tick_label($tick)));
     }
     foreach (growth_nice_ticks($xMin, $xMax, 9) as $tick) {
         $x = $sx($tick);
-        $svg[] = sprintf('<line class="rust-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
+        $svg[] = sprintf('<line class="growth-grid" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>',
             $x, $top, $x, $top + $plotH);
-        $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
+        $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="middle">%s</text>',
             $x, $top + $plotH + 20, growth_h(growth_tick_label($tick)));
     }
-    $svg[] = sprintf('<text class="rust-axis rust-axis-unit" x="%.1f" y="%.1f">%s</text>',
+    $svg[] = sprintf('<text class="growth-axis growth-axis-unit" x="%.1f" y="%.1f">%s</text>',
         4, $top + 4, growth_h(growth_velocity_unit()));
-    $svg[] = sprintf('<text class="rust-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
+    $svg[] = sprintf('<text class="growth-axis" x="%.1f" y="%.1f" text-anchor="end">%s</text>',
         $left + $plotW, $top + $plotH + 32, th('index_age'));
 
     $pacePath = growth_line_path($paceCurve, $sx, $sy);
     if ($pacePath !== '') {
-        $svg[] = '<path class="rust-tempo-line" d="' . $pacePath . '"/>';
+        $svg[] = '<path class="growth-velocity-line" d="' . $pacePath . '"/>';
     }
 
     $points = array();
@@ -805,14 +805,14 @@ function growth_velocity_chart_svg($referenceId, $sex, $velocities, $options = a
     }
     $childPath = growth_line_path($points, $sx, $sy);
     if ($childPath !== '') {
-        $class = $smoothCurve ? 'rust-child-line rust-child-line-tlum' : 'rust-child-line';
+        $class = $smoothCurve ? 'growth-child-line growth-child-line-dim' : 'growth-child-line';
         $svg[] = sprintf('<path class="%s" d="%s"/>', $class, $childPath);
     }
 
     if ($smoothCurve) {
         $smoothPath = growth_line_path($smoothCurve, $sx, $sy);
         if ($smoothPath !== '') {
-            $svg[] = '<path class="rust-smooth-line" d="' . $smoothPath . '"/>';
+            $svg[] = '<path class="growth-smooth-line" d="' . $smoothPath . '"/>';
         }
     }
 
@@ -837,7 +837,7 @@ function growth_velocity_chart_svg($referenceId, $sex, $velocities, $options = a
             ));
         }
         $svg[] = sprintf(
-            '<circle class="rust-child-dot rust-ukazatel" cx="%.1f" cy="%.1f" r="2.8"'
+            '<circle class="growth-child-dot growth-marker" cx="%.1f" cy="%.1f" r="2.8"'
             . ' tabindex="0" role="img"><title>%s</title></circle>',
             $sx($v['age']), $sy($v['cm_per_year']), growth_h(implode(' · ', $parts))
         );
@@ -845,17 +845,17 @@ function growth_velocity_chart_svg($referenceId, $sex, $velocities, $options = a
 
     $svg[] = '</svg>';
 
-    $legend = array(array('mereni', t('legend_measured_velocity')));
+    $legend = array(array('measured', t('legend_measured_velocity')));
     if ($smoothCurve) {
-        $legend[] = array('vyrovnani', t('legend_smoothed'));
+        $legend[] = array('smooth', t('legend_smoothed'));
     }
-    $legend[] = array('tempo', t('legend_median_pace'));
+    $legend[] = array('velocity', t('legend_median_pace'));
     $items = array();
     foreach ($legend as $entry) {
-        $items[] = sprintf('<span class="rust-legenda rust-legenda-%s">%s</span>',
+        $items[] = sprintf('<span class="growth-legend growth-legend-%s">%s</span>',
             $entry[0], growth_h($entry[1]));
     }
-    $svg[] = '<p class="rust-legenda-radek">' . implode(' ', $items) . '</p>';
+    $svg[] = '<p class="growth-legend-row">' . implode(' ', $items) . '</p>';
     $svg[] = '</figure>';
 
     return implode("\n", $svg);

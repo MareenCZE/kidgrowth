@@ -246,7 +246,7 @@ function growth_format_percentile($percentile, $z, $referenceId, $metric = 'heig
         && (abs($z) > 1.8807936);
 
     if ($extrapolated) {
-        return '<span class="rust-odhad" title="' . th('percentile_extrapolated_title')
+        return '<span class="growth-estimate" title="' . th('percentile_extrapolated_title')
             . '">~' . $text . '</span>';
     }
     return $text;

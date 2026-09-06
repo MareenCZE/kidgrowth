@@ -38,21 +38,21 @@ growth_head('');
 <h1><?php echo th('page_title_home'); ?></h1>
 
 <?php if (isset($_GET['smazano'])): ?>
-  <p class="rust-poznamka">
+  <p class="growth-note">
     <?php echo t('flash_moved_to_trash', array('name' => growth_h((string)$_GET['smazano']))); ?>
   </p>
 <?php endif; ?>
 
 <?php if ($error !== ''): ?>
-  <p class="rust-chyba"><?php echo growth_h($error); ?></p>
+  <p class="growth-error"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
 <?php if (!$children): ?>
-  <p class="rust-uvod">
+  <p class="growth-intro">
     <?php echo t('intro_no_children'); ?>
   </p>
 <?php else: ?>
-  <ul class="rust-seznam">
+  <ul class="growth-list">
     <?php foreach ($children as $child): ?>
       <?php
         $measurements = growth_measurements($child['id']);
@@ -68,29 +68,29 @@ growth_head('');
       <li>
         <a href="child.php?id=<?php echo (int)$child['id']; ?>">
           <strong><?php echo growth_h($child['jmeno']); ?></strong>
-          <span class="rust-vek"><?php echo growth_h(growth_format_age($age)); ?></span>
+          <span class="growth-age"><?php echo growth_h(growth_format_age($age)); ?></span>
         </a>
         <?php if ($last): ?>
-          <span class="rust-posledni">
+          <span class="growth-latest">
             <?php echo growth_h(growth_format_date($last['datum'])); ?>:
             <?php if ($last['vyska_cm'] !== null): ?>
               <?php echo growth_h(growth_num(growth_display_length($last['vyska_cm']))); ?> <?php echo growth_length_unit(); ?><?php endif; ?>
             <?php if ($last['vyska_cm'] !== null && $last['hmotnost_kg'] !== null): ?>,<?php endif; ?>
             <?php if ($last['hmotnost_kg'] !== null): ?>
               <?php echo growth_h(growth_num(growth_display_weight($last['hmotnost_kg']), growth_weight_decimals())); ?> <?php echo growth_weight_unit(); ?><?php endif; ?>
-            <span class="rust-pocet"><?php echo th('count_measurements', array('n' => count($measurements))); ?></span>
+            <span class="growth-count"><?php echo th('count_measurements', array('n' => count($measurements))); ?></span>
           </span>
         <?php else: ?>
-          <span class="rust-posledni"><?php echo th('no_measurements_yet'); ?></span>
+          <span class="growth-latest"><?php echo th('no_measurements_yet'); ?></span>
         <?php endif; ?>
       </li>
     <?php endforeach; ?>
   </ul>
 <?php endif; ?>
 
-<details class="rust-panel"<?php echo $children ? '' : ' open'; ?>>
+<details class="growth-panel"<?php echo $children ? '' : ' open'; ?>>
   <summary><?php echo th('add_child_summary'); ?></summary>
-  <form method="post" class="rust-formular">
+  <form method="post" class="growth-form">
     <?php echo growth_csrf_field(); ?>
     <input type="hidden" name="akce" value="nove_dite">
     <label><?php echo th('label_name'); ?>
@@ -112,18 +112,18 @@ growth_head('');
     <label><?php echo th('label_mother_height'); ?> (<?php echo growth_length_unit(); ?>)
       <input type="text" inputmode="text" name="matka" placeholder="<?php echo $heightPlaceholder; ?>">
     </label>
-    <label class="rust-zaskrtnuti">
+    <label class="growth-checkbox">
       <input type="checkbox" name="kojeno" value="1">
       <?php echo th('label_breastfed'); ?>
     </label>
     <button type="submit"><?php echo th('button_add'); ?></button>
   </form>
-  <p class="rust-poznamka">
+  <p class="growth-note">
     <?php echo th('note_parent_heights'); ?>
   </p>
 </details>
 
-<p class="rust-odkazy">
+<p class="growth-links">
   <a href="import.php"><?php echo th('nav_import_csv'); ?></a>
   &middot;
   <a href="trash.php"><?php echo th('nav_trash'); ?></a>

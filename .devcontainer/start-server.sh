@@ -15,7 +15,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 port=8080
-log=/tmp/rust-server.log
+log=/tmp/growth-server.log
 
 # Any HTTP response counts: even the "not protected" 403 means PHP is answering.
 # Only a refused connection is the failure this guards against.

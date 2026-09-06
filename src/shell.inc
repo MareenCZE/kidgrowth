@@ -31,17 +31,17 @@ function growth_head($title, $childId = null)
 <link rel="stylesheet" href="growth.css?v=<?php echo GROWTH_ASSET_VERSION; ?>">
 </head>
 <body>
-<header class="rust-hlavicka">
-  <a class="rust-logo" href="index.php">Růst</a>
+<header class="growth-header">
+  <a class="growth-logo" href="index.php">Růst</a>
   <?php
     $children = growth_children();
     if (count($children) > 0) {
-        echo '<nav class="rust-deti">';
+        echo '<nav class="growth-children">';
         foreach ($children as $child) {
             $current = ($childId !== null && (int)$child['id'] === (int)$childId);
             printf(
-                '<a class="rust-dite-odkaz%s" href="child.php?id=%d%s">%s</a>',
-                $current ? ' rust-aktivni' : '',
+                '<a class="growth-child-link%s" href="child.php?id=%d%s">%s</a>',
+                $current ? ' growth-active' : '',
                 (int)$child['id'],
                 isset($_GET['ref']) ? '&amp;ref=' . growth_h(growth_selected_reference()) : '',
                 growth_h($child['jmeno'])
@@ -54,9 +54,9 @@ function growth_head($title, $childId = null)
   ?>
 </header>
 <?php if (growth_demo_mode()): ?>
-  <p class="rust-demo"><?php echo th('demo_banner'); ?></p>
+  <p class="growth-demo"><?php echo th('demo_banner'); ?></p>
 <?php endif; ?>
-<main class="rust-obsah">
+<main class="growth-content">
     <?php
 }
 
@@ -69,12 +69,12 @@ function growth_head($title, $childId = null)
 function growth_language_switcher()
 {
     $params = $_GET;
-    echo '<nav class="rust-jazyk">';
+    echo '<nav class="growth-language">';
     foreach (GROWTH_LOCALES as $locale) {
         $params['lang'] = $locale;
         printf(
-            '<a class="rust-volba-jazyka%s" href="?%s">%s</a>',
-            $locale === growth_locale() ? ' rust-aktivni' : '',
+            '<a class="growth-option-language%s" href="?%s">%s</a>',
+            $locale === growth_locale() ? ' growth-active' : '',
             growth_h(http_build_query($params)),
             growth_h(strtoupper($locale))
         );
@@ -91,12 +91,12 @@ function growth_language_switcher()
 function growth_units_switcher()
 {
     $params = $_GET;
-    echo '<nav class="rust-jednotky">';
+    echo '<nav class="growth-units">';
     foreach (array('metric' => 'cm/kg', 'imperial' => 'in/lb') as $value => $label) {
         $params['units'] = $value;
         printf(
-            '<a class="rust-volba-jednotek%s" href="?%s">%s</a>',
-            $value === growth_units() ? ' rust-aktivni' : '',
+            '<a class="growth-option-units%s" href="?%s">%s</a>',
+            $value === growth_units() ? ' growth-active' : '',
             growth_h(http_build_query($params)),
             growth_h($label)
         );
@@ -130,7 +130,7 @@ function growth_foot($referenceId = null)
     }
     ?>
 </main>
-<footer class="rust-paticka">
+<footer class="growth-footer">
   <?php
     $reference = ($referenceId === null) ? null : growth_reference($referenceId);
     if ($reference && isset($reference['source'])):
@@ -162,7 +162,7 @@ function growth_reference_picker($current, $params = array(), $ids = null)
     if ($ids === null) {
         $ids = growth_reference_ids();
     }
-    echo '<div class="rust-prepinac">';
+    echo '<div class="growth-switch">';
     foreach ($ids as $id) {
         $reference = growth_reference($id);
         if (!$reference) {
@@ -170,8 +170,8 @@ function growth_reference_picker($current, $params = array(), $ids = null)
         }
         $query = array_merge($params, array('ref' => $id));
         printf(
-            '<a class="rust-volba%s" href="?%s" title="%s">%s</a>',
-            $id === $current ? ' rust-aktivni' : '',
+            '<a class="growth-option%s" href="?%s" title="%s">%s</a>',
+            $id === $current ? ' growth-active' : '',
             growth_h(http_build_query($query)),
             growth_h($reference['note']),
             growth_h($reference['label'])

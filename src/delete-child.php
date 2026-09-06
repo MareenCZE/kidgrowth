@@ -42,15 +42,15 @@ growth_head(t('page_title_delete_child'), $childId);
       'n' => '<strong>' . (int)$measurementCount . '</strong>',
   )); ?>
 </p>
-<p class="rust-poznamka">
+<p class="growth-note">
   <?php echo t('note_delete_child_confirm'); ?>
 </p>
 
 <?php if ($error !== ''): ?>
-  <p class="rust-chyba"><?php echo growth_h($error); ?></p>
+  <p class="growth-error"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
-<form method="post" class="rust-formular">
+<form method="post" class="growth-form">
   <?php echo growth_csrf_field(); ?>
   <input type="hidden" name="id" value="<?php echo (int)$childId; ?>">
   <label><?php echo th('label_confirm_name'); ?>
@@ -59,7 +59,7 @@ growth_head(t('page_title_delete_child'), $childId);
   <button type="submit"><?php echo th('button_move_to_trash'); ?></button>
 </form>
 
-<p class="rust-odkazy">
+<p class="growth-links">
   <a href="child.php?id=<?php echo (int)$childId; ?>"><?php echo th('nav_back'); ?></a>
 </p>
 

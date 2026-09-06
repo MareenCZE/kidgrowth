@@ -42,11 +42,11 @@ growth_head(t('page_title_delete_measurement'), $childId);
       'date' => '<strong>' . growth_h(growth_format_date($measurement['datum'])) . '</strong>',
   )); ?>
 </p>
-<p class="rust-poznamka">
+<p class="growth-note">
   <?php echo t('note_recoverable_from_trash'); ?>
 </p>
 
-<form method="post" action="save-measurement.php" class="rust-formular">
+<form method="post" action="save-measurement.php" class="growth-form">
   <?php echo growth_csrf_field(); ?>
   <input type="hidden" name="akce" value="smazat">
   <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
@@ -55,7 +55,7 @@ growth_head(t('page_title_delete_measurement'), $childId);
   <button type="submit"><?php echo th('button_delete'); ?></button>
 </form>
 
-<p class="rust-odkazy">
+<p class="growth-links">
   <a href="child.php?id=<?php echo (int)$childId; ?>&amp;ref=<?php echo growth_h($ref); ?>"><?php echo th('nav_back'); ?></a>
 </p>
 

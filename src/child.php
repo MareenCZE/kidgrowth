@@ -24,8 +24,8 @@ $reference = growth_reference($referenceId);
 $fullRange = isset($_GET['rozsah']) && $_GET['rozsah'] === 'vse';
 $smoothing = isset($_GET['vyhlazeni']) && $_GET['vyhlazeni'] === '1';
 
-$sex = $child['pohlavi'];
-$born = $child['datum_narozeni'];
+$sex = $child['sex'];
+$born = $child['birth_date'];
 $measurements = growth_measurements($childId);
 
 /* Split into per-metric series once; the charts and the table both need them.
@@ -35,22 +35,22 @@ $measurements = growth_measurements($childId);
    age" apart from "underweight". */
 $series = array('height' => array(), 'weight' => array(), 'bmi' => array(), 'wfh' => array());
 foreach ($measurements as $row) {
-    $age = growth_decimal_age($born, $row['datum']);
-    if ($row['vyska_cm'] !== null) {
-        $series['height'][] = array('age' => $age, 'value' => $row['vyska_cm'], 'date' => $row['datum']);
+    $age = growth_decimal_age($born, $row['date']);
+    if ($row['height_cm'] !== null) {
+        $series['height'][] = array('age' => $age, 'value' => $row['height_cm'], 'date' => $row['date']);
     }
-    if ($row['hmotnost_kg'] !== null) {
-        $series['weight'][] = array('age' => $age, 'value' => $row['hmotnost_kg'], 'date' => $row['datum']);
+    if ($row['weight_kg'] !== null) {
+        $series['weight'][] = array('age' => $age, 'value' => $row['weight_kg'], 'date' => $row['date']);
     }
-    if ($row['vyska_cm'] !== null && $row['hmotnost_kg'] !== null) {
-        $bmi = growth_bmi($row['vyska_cm'], $row['hmotnost_kg']);
+    if ($row['height_cm'] !== null && $row['weight_kg'] !== null) {
+        $bmi = growth_bmi($row['height_cm'], $row['weight_kg']);
         if ($bmi !== null) {
-            $series['bmi'][] = array('age' => $age, 'value' => $bmi, 'date' => $row['datum']);
+            $series['bmi'][] = array('age' => $age, 'value' => $bmi, 'date' => $row['date']);
         }
         $series['wfh'][] = array(
-            'age' => (float)$row['vyska_cm'],   /* the index here is the height */
-            'value' => $row['hmotnost_kg'],
-            'date' => $row['datum'],
+            'age' => (float)$row['height_cm'],   /* the index here is the height */
+            'value' => $row['weight_kg'],
+            'date' => $row['date'],
         );
     }
 }
@@ -59,7 +59,7 @@ usort($series['wfh'], function ($a, $b) {
     return $a['age'] <=> $b['age'];
 });
 
-$target = growth_target_height($child['vyska_otce_cm'], $child['vyska_matky_cm'], $sex);
+$target = growth_target_height($child['father_height_cm'], $child['mother_height_cm'], $sex);
 $projection = growth_channel_projection($born, $sex, $measurements, $referenceId);
 $velocities = growth_velocities($born, $measurements);
 $currentAge = growth_decimal_age($born, date('Y-m-d'));
@@ -90,12 +90,12 @@ if ($smoothing) {
     }
 }
 
-growth_head($child['jmeno'], $childId);
+growth_head($child['name'], $childId);
 ?>
 
-<h1><?php echo growth_h($child['jmeno']); ?></h1>
+<h1><?php echo growth_h($child['name']); ?></h1>
 <p class="growth-subtitle">
-  <?php echo th($sex === 'z' ? 'subtitle_born_f' : 'subtitle_born_m'); ?>
+  <?php echo th($sex === 'f' ? 'subtitle_born_f' : 'subtitle_born_m'); ?>
   <?php echo growth_h(growth_format_date($born)); ?>,
   <?php echo th('subtitle_now'); ?> <?php echo growth_h(growth_format_age($currentAge)); ?>
 </p>
@@ -332,8 +332,8 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
         </p>
         <p class="growth-note">
           <?php echo t('note_target_height', array(
-              'father' => growth_h(growth_num(growth_display_length($child['vyska_otce_cm']))),
-              'mother' => growth_h(growth_num(growth_display_length($child['vyska_matky_cm']))),
+              'father' => growth_h(growth_num(growth_display_length($child['father_height_cm']))),
+              'mother' => growth_h(growth_num(growth_display_length($child['mother_height_cm']))),
               'band' => growth_h(growth_num(growth_display_length($target['high'] - $target['low']))),
               'unit' => growth_length_unit(),
           )); ?>
@@ -364,19 +364,19 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
 
   <form method="post" action="save-measurement.php" class="growth-form growth-row">
     <?php echo growth_csrf_field(); ?>
-    <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
+    <input type="hidden" name="child_id" value="<?php echo (int)$childId; ?>">
     <input type="hidden" name="ref" value="<?php echo growth_h($referenceId); ?>">
     <label><?php echo th('label_date'); ?>
-      <input type="date" name="datum" value="<?php echo date('Y-m-d'); ?>" required
+      <input type="date" name="date" value="<?php echo date('Y-m-d'); ?>" required
              max="<?php echo date('Y-m-d'); ?>">
     </label>
     <?php $imperial = growth_units() === 'imperial'; ?>
     <label><?php echo th('label_height_cm'); ?> (<?php echo growth_length_unit(); ?>)
-      <input type="text" inputmode="<?php echo $imperial ? 'text' : 'decimal'; ?>" name="vyska"
+      <input type="text" inputmode="<?php echo $imperial ? 'text' : 'decimal'; ?>" name="height"
              placeholder="<?php echo $imperial ? th('placeholder_example_height_imperial') : th('placeholder_example_height'); ?>">
     </label>
     <label><?php echo th('label_weight_kg'); ?> (<?php echo growth_weight_unit(); ?>)
-      <input type="text" inputmode="decimal" name="hmotnost"
+      <input type="text" inputmode="decimal" name="weight"
              placeholder="<?php echo $imperial ? th('placeholder_example_weight_imperial') : th('placeholder_example_weight'); ?>">
     </label>
     <button type="submit"><?php echo th('button_save'); ?></button>
@@ -407,29 +407,29 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
       <tbody>
       <?php foreach (array_reverse($measurements) as $row): ?>
         <?php
-          $age = growth_decimal_age($born, $row['datum']);
-          $h = growth_evaluate($born, $sex, $row['datum'], 'height', $row['vyska_cm'], $referenceId);
-          $w = growth_evaluate($born, $sex, $row['datum'], 'weight', $row['hmotnost_kg'], $referenceId);
-          $bmiValue = growth_bmi($row['vyska_cm'], $row['hmotnost_kg']);
-          $b = growth_evaluate($born, $sex, $row['datum'], 'bmi', $bmiValue, $referenceId);
+          $age = growth_decimal_age($born, $row['date']);
+          $h = growth_evaluate($born, $sex, $row['date'], 'height', $row['height_cm'], $referenceId);
+          $w = growth_evaluate($born, $sex, $row['date'], 'weight', $row['weight_kg'], $referenceId);
+          $bmiValue = growth_bmi($row['height_cm'], $row['weight_kg']);
+          $b = growth_evaluate($born, $sex, $row['date'], 'bmi', $bmiValue, $referenceId);
         ?>
         <tr>
-          <td><?php echo growth_h(growth_format_date($row['datum'])); ?></td>
+          <td><?php echo growth_h(growth_format_date($row['date'])); ?></td>
           <td class="growth-muted"><?php echo growth_h(growth_format_age($age)); ?></td>
 
-          <td><?php echo $row['vyska_cm'] === null ? '' : growth_h(growth_num(growth_display_length($row['vyska_cm']))) . '&nbsp;' . growth_length_unit(); ?></td>
-          <td><?php echo $row['vyska_cm'] === null ? '' : growth_format_percentile($h['percentile'], $h['z'], $referenceId, 'height'); ?></td>
+          <td><?php echo $row['height_cm'] === null ? '' : growth_h(growth_num(growth_display_length($row['height_cm']))) . '&nbsp;' . growth_length_unit(); ?></td>
+          <td><?php echo $row['height_cm'] === null ? '' : growth_format_percentile($h['percentile'], $h['z'], $referenceId, 'height'); ?></td>
           <td class="growth-muted"><?php echo $h['z'] === null ? '' : growth_h(growth_num($h['z'], 2)); ?></td>
 
-          <td><?php echo $row['hmotnost_kg'] === null ? '' : growth_h(growth_num(growth_display_weight($row['hmotnost_kg']), growth_weight_decimals())) . '&nbsp;' . growth_weight_unit(); ?></td>
-          <td><?php echo $row['hmotnost_kg'] === null ? '' : growth_format_percentile($w['percentile'], $w['z'], $referenceId, 'weight'); ?></td>
+          <td><?php echo $row['weight_kg'] === null ? '' : growth_h(growth_num(growth_display_weight($row['weight_kg']), growth_weight_decimals())) . '&nbsp;' . growth_weight_unit(); ?></td>
+          <td><?php echo $row['weight_kg'] === null ? '' : growth_format_percentile($w['percentile'], $w['z'], $referenceId, 'weight'); ?></td>
           <td class="growth-muted"><?php echo $w['z'] === null ? '' : growth_h(growth_num($w['z'], 2)); ?></td>
 
           <td><?php echo $bmiValue === null ? '' : growth_h(growth_num($bmiValue, 1)); ?></td>
           <td><?php echo $bmiValue === null ? '' : growth_format_percentile($b['percentile'], $b['z'], $referenceId, 'bmi'); ?></td>
 
           <td class="growth-muted">
-            <?php if (isset($velocityByDate[$row['datum']])): $v = $velocityByDate[$row['datum']]; ?>
+            <?php if (isset($velocityByDate[$row['date']])): $v = $velocityByDate[$row['date']]; ?>
               <span title="<?php echo th('velocity_since', array(
                   'date' => growth_h(growth_format_date($v['from_date'])),
                   'span' => growth_h(growth_format_years_span($v['years'])),
@@ -439,7 +439,7 @@ $velocityChart = growth_velocity_chart_svg($referenceId, $sex, $velocities, arra
             <?php endif; ?>
           </td>
           <td>
-            <a href="delete-measurement.php?dite_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo growth_h($referenceId); ?>"
+            <a href="delete-measurement.php?child_id=<?php echo (int)$childId; ?>&amp;id=<?php echo (int)$row['id']; ?>&amp;ref=<?php echo growth_h($referenceId); ?>"
                class="growth-delete" title="<?php echo th('button_delete'); ?>">&times;</a>
           </td>
         </tr>

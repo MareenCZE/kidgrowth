@@ -27,8 +27,8 @@ function growth_test_json_cleanup($path)
 function test_json_child_upsert_is_idempotent_by_name()
 {
     $path = growth_test_json_fixture();
-    $id1 = growth_storage_child_upsert('Jana Novakova', 'z', '2018-01-01', null, null, 0);
-    $id2 = growth_storage_child_upsert('Jana Novakova', 'z', '2018-01-01', null, null, 0);
+    $id1 = growth_storage_child_upsert('Jana Novakova', 'f', '2018-01-01', null, null, 0);
+    $id2 = growth_storage_child_upsert('Jana Novakova', 'f', '2018-01-01', null, null, 0);
     assert_equals($id1, $id2, 'same name upserts to the same id');
     assert_equals(1, count(growth_storage_children()), 'only one child was actually created');
     growth_test_json_cleanup($path);
@@ -42,8 +42,8 @@ function test_json_measurement_null_vs_zero()
 
     $rows = growth_storage_measurements($id);
     assert_equals(1, count($rows));
-    assert_close(65.0, $rows[0]['vyska_cm'], 1e-9, 'height stored');
-    assert_null($rows[0]['hmotnost_kg'], 'a missing weight must stay null, not become 0.0');
+    assert_close(65.0, $rows[0]['height_cm'], 1e-9, 'height stored');
+    assert_null($rows[0]['weight_kg'], 'a missing weight must stay null, not become 0.0');
     growth_test_json_cleanup($path);
 }
 
@@ -56,8 +56,8 @@ function test_json_measurement_save_upserts_on_date()
 
     $rows = growth_storage_measurements($id);
     assert_equals(1, count($rows), 'saving the same date again updates, does not duplicate');
-    assert_close(66.0, $rows[0]['vyska_cm'], 1e-9);
-    assert_equals('corrected', $rows[0]['poznamka']);
+    assert_close(66.0, $rows[0]['height_cm'], 1e-9);
+    assert_equals('corrected', $rows[0]['note']);
     growth_test_json_cleanup($path);
 }
 
@@ -122,7 +122,7 @@ function test_json_measurement_delete_revival_via_save()
     growth_storage_measurement_save($id, '2018-06-01', 67.0, 7.5, null);
     $active = growth_storage_measurements($id);
     assert_equals(1, count($active), 'exactly one active row for that date');
-    assert_close(67.0, $active[0]['vyska_cm'], 1e-9);
+    assert_close(67.0, $active[0]['height_cm'], 1e-9);
     assert_equals(0, count(growth_storage_measurements_deleted($id)), 'nothing left in the trash for this child');
     growth_test_json_cleanup($path);
 }

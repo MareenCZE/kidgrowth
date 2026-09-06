@@ -86,7 +86,7 @@ function test_bmi()
 function test_target_height_both_sexes()
 {
     $boy = growth_target_height(180.0, 165.0, 'm');
-    $girl = growth_target_height(180.0, 165.0, 'z');
+    $girl = growth_target_height(180.0, 165.0, 'f');
     /* Same parents, but the boy's target sits exactly 13 cm above the girl's -
        that shift is the whole content of the sex difference in this formula. */
     assert_close(13.0, $boy['mid'] - $girl['mid'], 1e-9, 'sex shift');
@@ -107,8 +107,8 @@ function test_target_height_both_sexes()
 function test_channel_projection_refuses_past_reference_ceiling()
 {
     $measurements = array(
-        array('datum' => '2020-01-01', 'vyska_cm' => 90.0, 'hmotnost_kg' => 13.0),
-        array('datum' => '2021-01-01', 'vyska_cm' => 96.0, 'hmotnost_kg' => 14.0),
+        array('date' => '2020-01-01', 'height_cm' => 90.0, 'weight_kg' => 13.0),
+        array('date' => '2021-01-01', 'height_cm' => 96.0, 'weight_kg' => 14.0),
     );
     $result = growth_channel_projection('2018-01-01', 'm', $measurements, 'cdc', 30.0);
     assert_null($result, 'must refuse rather than extrapolate past the reference ceiling');
@@ -117,9 +117,9 @@ function test_channel_projection_refuses_past_reference_ceiling()
 function test_channel_projection_succeeds_within_reference_range()
 {
     $measurements = array(
-        array('datum' => '2020-01-01', 'vyska_cm' => 90.0, 'hmotnost_kg' => 13.0),
-        array('datum' => '2021-01-01', 'vyska_cm' => 96.0, 'hmotnost_kg' => 14.0),
-        array('datum' => '2022-01-01', 'vyska_cm' => 102.0, 'hmotnost_kg' => 16.0),
+        array('date' => '2020-01-01', 'height_cm' => 90.0, 'weight_kg' => 13.0),
+        array('date' => '2021-01-01', 'height_cm' => 96.0, 'weight_kg' => 14.0),
+        array('date' => '2022-01-01', 'height_cm' => 102.0, 'weight_kg' => 16.0),
     );
     $result = growth_channel_projection('2018-01-01', 'm', $measurements, 'cdc', 18.0);
     assert_true($result !== null, 'a projection within the reference range should succeed');

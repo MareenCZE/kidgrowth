@@ -57,7 +57,7 @@ function growth_csrf_check()
     if ($expected === '' || !hash_equals($expected, $token)) {
         header('HTTP/1.1 403 Forbidden');
         header('Content-Type: text/plain; charset=utf-8');
-        echo "Neplatny nebo chybejici bezpecnostni token. Vratte se zpet a zkuste to znovu.\n";
+        echo "Neplatny nebo chybejici bezpecnostni token. Vratte se back a zkuste to znovu.\n";
         exit;
     }
 }

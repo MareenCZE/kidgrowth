@@ -114,7 +114,7 @@ function growth_installed_reference_ids()
 function growth_reference_ids_for($child)
 {
     $ids = growth_installed_reference_ids();
-    $breastfed = !empty($child['kojeno']);
+    $breastfed = !empty($child['breastfed']);
     if ($breastfed) {
         return $ids;
     }
@@ -515,15 +515,15 @@ function growth_channel_projection($birthDate, $sex, $measurements, $referenceId
     /* newest first, keep those with a height, take up to four */
     $recent = array();
     foreach (array_reverse($measurements) as $m) {
-        if ($m['vyska_cm'] === null) {
+        if ($m['height_cm'] === null) {
             continue;
         }
-        $age = growth_decimal_age($birthDate, $m['datum']);
+        $age = growth_decimal_age($birthDate, $m['date']);
         $lms = growth_lms_at($rows, $age);
         if (!$lms) {
             continue;
         }
-        $z = growth_zscore((float)$m['vyska_cm'], $lms);
+        $z = growth_zscore((float)$m['height_cm'], $lms);
         if ($z === null) {
             continue;
         }
@@ -818,13 +818,13 @@ function growth_velocities($birthDate, $measurements)
 
     $points = array();
     foreach ($measurements as $m) {
-        if ($m['vyska_cm'] === null) {
+        if ($m['height_cm'] === null) {
             continue;
         }
         $points[] = array(
-            'age' => growth_decimal_age($birthDate, $m['datum']),
-            'date' => $m['datum'],
-            'height' => (float)$m['vyska_cm'],
+            'age' => growth_decimal_age($birthDate, $m['date']),
+            'date' => $m['date'],
+            'height' => (float)$m['height_cm'],
         );
     }
 

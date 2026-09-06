@@ -44,7 +44,7 @@ function growth_head($title, $childId = null)
                 $current ? ' growth-active' : '',
                 (int)$child['id'],
                 isset($_GET['ref']) ? '&amp;ref=' . growth_h(growth_selected_reference()) : '',
-                growth_h($child['jmeno'])
+                growth_h($child['name'])
             );
         }
         echo '</nav>';

@@ -147,7 +147,7 @@ function growth_measurements_deleted($childId)
 /**
  * Inserts, updates, or revives the measurement for one child on one date.
  *
- * Keyed on (dite_id, datum) regardless of that row's soft-delete state: saving
+ * Keyed on (child_id, date) regardless of that row's soft-delete state: saving
  * a date that was previously deleted revives it rather than colliding with it.
  */
 function growth_measurement_save($childId, $date, $heightCm, $weightKg, $note)

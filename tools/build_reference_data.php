@@ -38,7 +38,7 @@ const WHO_FILES = [
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/length-height-for-age/expandable-tables/lhfa-boys-zscore-expanded-tables.xlsx', 'day'],
             ['https://cdn.who.int/media/docs/default-source/child-growth/growth-reference-5-19-years/height-for-age-(5-19-years)/hfa-boys-z-who-2007-exp.xlsx', 'month'],
         ],
-        'z' => [
+        'f' => [
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/length-height-for-age/expandable-tables/lhfa-girls-zscore-expanded-tables.xlsx', 'day'],
             ['https://cdn.who.int/media/docs/default-source/child-growth/growth-reference-5-19-years/height-for-age-(5-19-years)/hfa-girls-z-who-2007-exp.xlsx', 'month'],
         ],
@@ -52,7 +52,7 @@ const WHO_FILES = [
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-age/expanded-tables/wfa-boys-zscore-expanded-tables.xlsx', 'day'],
             ['https://cdn.who.int/media/docs/default-source/child-growth/growth-reference-5-19-years/weight-for-age-(5-10-years)/hfa-boys-z-who-2007-exp_0ff9c43c-8cc0-4c23-9fc6-81290675e08b.xlsx?sfvrsn=b3ca0d6f_4', 'month'],
         ],
-        'z' => [
+        'f' => [
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-age/expanded-tables/wfa-girls-zscore-expanded-tables.xlsx', 'day'],
             ['https://cdn.who.int/media/docs/default-source/child-growth/growth-reference-5-19-years/weight-for-age-(5-10-years)/hfa-girls-z-who-2007-exp_7ea58763-36a2-436d-bef0-7fcfbadd2820.xlsx?sfvrsn=6ede55a4_4', 'month'],
         ],
@@ -62,7 +62,7 @@ const WHO_FILES = [
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/body-mass-index-for-age/expanded-tables/bfa-boys-zscore-expanded-tables.xlsx', 'day'],
             ['https://cdn.who.int/media/docs/default-source/child-growth/growth-reference-5-19-years/bmi-for-age-(5-19-years)/bmi-boys-z-who-2007-exp.xlsx?sfvrsn=a84bca93_2', 'month'],
         ],
-        'z' => [
+        'f' => [
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/body-mass-index-for-age/expanded-tables/bfa-girls-zscore-expanded-tables.xlsx', 'day'],
             ['https://cdn.who.int/media/docs/default-source/child-growth/growth-reference-5-19-years/bmi-for-age-(5-19-years)/bmi-girls-z-who-2007-exp.xlsx?sfvrsn=79222875_2', 'month'],
         ],
@@ -75,7 +75,7 @@ const WHO_FILES = [
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-length-height/expanded-tables/wfl-boys-zscore-expanded-table.xlsx', 'cm'],
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-length-height/expanded-tables/wfh-boys-zscore-expanded-tables.xlsx', 'cm'],
         ],
-        'z' => [
+        'f' => [
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-length-height/expanded-tables/wfl-girls-zscore-expanded-table.xlsx', 'cm'],
             ['https://cdn.who.int/media/docs/default-source/child-growth/child-growth-standards/indicators/weight-for-length-height/expanded-tables/wfh-girls-zscore-expanded-tables.xlsx', 'cm'],
         ],
@@ -87,11 +87,11 @@ const WHO_FILES = [
 const BREASTFED_CHARTS = [
     'height' => [
         'm' => 'https://szu.gov.cz/wp-content/uploads/2022/12/TELESNA_DELKA_chlapci.pdf',
-        'z' => 'https://szu.gov.cz/wp-content/uploads/2022/12/TELESNA_DELKA_divky.pdf',
+        'f' => 'https://szu.gov.cz/wp-content/uploads/2022/12/TELESNA_DELKA_divky.pdf',
     ],
     'weight' => [
         'm' => 'https://szu.gov.cz/wp-content/uploads/2024/04/hmotnost_chlapci.pdf',
-        'z' => 'https://szu.gov.cz/wp-content/uploads/2024/04/hmotnost_divky.pdf',
+        'f' => 'https://szu.gov.cz/wp-content/uploads/2024/04/hmotnost_divky.pdf',
     ],
 ];
 
@@ -393,7 +393,7 @@ function fit_lms_pairs(array $pairs, float $median): array
  */
 function parse_cdc_csv(string $path, string $indexColumn, float $divisor): array
 {
-    $rows = ['m' => [], 'z' => []];
+    $rows = ['m' => [], 'f' => []];
     $fh = fopen($path, 'r');
     $header = null;
     while (($line = fgetcsv($fh)) !== false) {
@@ -409,7 +409,7 @@ function parse_cdc_csv(string $path, string $indexColumn, float $divisor): array
         $row = @array_combine($header, $line);
         if (!$row || !isset($row['sex'], $row[$indexColumn], $row['l'], $row['m'], $row['s'])) { continue; }
         if (!is_numeric($row[$indexColumn])) { continue; }
-        $sex = ((int)$row['sex'] === 1) ? 'm' : 'z';
+        $sex = ((int)$row['sex'] === 1) ? 'm' : 'f';
         $rows[$sex][] = [
             'age' => round(((float)$row[$indexColumn]) / $divisor, 6),
             'l' => (float)$row['l'],
@@ -966,7 +966,7 @@ function parse_polish_preschool(string $path): array
     $result = [];
 
     /* the boys' table comes before the girls' */
-    $sexes = ['m', 'z'];
+    $sexes = ['m', 'f'];
     $found = 0;
     foreach ($tables as $rows) {
         if (!$rows || ($rows[0][0] ?? '') !== 'Age (years)') {
@@ -1038,7 +1038,7 @@ function parse_polish_school(string $path): array
         foreach ($rows as $row) {
             if (count($row) === 1) {
                 if ($row[0] === 'Boys') { $sex = 'm'; }
-                elseif ($row[0] === 'Girls') { $sex = 'z'; }
+                elseif ($row[0] === 'Girls') { $sex = 'f'; }
                 continue;
             }
             if ($sex === null || count($row) < $offset + 3 || !is_numeric($row[0])) {
@@ -1092,14 +1092,14 @@ fwrite(STDERR, '  pages with text: ' . count($pages) . "\n");
 
 $cavSpec = [
     ['metric' => 'height', 'sex' => 'm', 'caption' => 'Height (cm)',      'marker' => 'Boys'],
-    ['metric' => 'height', 'sex' => 'z', 'caption' => 'Height (cm)',      'marker' => 'Girls'],
+    ['metric' => 'height', 'sex' => 'f', 'caption' => 'Height (cm)',      'marker' => 'Girls'],
     ['metric' => 'weight', 'sex' => 'm', 'caption' => 'Body weight (kg)', 'marker' => 'Boys'],
-    ['metric' => 'weight', 'sex' => 'z', 'caption' => 'Body weight (kg)', 'marker' => 'Girls'],
+    ['metric' => 'weight', 'sex' => 'f', 'caption' => 'Body weight (kg)', 'marker' => 'Girls'],
     ['metric' => 'bmi',    'sex' => 'm', 'caption' => 'Body Mass Index',  'marker' => 'Boys'],
-    ['metric' => 'bmi',    'sex' => 'z', 'caption' => 'Body Mass Index',  'marker' => 'Girls'],
+    ['metric' => 'bmi',    'sex' => 'f', 'caption' => 'Body Mass Index',  'marker' => 'Girls'],
     /* indexed by height in centimetres rather than by age */
     ['metric' => 'wfh',    'sex' => 'm', 'caption' => 'Weight-for-height (kg)', 'marker' => 'Boys'],
-    ['metric' => 'wfh',    'sex' => 'z', 'caption' => 'Weight-for-height (kg)', 'marker' => 'Girls'],
+    ['metric' => 'wfh',    'sex' => 'f', 'caption' => 'Weight-for-height (kg)', 'marker' => 'Girls'],
 ];
 
 $cav = [];
@@ -1197,14 +1197,14 @@ TXT,
 fwrite(STDERR, "CDC 2000 reference\n");
 $cdc = [];
 foreach (CDC_FILES as $metric => $sources) {
-    $merged = ['m' => [], 'z' => []];
+    $merged = ['m' => [], 'f' => []];
     foreach ($sources as [$url, $indexColumn, $divisor]) {
         $parsed = parse_cdc_csv(fetch_cached($url, $cacheDir), $indexColumn, $divisor);
-        foreach (['m', 'z'] as $sex) {
+        foreach (['m', 'f'] as $sex) {
             $merged[$sex] = array_merge($merged[$sex], $parsed[$sex]);
         }
     }
-    foreach (['m', 'z'] as $sex) {
+    foreach (['m', 'f'] as $sex) {
         $cdc[$metric][$sex] = normalise_rows($merged[$sex]);
         fwrite(STDERR, sprintf("  %-6s %s: %3d age rows\n", $metric, $sex, count($cdc[$metric][$sex])));
     }
@@ -1280,7 +1280,7 @@ $school = parse_polish_school(fetch_cached(POLISH_SCHOOL_URL, $cacheDir));
 
 $pol = [];
 foreach (['height', 'weight', 'bmi'] as $metric) {
-    foreach (['m', 'z'] as $sex) {
+    foreach (['m', 'f'] as $sex) {
         $merged = array_merge(
             $preschool[$metric][$sex] ?? [],
             $school[$metric][$sex] ?? []
@@ -1300,7 +1300,7 @@ foreach (['height', 'weight', 'bmi'] as $metric) {
    this reference could be discontinuous. Report the step at the seam rather
    than assume it is smooth. */
 foreach (['height', 'weight', 'bmi'] as $metric) {
-    foreach (['m', 'z'] as $sex) {
+    foreach (['m', 'f'] as $sex) {
         $before = null;
         $after = null;
         foreach ($pol[$metric][$sex] as $row) {
@@ -1362,7 +1362,7 @@ fwrite(STDERR, "Czech breastfed-infant reference\n");
    ages so the check involves no interpolation of the reference at all. */
 $cavByMonth = [];
 foreach (['height', 'weight'] as $metric) {
-    foreach (['m', 'z'] as $sex) {
+    foreach (['m', 'f'] as $sex) {
         foreach ($cav[$metric][$sex] as $row) {
             if ($row['age'] > 1.0001) {
                 continue;

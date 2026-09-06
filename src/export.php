@@ -34,21 +34,21 @@ header('Content-Disposition: attachment; filename="' . $filename . '"');
 $out = fopen('php://output', 'w');
 /* A UTF-8 BOM, so Excel opens Czech names correctly instead of as mojibake. */
 fwrite($out, "\xEF\xBB\xBF");
-fputcsv($out, array('dite', 'pohlavi', 'narozeni', 'otec_cm', 'matka_cm',
-                    'datum', 'vyska_cm', 'hmotnost_kg', 'poznamka'));
+fputcsv($out, array('child', 'sex', 'born', 'otec_cm', 'matka_cm',
+                    'date', 'height_cm', 'weight_kg', 'note'));
 
 foreach ($children as $child) {
     foreach (growth_measurements($child['id']) as $row) {
         fputcsv($out, array(
-            $child['jmeno'],
-            $child['pohlavi'],
-            $child['datum_narozeni'],
-            $child['vyska_otce_cm'],
-            $child['vyska_matky_cm'],
-            $row['datum'],
-            $row['vyska_cm'],
-            $row['hmotnost_kg'],
-            $row['poznamka'],
+            $child['name'],
+            $child['sex'],
+            $child['birth_date'],
+            $child['father_height_cm'],
+            $child['mother_height_cm'],
+            $row['date'],
+            $row['height_cm'],
+            $row['weight_kg'],
+            $row['note'],
         ));
     }
 }

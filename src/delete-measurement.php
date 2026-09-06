@@ -10,7 +10,7 @@
  */
 require_once __DIR__ . '/shell.inc';
 
-$childId = isset($_GET['dite_id']) ? (int)$_GET['dite_id'] : 0;
+$childId = isset($_GET['child_id']) ? (int)$_GET['child_id'] : 0;
 $child = growth_child($childId);
 if (!$child) {
     header('Location: index.php');
@@ -38,8 +38,8 @@ growth_head(t('page_title_delete_measurement'), $childId);
 <h1><?php echo th('heading_delete_measurement'); ?></h1>
 <p>
   <?php echo t('confirm_delete_measurement', array(
-      'name' => '<strong>' . growth_h($child['jmeno']) . '</strong>',
-      'date' => '<strong>' . growth_h(growth_format_date($measurement['datum'])) . '</strong>',
+      'name' => '<strong>' . growth_h($child['name']) . '</strong>',
+      'date' => '<strong>' . growth_h(growth_format_date($measurement['date'])) . '</strong>',
   )); ?>
 </p>
 <p class="growth-note">
@@ -48,8 +48,8 @@ growth_head(t('page_title_delete_measurement'), $childId);
 
 <form method="post" action="save-measurement.php" class="growth-form">
   <?php echo growth_csrf_field(); ?>
-  <input type="hidden" name="akce" value="smazat">
-  <input type="hidden" name="dite_id" value="<?php echo (int)$childId; ?>">
+  <input type="hidden" name="action" value="delete">
+  <input type="hidden" name="child_id" value="<?php echo (int)$childId; ?>">
   <input type="hidden" name="id" value="<?php echo (int)$measurementId; ?>">
   <input type="hidden" name="ref" value="<?php echo growth_h($ref); ?>">
   <button type="submit"><?php echo th('button_delete'); ?></button>

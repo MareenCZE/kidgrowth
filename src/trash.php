@@ -12,12 +12,12 @@ require_once __DIR__ . '/shell.inc';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     growth_csrf_check();
-    $action = isset($_POST['akce']) ? (string)$_POST['akce'] : '';
+    $action = isset($_POST['action']) ? (string)$_POST['action'] : '';
     if ($action === 'obnovit_dite') {
         growth_child_restore(isset($_POST['id']) ? (int)$_POST['id'] : 0);
     } elseif ($action === 'obnovit_mereni') {
         growth_measurement_restore(
-            isset($_POST['dite_id']) ? (int)$_POST['dite_id'] : 0,
+            isset($_POST['child_id']) ? (int)$_POST['child_id'] : 0,
             isset($_POST['id']) ? (int)$_POST['id'] : 0
         );
     }
@@ -53,11 +53,11 @@ growth_head(t('nav_trash'));
   <ul class="growth-list">
     <?php foreach ($deletedChildren as $child): ?>
       <li>
-        <?php echo growth_h($child['jmeno']); ?>
-        <span class="growth-muted"><?php echo th('trash_deleted_at', array('when' => growth_h($child['smazano']))); ?></span>
+        <?php echo growth_h($child['name']); ?>
+        <span class="growth-muted"><?php echo th('trash_deleted_at', array('when' => growth_h($child['deleted_at']))); ?></span>
         <form method="post">
           <?php echo growth_csrf_field(); ?>
-          <input type="hidden" name="akce" value="obnovit_dite">
+          <input type="hidden" name="action" value="obnovit_dite">
           <input type="hidden" name="id" value="<?php echo (int)$child['id']; ?>">
           <button type="submit"><?php echo th('button_restore'); ?></button>
         </form>
@@ -71,16 +71,16 @@ growth_head(t('nav_trash'));
   <p class="growth-nodata"><?php echo th('trash_none'); ?></p>
 <?php else: ?>
   <?php foreach ($deletedMeasurements as $group): ?>
-    <h3><?php echo growth_h($group['child']['jmeno']); ?></h3>
+    <h3><?php echo growth_h($group['child']['name']); ?></h3>
     <ul class="growth-list">
       <?php foreach ($group['rows'] as $row): ?>
         <li>
-          <?php echo growth_h(growth_format_date($row['datum'])); ?>
-          <span class="growth-muted"><?php echo th('trash_deleted_at', array('when' => growth_h($row['smazano']))); ?></span>
+          <?php echo growth_h(growth_format_date($row['date'])); ?>
+          <span class="growth-muted"><?php echo th('trash_deleted_at', array('when' => growth_h($row['deleted_at']))); ?></span>
           <form method="post">
             <?php echo growth_csrf_field(); ?>
-            <input type="hidden" name="akce" value="obnovit_mereni">
-            <input type="hidden" name="dite_id" value="<?php echo (int)$group['child']['id']; ?>">
+            <input type="hidden" name="action" value="obnovit_mereni">
+            <input type="hidden" name="child_id" value="<?php echo (int)$group['child']['id']; ?>">
             <input type="hidden" name="id" value="<?php echo (int)$row['id']; ?>">
             <button type="submit"><?php echo th('button_restore'); ?></button>
           </form>

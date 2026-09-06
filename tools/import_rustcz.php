@@ -117,7 +117,7 @@ function read_export($path)
         $child['name'] = trim($m[1]);
     }
     if (preg_match('~Pohlav.*?:\s*(\S+)~u', $text, $m)) {
-        $child['sex'] = (stripos($m[1], 'chlapec') !== false) ? 'm' : 'z';
+        $child['sex'] = (stripos($m[1], 'chlapec') !== false) ? 'm' : 'f';
     }
     if (preg_match('~narozen.:\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})~u', $text, $m)) {
         $child['born'] = sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);

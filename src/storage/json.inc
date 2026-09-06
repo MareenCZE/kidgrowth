@@ -96,10 +96,10 @@ function growth_json_next_id($rows)
 function growth_storage_children()
 {
     $rows = array_values(array_filter(growth_json_read()['children'], function ($c) {
-        return empty($c['smazano']);
+        return empty($c['deleted_at']);
     }));
     usort($rows, function ($a, $b) {
-        return [$a['poradi'], $a['datum_narozeni']] <=> [$b['poradi'], $b['datum_narozeni']];
+        return [$a['position'], $a['birth_date']] <=> [$b['position'], $b['birth_date']];
     });
     return $rows;
 }
@@ -107,10 +107,10 @@ function growth_storage_children()
 function growth_storage_children_deleted()
 {
     $rows = array_values(array_filter(growth_json_read()['children'], function ($c) {
-        return !empty($c['smazano']);
+        return !empty($c['deleted_at']);
     }));
     usort($rows, function ($a, $b) {
-        return strcmp($b['smazano'], $a['smazano']);
+        return strcmp($b['deleted_at'], $a['deleted_at']);
     });
     return $rows;
 }
@@ -118,7 +118,7 @@ function growth_storage_children_deleted()
 function growth_storage_child($id)
 {
     foreach (growth_json_read()['children'] as $c) {
-        if ((int)$c['id'] === $id && empty($c['smazano'])) {
+        if ((int)$c['id'] === $id && empty($c['deleted_at'])) {
             return $c;
         }
     }
@@ -129,7 +129,7 @@ function growth_storage_child_deleted_at($id)
 {
     foreach (growth_json_read()['children'] as $c) {
         if ((int)$c['id'] === $id) {
-            return $c['smazano'] ?: null;
+            return $c['deleted_at'] ?: null;
         }
     }
     return null;
@@ -140,16 +140,16 @@ function growth_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $
     $id = null;
     growth_json_write(function ($data) use ($name, $sex, $born, $fatherCm, $motherCm, $breastfed, &$id) {
         foreach ($data['children'] as $c) {
-            if ($c['jmeno'] === $name && empty($c['smazano'])) {
+            if ($c['name'] === $name && empty($c['deleted_at'])) {
                 $id = (int)$c['id'];
                 return $data;
             }
         }
         $id = growth_json_next_id($data['children']);
         $data['children'][] = array(
-            'id' => $id, 'jmeno' => $name, 'pohlavi' => $sex, 'datum_narozeni' => $born,
-            'vyska_otce_cm' => $fatherCm, 'vyska_matky_cm' => $motherCm, 'poradi' => 0,
-            'kojeno' => $breastfed, 'smazano' => null,
+            'id' => $id, 'name' => $name, 'sex' => $sex, 'birth_date' => $born,
+            'father_height_cm' => $fatherCm, 'mother_height_cm' => $motherCm, 'position' => 0,
+            'breastfed' => $breastfed, 'deleted_at' => null,
         );
         return $data;
     });
@@ -162,12 +162,12 @@ function growth_storage_child_update($id, $name, $sex, $born, $fatherCm, $mother
     growth_json_write(function ($data) use ($id, $name, $sex, $born, $fatherCm, $motherCm, $breastfed, &$ok) {
         foreach ($data['children'] as &$c) {
             if ((int)$c['id'] === $id) {
-                $c['jmeno'] = $name;
-                $c['pohlavi'] = $sex;
-                $c['datum_narozeni'] = $born;
-                $c['vyska_otce_cm'] = $fatherCm;
-                $c['vyska_matky_cm'] = $motherCm;
-                $c['kojeno'] = $breastfed;
+                $c['name'] = $name;
+                $c['sex'] = $sex;
+                $c['birth_date'] = $born;
+                $c['father_height_cm'] = $fatherCm;
+                $c['mother_height_cm'] = $motherCm;
+                $c['breastfed'] = $breastfed;
                 $ok = true;
             }
         }
@@ -182,8 +182,8 @@ function growth_storage_child_delete($id, $when)
     $ok = false;
     growth_json_write(function ($data) use ($id, $when, &$ok) {
         foreach ($data['children'] as &$c) {
-            if ((int)$c['id'] === $id && empty($c['smazano'])) {
-                $c['smazano'] = $when;
+            if ((int)$c['id'] === $id && empty($c['deleted_at'])) {
+                $c['deleted_at'] = $when;
                 $ok = true;
             }
         }
@@ -198,8 +198,8 @@ function growth_storage_child_restore($id)
     $ok = false;
     growth_json_write(function ($data) use ($id, &$ok) {
         foreach ($data['children'] as &$c) {
-            if ((int)$c['id'] === $id && !empty($c['smazano'])) {
-                $c['smazano'] = null;
+            if ((int)$c['id'] === $id && !empty($c['deleted_at'])) {
+                $c['deleted_at'] = null;
                 $ok = true;
             }
         }
@@ -214,10 +214,10 @@ function growth_storage_child_restore($id)
 function growth_storage_measurements($childId)
 {
     $rows = array_values(array_filter(growth_json_read()['measurements'], function ($m) use ($childId) {
-        return (int)$m['dite_id'] === $childId && empty($m['smazano']);
+        return (int)$m['child_id'] === $childId && empty($m['deleted_at']);
     }));
     usort($rows, function ($a, $b) {
-        return strcmp($a['datum'], $b['datum']);
+        return strcmp($a['date'], $b['date']);
     });
     return $rows;
 }
@@ -225,10 +225,10 @@ function growth_storage_measurements($childId)
 function growth_storage_measurements_deleted($childId)
 {
     $rows = array_values(array_filter(growth_json_read()['measurements'], function ($m) use ($childId) {
-        return (int)$m['dite_id'] === $childId && !empty($m['smazano']);
+        return (int)$m['child_id'] === $childId && !empty($m['deleted_at']);
     }));
     usort($rows, function ($a, $b) {
-        return strcmp($b['smazano'], $a['smazano']);
+        return strcmp($b['deleted_at'], $a['deleted_at']);
     });
     return $rows;
 }
@@ -237,19 +237,19 @@ function growth_storage_measurement_save($childId, $date, $heightCm, $weightKg, 
 {
     growth_json_write(function ($data) use ($childId, $date, $heightCm, $weightKg, $note) {
         foreach ($data['measurements'] as &$m) {
-            if ((int)$m['dite_id'] === $childId && $m['datum'] === $date) {
-                $m['vyska_cm'] = $heightCm;
-                $m['hmotnost_kg'] = $weightKg;
-                $m['poznamka'] = $note;
-                $m['smazano'] = null;
+            if ((int)$m['child_id'] === $childId && $m['date'] === $date) {
+                $m['height_cm'] = $heightCm;
+                $m['weight_kg'] = $weightKg;
+                $m['note'] = $note;
+                $m['deleted_at'] = null;
                 return $data;
             }
         }
         unset($m);
         $id = growth_json_next_id($data['measurements']);
         $data['measurements'][] = array(
-            'id' => $id, 'dite_id' => $childId, 'datum' => $date,
-            'vyska_cm' => $heightCm, 'hmotnost_kg' => $weightKg, 'poznamka' => $note, 'smazano' => null,
+            'id' => $id, 'child_id' => $childId, 'date' => $date,
+            'height_cm' => $heightCm, 'weight_kg' => $weightKg, 'note' => $note, 'deleted_at' => null,
         );
         return $data;
     });
@@ -261,8 +261,8 @@ function growth_storage_measurement_delete($childId, $id, $when)
     $ok = false;
     growth_json_write(function ($data) use ($childId, $id, $when, &$ok) {
         foreach ($data['measurements'] as &$m) {
-            if ((int)$m['id'] === $id && (int)$m['dite_id'] === $childId && empty($m['smazano'])) {
-                $m['smazano'] = $when;
+            if ((int)$m['id'] === $id && (int)$m['child_id'] === $childId && empty($m['deleted_at'])) {
+                $m['deleted_at'] = $when;
                 $ok = true;
             }
         }
@@ -277,8 +277,8 @@ function growth_storage_measurement_restore($childId, $id)
     $ok = false;
     growth_json_write(function ($data) use ($childId, $id, &$ok) {
         foreach ($data['measurements'] as &$m) {
-            if ((int)$m['id'] === $id && (int)$m['dite_id'] === $childId && !empty($m['smazano'])) {
-                $m['smazano'] = null;
+            if ((int)$m['id'] === $id && (int)$m['child_id'] === $childId && !empty($m['deleted_at'])) {
+                $m['deleted_at'] = null;
                 $ok = true;
             }
         }
@@ -292,8 +292,8 @@ function growth_storage_measurements_delete_for_child($childId, $when)
 {
     growth_json_write(function ($data) use ($childId, $when) {
         foreach ($data['measurements'] as &$m) {
-            if ((int)$m['dite_id'] === $childId && empty($m['smazano'])) {
-                $m['smazano'] = $when;
+            if ((int)$m['child_id'] === $childId && empty($m['deleted_at'])) {
+                $m['deleted_at'] = $when;
             }
         }
         unset($m);
@@ -306,8 +306,8 @@ function growth_storage_measurements_restore_for_child($childId, $when)
 {
     growth_json_write(function ($data) use ($childId, $when) {
         foreach ($data['measurements'] as &$m) {
-            if ((int)$m['dite_id'] === $childId && isset($m['smazano']) && $m['smazano'] === $when) {
-                $m['smazano'] = null;
+            if ((int)$m['child_id'] === $childId && isset($m['deleted_at']) && $m['deleted_at'] === $when) {
+                $m['deleted_at'] = null;
             }
         }
         unset($m);

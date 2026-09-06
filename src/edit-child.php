@@ -14,12 +14,12 @@ if (!$child) {
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     growth_csrf_check();
-    $name = trim((string)$_POST['jmeno']);
-    $sex = ($_POST['pohlavi'] === 'z') ? 'z' : 'm';
-    $born = trim((string)$_POST['narozeni']);
-    $father = growth_parse_length_input($_POST['otec']);
-    $mother = growth_parse_length_input($_POST['matka']);
-    $breastfed = !empty($_POST['kojeno']);
+    $name = trim((string)$_POST['name']);
+    $sex = ($_POST['sex'] === 'f') ? 'f' : 'm';
+    $born = trim((string)$_POST['born']);
+    $father = growth_parse_length_input($_POST['father']);
+    $mother = growth_parse_length_input($_POST['mother']);
+    $breastfed = !empty($_POST['breastfed']);
 
     if ($name === '' || !growth_valid_date($born)) {
         $error = t('error_name_and_birth_required');
@@ -31,12 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     $child = array_merge($child, array(
-        'jmeno' => $name, 'pohlavi' => $sex, 'datum_narozeni' => $born,
-        'vyska_otce_cm' => $father, 'vyska_matky_cm' => $mother, 'kojeno' => $breastfed ? 1 : 0,
+        'name' => $name, 'sex' => $sex, 'birth_date' => $born,
+        'father_height_cm' => $father, 'mother_height_cm' => $mother, 'breastfed' => $breastfed ? 1 : 0,
     ));
 }
 
-growth_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
+growth_head(t('page_title_edit') . ' – ' . $child['name'], $childId);
 ?>
 
 <h1><?php echo th('heading_edit_child'); ?></h1>
@@ -49,29 +49,29 @@ growth_head(t('page_title_edit') . ' – ' . $child['jmeno'], $childId);
   <?php echo growth_csrf_field(); ?>
   <input type="hidden" name="id" value="<?php echo (int)$childId; ?>">
   <label><?php echo th('label_name'); ?>
-    <input type="text" name="jmeno" required maxlength="60"
-           value="<?php echo growth_h($child['jmeno']); ?>">
+    <input type="text" name="name" required maxlength="60"
+           value="<?php echo growth_h($child['name']); ?>">
   </label>
   <label><?php echo th('label_sex'); ?>
-    <select name="pohlavi">
-      <option value="m"<?php echo $child['pohlavi'] === 'm' ? ' selected' : ''; ?>><?php echo th('sex_boy'); ?></option>
-      <option value="z"<?php echo $child['pohlavi'] === 'z' ? ' selected' : ''; ?>><?php echo th('sex_girl'); ?></option>
+    <select name="sex">
+      <option value="m"<?php echo $child['sex'] === 'm' ? ' selected' : ''; ?>><?php echo th('sex_boy'); ?></option>
+      <option value="f"<?php echo $child['sex'] === 'f' ? ' selected' : ''; ?>><?php echo th('sex_girl'); ?></option>
     </select>
   </label>
   <label><?php echo th('label_birth_date'); ?>
-    <input type="date" name="narozeni" required max="<?php echo date('Y-m-d'); ?>"
-           value="<?php echo growth_h($child['datum_narozeni']); ?>">
+    <input type="date" name="born" required max="<?php echo date('Y-m-d'); ?>"
+           value="<?php echo growth_h($child['birth_date']); ?>">
   </label>
   <label><?php echo th('label_father_height'); ?> (<?php echo growth_length_unit(); ?>)
-    <input type="text" inputmode="text" name="otec"
-           value="<?php echo growth_h(growth_num(growth_display_length($child['vyska_otce_cm']))); ?>">
+    <input type="text" inputmode="text" name="father"
+           value="<?php echo growth_h(growth_num(growth_display_length($child['father_height_cm']))); ?>">
   </label>
   <label><?php echo th('label_mother_height'); ?> (<?php echo growth_length_unit(); ?>)
-    <input type="text" inputmode="text" name="matka"
-           value="<?php echo growth_h(growth_num(growth_display_length($child['vyska_matky_cm']))); ?>">
+    <input type="text" inputmode="text" name="mother"
+           value="<?php echo growth_h(growth_num(growth_display_length($child['mother_height_cm']))); ?>">
   </label>
   <label class="growth-checkbox">
-    <input type="checkbox" name="kojeno" value="1"<?php echo !empty($child['kojeno']) ? ' checked' : ''; ?>>
+    <input type="checkbox" name="breastfed" value="1"<?php echo !empty($child['breastfed']) ? ' checked' : ''; ?>>
     <?php echo th('label_breastfed'); ?>
   </label>
   <p class="growth-note">

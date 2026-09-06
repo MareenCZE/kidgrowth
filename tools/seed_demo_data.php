@@ -62,6 +62,6 @@ seed_measurements($alexId, 'm', $alexBorn, 6.25, 0.3);
 fwrite(STDERR, "Seeded Alex Demo (id $alexId)\n");
 
 $samBorn = date('Y-m-d', strtotime('-20 months'));
-$samId = growth_child_upsert('Sam Demo', 'z', $samBorn, 172.0, 160.0, 1);
-seed_measurements($samId, 'z', $samBorn, 20 / 12.0, -0.4);
+$samId = growth_child_upsert('Sam Demo', 'f', $samBorn, 172.0, 160.0, 1);
+seed_measurements($samId, 'f', $samBorn, 20 / 12.0, -0.4);
 fwrite(STDERR, "Seeded Sam Demo (id $samId)\n");

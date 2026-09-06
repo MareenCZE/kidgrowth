@@ -86,7 +86,7 @@ foreach ($files as $file) {
     $name = basename($file);
     foreach ($lines as $line) {
         if (preg_match('~Pohlav.*:\s*(\S+)~u', $line, $m)) {
-            $sex = (stripos($m[1], 'chlapec') !== false) ? 'm' : 'z';
+            $sex = (stripos($m[1], 'chlapec') !== false) ? 'm' : 'f';
         }
         if (preg_match('~jm.no:\s*(.+)$~u', $line, $m)) {
             $name = trim($m[1]);

@@ -21,11 +21,11 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     growth_csrf_check();
     $confirmName = trim((string)(isset($_POST['potvrzeni']) ? $_POST['potvrzeni'] : ''));
-    if ($confirmName !== $child['jmeno']) {
+    if ($confirmName !== $child['name']) {
         $error = t('error_name_mismatch');
     } else {
         growth_child_delete($childId);
-        header('Location: index.php?smazano=' . urlencode($child['jmeno']));
+        header('Location: index.php?deleted_at=' . urlencode($child['name']));
         exit;
     }
 }
@@ -35,10 +35,10 @@ $measurementCount = count(growth_measurements($childId));
 growth_head(t('page_title_delete_child'), $childId);
 ?>
 
-<h1><?php echo t('heading_delete_child', array('name' => growth_h($child['jmeno']))); ?></h1>
+<h1><?php echo t('heading_delete_child', array('name' => growth_h($child['name']))); ?></h1>
 <p>
   <?php echo t('confirm_delete_child', array(
-      'name' => '<strong>' . growth_h($child['jmeno']) . '</strong>',
+      'name' => '<strong>' . growth_h($child['name']) . '</strong>',
       'n' => '<strong>' . (int)$measurementCount . '</strong>',
   )); ?>
 </p>

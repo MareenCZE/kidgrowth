@@ -68,7 +68,7 @@ function growth_import_csv($handle)
         return strtolower(trim((string)$name));
     }, $header);
 
-    $required = array('dite', 'pohlavi', 'narozeni', 'datum');
+    $required = array('child', 'sex', 'born', 'date');
     foreach ($required as $column) {
         if (!in_array($column, $header, true)) {
             $report['errors'][] = t('import_error_missing_column', array('column' => $column));
@@ -96,16 +96,16 @@ function growth_import_csv($handle)
             continue;
         }
 
-        $name = trim((string)$data['dite']);
-        $date = trim((string)$data['datum']);
+        $name = trim((string)$data['child']);
+        $date = trim((string)$data['date']);
         if ($name === '' || !growth_valid_date($date)) {
             $report['skipped']++;
             continue;
         }
 
         if (!isset($childIds[$name])) {
-            $sex = (trim((string)$data['pohlavi']) === 'z') ? 'z' : 'm';
-            $born = trim((string)$data['narozeni']);
+            $sex = (trim((string)$data['sex']) === 'f') ? 'f' : 'm';
+            $born = trim((string)$data['born']);
             if (!growth_valid_date($born)) {
                 $report['errors'][] = t('import_error_invalid_birth', array('line' => $line));
                 continue;
@@ -118,14 +118,14 @@ function growth_import_csv($handle)
             $report['children'][$name] = 0;
         }
 
-        $height = growth_input_number(isset($data['vyska_cm']) ? $data['vyska_cm'] : '');
-        $weight = growth_input_number(isset($data['hmotnost_kg']) ? $data['hmotnost_kg'] : '');
+        $height = growth_input_number(isset($data['height_cm']) ? $data['height_cm'] : '');
+        $weight = growth_input_number(isset($data['weight_kg']) ? $data['weight_kg'] : '');
         if ($height === null && $weight === null) {
             $report['skipped']++;
             continue;
         }
 
-        $note = isset($data['poznamka']) ? trim((string)$data['poznamka']) : '';
+        $note = isset($data['note']) ? trim((string)$data['note']) : '';
         growth_measurement_save($childIds[$name], $date, $height, $weight, $note !== '' ? $note : null);
         $report['rows']++;
         $report['children'][$name]++;
@@ -173,7 +173,7 @@ growth_head(t('page_title_import'));
 <div class="growth-panel">
   <h2><?php echo th('import_format_heading'); ?></h2>
   <p><?php echo th('import_format_intro'); ?></p>
-  <pre>dite,pohlavi,narozeni,otec_cm,matka_cm,datum,vyska_cm,hmotnost_kg
+  <pre>child,sex,born,otec_cm,matka_cm,date,height_cm,weight_kg
 "Novak Jan",m,2018-03-14,180,165,2018-05-20,58,4.2</pre>
   <p class="growth-note">
     <?php echo t('import_format_note'); ?>

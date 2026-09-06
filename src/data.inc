@@ -238,7 +238,10 @@ function growth_format_percentile($percentile, $z, $referenceId, $metric = 'heig
     if ($percentile < 0.1 || $percentile > 99.9) {
         $decimals = 3;
     }
-    $text = growth_num($percentile, $decimals) . '.';
+    /* Czech writes an ordinal with a trailing period - "30,1." is 'the 30.1th' -
+       and English does not. The suffix is a translated string rather than a
+       hardcoded dot, which is what it had been in both languages. */
+    $text = growth_num($percentile, $decimals) . th('percentile_ordinal_suffix');
 
     $extrapolated = ($referenceId === 'cav')
         && ($metric === 'weight')

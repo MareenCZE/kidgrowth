@@ -220,6 +220,7 @@ return array(
     'unit_months' => 'měsíců',
     'median_diff' => '{sign}{value} {unit} oproti mediánu',
     'median_diff_exact' => 'přesně medián',
+    'percentile_ordinal_suffix' => '.',               /* Czech: 30,1. is an ordinal */
     'percentile_extrapolated_title' => 'Mimo rozsah publikovaný SZÚ (3.–97. percentil), hodnota je extrapolovaná',
 
     /* ------------------------------------------------------- reference data */

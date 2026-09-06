@@ -219,6 +219,7 @@ return array(
     'unit_months' => 'months',
     'median_diff' => '{sign}{value} {unit} from median',
     'median_diff_exact' => 'exactly the median',
+    'percentile_ordinal_suffix' => '',                /* English: a bare number */
     'percentile_extrapolated_title' => "Outside the range SZÚ publishes (3rd–97th percentile); the value is extrapolated",
 
     /* ------------------------------------------------------- reference data */

@@ -182,8 +182,6 @@ return array(
     'import_format_heading' => 'Format',
     'import_format_intro' => 'The first row is the header, comma-separated:',
     'import_format_note' => 'Required are <code>child</code>, <code>sex</code> (m or f), <code>birth_date</code> and <code>date</code>, the two dates in the form YYYY-MM-DD. Optional: <code>height_cm</code>, <code>weight_kg</code>, <code>note</code>, <code>father_cm</code>, <code>mother_cm</code>, <code>breastfed</code> (1 or 0). Height and weight may be blank – a blank cell means "not measured", not zero. Any sex other than m or f is refused with the line number rather than guessed at. A child\'s own columns are taken from the first row that names them; a later row that says something different is reported with its line number, and the first row is what is kept. Importing the same date again overwrites rather than duplicating it.',
-    'import_from_rustcz_heading' => 'From RůstCZ',
-    'import_from_rustcz_intro' => "A RůstCZ backup writes two files, <code>peda.rcz</code> and <code>meda.rcz</code>. Upload them both on the page below and they come in directly — every measurement in the backup names the child it belongs to, so nothing has to be paired up by hand and no text export is needed.",
 
     /* ------------------------------------------------------- RustCZ import */
     'nav_import_rustcz' => 'Import from RůstCZ',

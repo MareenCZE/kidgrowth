@@ -2,9 +2,12 @@
 /*
  * Growth tracker - CSV import.
  *
- * The single documented way data gets in in bulk, including from the old
- * RustCZ database: tools/import_rustcz.php converts the binary .rcz file to
- * this CSV rather than the site carrying code for a dead Windows format.
+ * The general way data gets in in bulk: from a spreadsheet, from another
+ * application, from anywhere that can write a comma. A RustCZ backup has its
+ * own page now (import_rustcz.php), and this one no longer mentions it -
+ * manage.php offers both side by side, which is the place to choose between
+ * them. A page that explains a second import route it does not perform is a
+ * page describing the application rather than doing its job.
  */
 require_once __DIR__ . '/shell.inc';
 require_once __DIR__ . '/import.inc';
@@ -76,9 +79,6 @@ growth_head(t('page_title_import'));
   <p class="growth-note">
     <?php echo t('import_format_note'); ?>
   </p>
-  <h2><?php echo th('import_from_rustcz_heading'); ?></h2>
-  <p><?php echo th('import_from_rustcz_intro'); ?></p>
-  <p><a href="import_rustcz.php"><?php echo th('nav_import_rustcz'); ?></a></p>
 </div>
 
 <p class="growth-links"><a href="index.php"><?php echo th('nav_back'); ?></a></p>

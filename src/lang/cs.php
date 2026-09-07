@@ -183,8 +183,6 @@ return array(
     'import_format_heading' => 'Formát',
     'import_format_intro' => 'První řádek je hlavička, oddělovač je čárka:',
     'import_format_note' => 'Povinné jsou <code>child</code>, <code>sex</code> (m nebo f), <code>birth_date</code> a <code>date</code>, obě data ve tvaru RRRR-MM-DD. Volitelné: <code>height_cm</code>, <code>weight_kg</code>, <code>note</code>, <code>father_cm</code>, <code>mother_cm</code>, <code>breastfed</code> (1 nebo 0). Výška i hmotnost mohou být prázdné &ndash; prázdná buňka znamená &bdquo;neměřeno&ldquo;, ne nulu. Jiná hodnota pohlaví než m nebo f se odmítne s číslem řádku, neuhodne se. Údaje o dítěti se berou z prvního řádku, kde se dítě objeví; pozdější řádek, který tvrdí něco jiného, se ohlásí s číslem řádku a platí ten první. Opakovaný import stejného data zápis přepíše, neduplikuje.',
-    'import_from_rustcz_heading' => 'Z RůstCZ',
-    'import_from_rustcz_intro' => 'Záloha z RůstCZ vytvoří dva soubory, <code>peda.rcz</code> a <code>meda.rcz</code>. Nahrajte na stránce níž oba a data se načtou přímo &ndash; každé měření v záloze říká, kterému dítěti patří, takže se nic nemusí párovat ručně a žádný textový export není potřeba.',
 
     /* ------------------------------------------------------- import RůstCZ */
     'nav_import_rustcz' => 'Import z RůstCZ',

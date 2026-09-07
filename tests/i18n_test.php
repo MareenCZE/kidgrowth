@@ -88,3 +88,20 @@ function test_t_substitutes_named_placeholders()
     assert_equals('Imported 5 measurements.',
         growth_test_run_locale_snippet('en', "echo t('import_summary', array('n' => 5));"));
 }
+
+function test_both_languages_say_the_same_things()
+{
+    /* A key added to one file and forgotten in the other shows up as the raw
+       key on the page, in the language of whoever was not thinking about it
+       at the time. Cheap to check, and easy to get wrong every time a feature
+       adds a dozen strings at once. */
+    $en = require __DIR__ . '/../src/lang/en.php';
+    $cs = require __DIR__ . '/../src/lang/cs.php';
+    assert_equals('', implode(', ', array_diff(array_keys($en), array_keys($cs))),
+        'keys in English but not in Czech');
+    assert_equals('', implode(', ', array_diff(array_keys($cs), array_keys($en))),
+        'keys in Czech but not in English');
+    foreach ($en as $key => $value) {
+        assert_true(trim((string)$cs[$key]) !== '', "the Czech $key is not empty");
+    }
+}

@@ -34,10 +34,11 @@ so it is useful well outside the Czech Republic.
 - Measurements can be corrected in place, including the date. Editing and
   deleting open in a dialog where the browser supports one, and fall back to
   their own pages where it does not.
-- CSV import/export, including a converter for RůstCZ's own database format
-  (`tools/import_rustcz.php`). The link on the children list exports every
-  child into one file the importer reads back — the backup worth taking
-  before an upgrade or a move to another host.
+- CSV import/export, plus a direct importer for a RůstCZ backup: upload the
+  two `.rcz` files it writes and the children and their measurements come
+  straight in, with a confirmation screen first. The CSV export link on the
+  children list writes every child into one file the importer reads back —
+  the backup worth taking before an upgrade or a move to another host.
 - Installable as a PWA (works from a phone's home screen).
 - English and Czech, with locale-aware number, date and plural formatting
   (`src/i18n.inc`, `src/lang/`). English is the default; a link in the header

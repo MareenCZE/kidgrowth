@@ -36,70 +36,81 @@
  * exports, which is a far more robust source than a second binary layout.
  */
 
-const RCZ_RECORD_SIZE = 68;
-
-/* Delphi counts days from 1899-12-30; Unix from 1970-01-01, 25569 days later. */
-const DELPHI_EPOCH_OFFSET_DAYS = 25569;
+require_once __DIR__ . '/../src/rustcz.inc';
 
 $args = array_slice($argv, 1);
-$rczPath = null;
+$rczPaths = array();
 $exports = array();
 foreach ($args as $arg) {
     if (substr($arg, -4) === '.rcz') {
-        $rczPath = $arg;
+        $rczPaths[] = $arg;
     } else {
         $exports[] = $arg;
     }
 }
 
-if ($rczPath === null || !$exports) {
-    fwrite(STDERR, "usage: php tools/import_rustcz.php <meda.rcz> <export.txt> [<export.txt> ...]\n");
+if (!$rczPaths) {
+    fwrite(STDERR,
+        "usage: php tools/import_rustcz.php <peda.rcz> <meda.rcz> > rust.csv\n"
+        . "   or: php tools/import_rustcz.php <meda.rcz> <export.txt> [...] > rust.csv\n"
+        . "\n"
+        . "The first form is the whole backup and needs nothing else. The second\n"
+        . "is for a measurement file that arrived without its companion, and\n"
+        . "reconstructs the children from RustCZ's printed exports instead.\n"
+        . "\n"
+        . "Neither is the ordinary way in any more: src/import_rustcz.php does\n"
+        . "this in a browser, which is where the people with these files are.\n");
     exit(2);
 }
-if (!is_file($rczPath)) {
-    fwrite(STDERR, "no such file: $rczPath\n");
-    exit(2);
+foreach ($rczPaths as $path) {
+    if (!is_file($path)) {
+        fwrite(STDERR, "no such file: $path\n");
+        exit(2);
+    }
 }
 
-/* ------------------------------------------------------ read the .rcz file */
+/* ------------------------------------------------------ read the .rcz files */
 
-$raw = file_get_contents($rczPath);
-if (strlen($raw) % RCZ_RECORD_SIZE !== 0) {
+/* The binary layouts live in src/rustcz.inc, once. They used to live here as
+   well, and two copies of a reverse-engineered format is two copies to get
+   wrong - the browser importer and this tool would drift apart on exactly the
+   kind of detail nobody re-derives twice. */
+
+$bodies = array();
+foreach ($rczPaths as $path) {
+    $bodies[$path] = (string)file_get_contents($path);
+}
+
+$childFile = null;
+$measurementFile = null;
+foreach ($bodies as $path => $body) {
+    $read = growth_rustcz_children($body);
+    if ($read['children'] && $childFile === null) {
+        $childFile = $path;
+        continue;
+    }
+    $read = growth_rustcz_measurements($body);
+    if ($read['groups'] && $measurementFile === null) {
+        $measurementFile = $path;
+    }
+}
+if ($measurementFile === null) {
     fwrite(STDERR, sprintf(
-        "FATAL: %s is %d bytes, not a whole number of %d-byte records.\n"
-        . "       This is not the RustCZ measurement file, or the layout differs.\n",
-        $rczPath, strlen($raw), RCZ_RECORD_SIZE
+        "FATAL: none of the given .rcz files is a RustCZ measurement file.\n"
+        . "       One should be %d bytes per measurement; check you have meda.rcz.\n",
+        GROWTH_RCZ_MEASUREMENT_SIZE
     ));
     exit(1);
 }
 
-$groups = array();
-$recordCount = strlen($raw) / RCZ_RECORD_SIZE;
-for ($i = 0; $i < $recordCount; $i++) {
-    $offset = $i * RCZ_RECORD_SIZE;
-    $guid = bin2hex(substr($raw, $offset, 16));
-
-    $serial = unpack('e', substr($raw, $offset + 16, 8))[1];
-    $height = unpack('g', substr($raw, $offset + 24, 4))[1];
-    $weight = unpack('g', substr($raw, $offset + 28, 4))[1];
-
-    $timestamp = ($serial - DELPHI_EPOCH_OFFSET_DAYS) * 86400;
-    $date = gmdate('Y-m-d', (int)round($timestamp));
-
-    $groups[$guid][] = array(
-        'date' => $date,
-        /* 0.0 means "not measured" and must stay empty all the way into the
-           database; a stored zero would be read back as a real measurement. */
-        'height' => ($height > 0.01) ? round($height, 1) : null,
-        'weight' => ($weight > 0.01) ? round($weight, 2) : null,
-    );
+$measurements = growth_rustcz_measurements($bodies[$measurementFile]);
+$groups = $measurements['groups'];
+$recordCount = 0;
+foreach ($groups as $rows) {
+    $recordCount += count($rows);
 }
-foreach ($groups as $guid => $records) {
-    usort($groups[$guid], function ($a, $b) {
-        return strcmp($a['date'], $b['date']);
-    });
-}
-fwrite(STDERR, sprintf("%s: %d records in %d groups\n", basename($rczPath), $recordCount, count($groups)));
+fwrite(STDERR, sprintf("%s: %d records in %d groups\n",
+    basename($measurementFile), $recordCount, count($groups)));
 
 /* -------------------------------------------------- read the text exports */
 
@@ -137,6 +148,45 @@ function read_export($path)
 }
 
 $children = array();
+
+
+if ($childFile !== null) {
+    /* The companion file names every child and carries the GUID of the
+       measurements that belong to them, so there is nothing here to pair and
+       nothing to guess. Everything below this branch exists only for the case
+       where that file is missing. */
+    $read = growth_rustcz_children($bodies[$childFile]);
+    foreach ($read['errors'] as $message) {
+        fwrite(STDERR, "  $message\n");
+    }
+    foreach ($read['children'] as $index => $child) {
+        $children[$index] = array(
+            'name' => $child['name'],
+            'sex' => $child['sex'],
+            'born' => $child['birth_date'],
+            'father' => $child['father_cm'],
+            'mother' => $child['mother_cm'],
+            'ages' => array(),
+        );
+        $assigned[$index] = $child['guid'];
+        fwrite(STDERR, sprintf(
+            "%s: %s, %s, born %s, parents %s/%s cm, %d measurements\n",
+            basename($childFile), $child['name'], $child['sex'] === 'm' ? 'boy' : 'girl',
+            $child['birth_date'], $child['father_cm'] ?: '?', $child['mother_cm'] ?: '?',
+            isset($groups[$child['guid']]) ? count($groups[$child['guid']]) : 0
+        ));
+    }
+    if (!$children) {
+        fwrite(STDERR, "FATAL: no child could be read from $childFile.\n");
+        exit(1);
+    }
+} else {
+
+if (!$exports) {
+    fwrite(STDERR, "FATAL: without the companion .rcz file, RustCZ's printed text\n"
+        . "       exports are needed to say who the measurements belong to.\n");
+    exit(2);
+}
 foreach ($exports as $path) {
     if (!is_file($path)) {
         fwrite(STDERR, "no such file: $path\n");
@@ -190,7 +240,7 @@ function score_pairing($records, $child)
     return $hits;
 }
 
-$assigned = array();
+
 $usedGuids = array();
 foreach ($children as $index => $child) {
     $bestGuid = null;
@@ -217,6 +267,8 @@ foreach ($children as $index => $child) {
     ));
 }
 
+}   /* end of the text-export fallback */
+
 /* --------------------------------------------------------------- emit CSV */
 
 $out = fopen('php://output', 'w');
@@ -226,8 +278,12 @@ fputcsv($out, array('child', 'sex', 'birth_date', 'father_cm', 'mother_cm',
 $written = 0;
 $empty = 0;
 foreach ($children as $index => $child) {
-    foreach ($groups[$assigned[$index]] as $record) {
-        if ($record['height'] === null && $record['weight'] === null) {
+    $guid = $assigned[$index];
+    /* A child in the companion file with no measurements in the other one is
+       not an error - a record created and never used - but it is not a row
+       either. */
+    foreach (isset($groups[$guid]) ? $groups[$guid] : array() as $record) {
+        if ($record['height_cm'] === null && $record['weight_kg'] === null) {
             /* RustCZ keeps rows for visits where only a metric we do not track
                was recorded; they would import as blank measurements. */
             $empty++;
@@ -240,8 +296,8 @@ foreach ($children as $index => $child) {
             $child['father'],
             $child['mother'],
             $record['date'],
-            $record['height'],
-            $record['weight'],
+            $record['height_cm'],
+            $record['weight_kg'],
         ));
         $written++;
     }

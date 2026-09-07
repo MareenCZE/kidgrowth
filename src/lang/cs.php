@@ -12,6 +12,7 @@ return array(
     /* --------------------------------------------------------- navigation */
     'nav_back' => 'Zpět',
     'nav_back_to_children' => 'Zpět na seznam dětí',
+    'nav_back_to_manage' => 'Zpět na přidávání, import a koš',
     'nav_all_children' => 'Všechny děti',
     'nav_edit_child' => 'Upravit dítě',
     'nav_delete_child' => 'Smazat dítě',

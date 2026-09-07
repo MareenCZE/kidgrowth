@@ -290,7 +290,7 @@ growth_head(t('page_title_import_rustcz'));
 <p class="growth-links">
   <a href="import.php"><?php echo th('nav_import_csv'); ?></a>
   &middot;
-  <a href="index.php"><?php echo th('nav_back'); ?></a>
+  <a href="manage.php"><?php echo th('nav_back_to_manage'); ?></a>
 </p>
 
 <?php growth_foot(); ?>

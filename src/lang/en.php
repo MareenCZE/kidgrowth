@@ -11,6 +11,7 @@ return array(
     /* --------------------------------------------------------- navigation */
     'nav_back' => 'Back',
     'nav_back_to_children' => 'Back to the list of children',
+    'nav_back_to_manage' => 'Back to add, import and trash',
     'nav_all_children' => 'All children',
     'nav_edit_child' => 'Edit child',
     'nav_delete_child' => 'Delete child',

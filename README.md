@@ -92,30 +92,54 @@ The fastest way to see it working, no install and nobody else's data involved:
 
 ## Install
 
-Requirements: **PHP 8.0+**, and a **writable directory** - nothing else. By
-default, KidGrowth stores its data as a single JSON file (`storage/growth.json`);
-SQLite and MySQL are also available, see below.
+Requirements: **PHP 8.0+**, and a **writable directory** - nothing else. No
+shell access is needed. By default, KidGrowth stores its data as a single JSON
+file (`storage/growth.json`); SQLite and MySQL are also available, see below.
 
-1. Clone the repository and point your web server's document root at `src/`.
-   That's it for storage - the default JSON backend needs no further setup.
-2. Build the reference data your installation will use:
-   ```
-   php tools/build_reference_data.php
-   ```
-   This downloads from SZÚ, WHO, PMC and the CDC and writes `src/data/*.php`
-   locally. Only `src/data/cdc.php` (public domain) ships in the repository -
-   see `DATA-LICENCES.md` for why the rest do not, and for what each source's
-   licence actually permits. Run this again any time you want to refresh the
-   data; nothing else in the application depends on network access. Until you
-   run it, the app works with CDC's reference alone.
-3. **Put Basic Auth (or an equivalent) in front of it.** KidGrowth has no
-   authentication of its own - it relies entirely on your web server, and
-   refuses to render anything at all if it cannot see that one is configured
-   (`src/auth.inc`). A copy of `src/.htaccess` is provided as a starting point
-   for Apache; edit the `AuthUserFile` path before using it, and point it
-   somewhere outside your document root. Publishing this application without
-   an authentication layer in front of it means publishing your children's
-   health records to the open internet.
+**1. Upload `src/` to your host.** Over FTP, over SFTP, or by cloning the
+repository if you have a shell - it makes no difference. Point a web address at
+that directory. Everything the application needs at runtime is inside `src/`;
+the other directories here are for development.
+
+**2. Put a password in front of it, before anything else.** KidGrowth has no
+login of its own. It relies entirely on your web server, and refuses to render
+anything at all - including the installer - if it cannot see that one is
+configured (`src/auth.inc`). A copy of `src/.htaccess` is provided as a
+starting point for Apache; edit the `AuthUserFile` path before using it, and
+point it somewhere outside your document root. Most shared hosting control
+panels can also do this for a directory with a couple of clicks, usually under
+a heading like "password protection" or "directory privacy".
+
+This step is second rather than last on purpose. Publishing this application
+without authentication in front of it means publishing your children's health
+records to the open internet, and the setup page in step 3 accepts database
+credentials - so it refuses to run until the password is there.
+
+**3. Open `install.php` in your browser.** It checks what your server can do
+and tells you what it found, lets you choose where the measurements are kept
+(and creates the MySQL tables for you if that is what you pick), and downloads
+the growth references you want, one file at a time with the licence for each
+shown beside it. Then delete `install.php`.
+
+Only `src/data/cdc.php` (public domain) ships in the repository, so without
+step 3 the application works with the CDC reference alone - see
+`DATA-LICENCES.md` for why the rest cannot be redistributed, and what each
+source's licence permits.
+
+### If you have a shell and would rather not use the browser
+
+`tools/build_reference_data.php` does the same work from the command line, and
+is the same code - both front ends call `src/reference_build.inc`, so neither
+can quietly rot while the other is used.
+
+```
+php tools/build_reference_data.php               # everything
+php tools/build_reference_data.php --list        # what is available
+php tools/build_reference_data.php --only=cdc,who
+```
+
+Storage is then configured by copying `src/config.sample.php` to
+`src/config.php` by hand, and the MySQL tables by loading `db/schema.sql`.
 
 ### Switching storage backend
 

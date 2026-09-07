@@ -121,8 +121,8 @@ function growth_storage_children()
 {
     $link = growth_mysql_link();
     $result = growth_mysql_query_checked($link,
-        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, position, breastfed
-         FROM growth_children WHERE deleted_at IS NULL ORDER BY position, birth_date');
+        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, breastfed
+         FROM growth_children WHERE deleted_at IS NULL ORDER BY birth_date, id');
     $rows = array();
     while ($result && ($row = mysqli_fetch_assoc($result))) {
         $rows[] = $row;
@@ -134,7 +134,7 @@ function growth_storage_children_deleted()
 {
     $link = growth_mysql_link();
     $result = growth_mysql_query_checked($link,
-        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, position, breastfed, deleted_at
+        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, breastfed, deleted_at
          FROM growth_children WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC');
     $rows = array();
     while ($result && ($row = mysqli_fetch_assoc($result))) {
@@ -147,7 +147,7 @@ function growth_storage_child($id)
 {
     $link = growth_mysql_link();
     $stmt = growth_mysql_prepare($link,
-        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, position, breastfed
+        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, breastfed
          FROM growth_children WHERE id = ? AND deleted_at IS NULL');
     mysqli_stmt_bind_param($stmt, 'i', $id);
     mysqli_stmt_execute($stmt);

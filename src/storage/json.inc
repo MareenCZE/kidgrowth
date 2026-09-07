@@ -98,8 +98,11 @@ function growth_storage_children()
     $rows = array_values(array_filter(growth_json_read()['children'], function ($c) {
         return empty($c['deleted_at']);
     }));
+    /* Oldest first, and the id breaks a tie so that twins keep a stable
+       order rather than one that depends on the sort implementation. The
+       three backends agree on this ordering; see the SQL ones. */
     usort($rows, function ($a, $b) {
-        return [$a['position'], $a['birth_date']] <=> [$b['position'], $b['birth_date']];
+        return [$a['birth_date'], (int)$a['id']] <=> [$b['birth_date'], (int)$b['id']];
     });
     return $rows;
 }
@@ -148,7 +151,7 @@ function growth_storage_child_upsert($name, $sex, $born, $fatherCm, $motherCm, $
         $id = growth_json_next_id($data['children']);
         $data['children'][] = array(
             'id' => $id, 'name' => $name, 'sex' => $sex, 'birth_date' => $born,
-            'father_height_cm' => $fatherCm, 'mother_height_cm' => $motherCm, 'position' => 0,
+            'father_height_cm' => $fatherCm, 'mother_height_cm' => $motherCm,
             'breastfed' => $breastfed, 'deleted_at' => null,
         );
         return $data;

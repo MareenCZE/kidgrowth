@@ -31,7 +31,6 @@ function growth_mysql_schema_statements(): array
         . "  `birth_date` date NOT NULL,\n"
         . "  `father_height_cm` decimal(4,1) DEFAULT NULL,\n"
         . "  `mother_height_cm` decimal(4,1) DEFAULT NULL,\n"
-        . "  `position` int(11) NOT NULL DEFAULT 0,\n"
         . "  `breastfed` tinyint(1) NOT NULL DEFAULT 0,\n"
         . "  `deleted_at` datetime DEFAULT NULL,\n"
         . "  PRIMARY KEY (`id`)\n"

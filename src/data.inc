@@ -333,6 +333,36 @@ function growth_input_sex($value)
     return ($value === 'm' || $value === 'f') ? $value : null;
 }
 
+/**
+ * Turns a yes/no field into true, false, or null when it is neither.
+ *
+ * `breastfed` is the only such column so far, and it is the same shape of
+ * decision as sex: it selects whether the Czech breastfed-infant reference is
+ * offered for a child at all, so a cell the file means as "yes" and the
+ * importer reads as "no" quietly removes a curve without saying anything.
+ * Null therefore means refuse, exactly as it does for sex. An empty cell is
+ * not a value at all, and what to do about one is the caller's business
+ * rather than this function's.
+ *
+ * The accepted spellings are the ones somebody actually types into a
+ * spreadsheet. This application's own export writes 1 and 0, but a
+ * hand-edited file arrives with yes/no or true/false - and in Czech, which is
+ * half of this application's audience, with ano/ne. None of those is a second
+ * storage spelling of the kind retired with `z`: the stored value is a
+ * boolean whichever way the cell was written.
+ */
+function growth_input_flag($value)
+{
+    $value = strtolower(trim((string)$value));
+    if (in_array($value, array('1', 'y', 'yes', 'true', 'ano'), true)) {
+        return true;
+    }
+    if (in_array($value, array('0', 'n', 'no', 'false', 'ne'), true)) {
+        return false;
+    }
+    return null;
+}
+
 /** Guards against an open redirect on the return-to parameter. */
 function growth_safe_return($value, $fallback)
 {

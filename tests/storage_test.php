@@ -181,3 +181,19 @@ function test_json_measurement_update_ignores_a_deleted_row()
     assert_equals(1, count(growth_storage_measurements_deleted($id)), 'it is still in the trash');
     growth_test_json_cleanup($path);
 }
+
+function test_json_children_are_ordered_oldest_first()
+{
+    /* growth_children.position was read by every ordering query and written
+       by nothing, so it was always 0 and this is what the order had in fact
+       always been. Now it is what the code says as well, in all three
+       backends - see the matching SQLite test. */
+    $path = growth_test_json_fixture();
+    growth_storage_child_upsert('Younger', 'm', '2020-05-05', null, null, 0);
+    growth_storage_child_upsert('Older', 'f', '2016-02-02', null, null, 0);
+    $names = array_map(function ($c) {
+        return $c['name'];
+    }, growth_storage_children());
+    assert_equals(array('Older', 'Younger'), $names, 'oldest first');
+    growth_test_json_cleanup($path);
+}

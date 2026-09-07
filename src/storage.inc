@@ -21,8 +21,16 @@
 /* config.php is optional, not required: with none present, the JSON backend
    and its default path (below) apply, which is what makes "clone it and
    open it" true without a config-file-copying step first. Only switching
-   backend, or pointing a path elsewhere, needs one. */
-if (is_file(__DIR__ . '/config.php')) {
+   backend, or pointing a path elsewhere, needs one.
+
+   It is also skipped entirely when the including scope has already chosen a
+   backend. Nothing in the application does that - every page includes this
+   file cold - but a test process does, and without this it would be at the
+   mercy of whatever src/config.php the developer's own machine happens to
+   hold: a suite that writes fixture children into somebody's real MySQL
+   database is worse than no suite. Whoever sets $STORAGE_BACKEND has taken
+   on setting that backend's paths and credentials too. */
+if (!isset($STORAGE_BACKEND) && is_file(__DIR__ . '/config.php')) {
     require_once __DIR__ . '/config.php';
 }
 

@@ -332,6 +332,80 @@ function growth_reference_plan(array $wanted): array
 
 /* ------------------------------------------------------------------ fetching */
 
+/**
+ * What a downloaded body has to look like before it is believed.
+ *
+ * Nothing checked the answer before this. A non-200 was caught, because it
+ * is not a 200; a 200 carrying something else entirely was not. That is the
+ * failure that actually happens: cdc.gov answers a bot filter with a 403 page
+ * and other publishers answer with a consent screen, a login redirect or a
+ * "this file has moved" page, all of them valid HTML served with a 200 and
+ * all of them cached and parsed here as if they were data. What came out then
+ * was not an error but a parse that found nothing, or found nonsense - and
+ * finding out which download went wrong from that is the expensive part.
+ *
+ * The expectation is derived from the URL rather than listed per source, so a
+ * source cannot be added without one. Magic bytes and a size floor are the
+ * whole of it: they are what separates a spreadsheet from a page apologising
+ * for not being one, they need no network to establish, and they do not go
+ * stale when a publisher reissues a file.
+ *
+ * Deliberately not a checksum per URL. Two of the sources are living HTML
+ * pages whose bytes change without the data changing, and for the rest a
+ * digest that fails closed would stop an installation dead the day SZU
+ * re-exports a PDF - for an audience whose fix would be to edit PHP over FTP.
+ * The shape check catches the download that is wrong; noticing that a
+ * publisher has revised a table is a job for whoever compares the numbers.
+ */
+function growth_download_shape(string $url): array
+{
+    $ext = strtolower(pathinfo((string)parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+    switch ($ext) {
+        /* %PDF- is the header every PDF starts with. The smallest source here
+           is a single SZU chart at a few hundred KB. */
+        case 'pdf':
+            return ['a PDF', "%PDF-", 50000, false];
+        /* An .xlsx is a zip, so it starts with the local file header PK\x03\x04. */
+        case 'xlsx':
+            return ['a spreadsheet', "PK\x03\x04", 5000, false];
+        /* CDC's tables are plain CSV; a header line and a few hundred rows. */
+        case 'csv':
+            return ['a CSV table', null, 2000, false];
+        /* The two PMC article pages, which are HTML by design. */
+        default:
+            return ['an HTML page', null, 20000, true];
+    }
+}
+
+/**
+ * Returns an empty string when what arrived is the shape the URL promised,
+ * and otherwise says what turned up instead. Takes the first few KB and the
+ * total size rather than the whole body, so a file already sitting in the
+ * cache can be held to the same standard without being read into memory.
+ */
+function growth_download_complaint(string $url, string $head, int $size): string
+{
+    list($label, $magic, $minBytes, $htmlIsFine) = growth_download_shape($url);
+
+    if ($size < $minBytes) {
+        return 'expected ' . $label . ', got ' . $size . ' bytes - too small to be one';
+    }
+    $looksLikeHtml = stripos(substr($head, 0, 1000), '<html') !== false
+        || stripos(substr($head, 0, 1000), '<!doctype') !== false;
+
+    if ($magic !== null && strncmp($head, $magic, strlen($magic)) !== 0) {
+        return 'expected ' . $label . ', got '
+            . ($looksLikeHtml ? 'a web page - a block, consent or error page rather than the file'
+                              : 'something else entirely');
+    }
+    /* A CSV has no magic bytes of its own, so the only thing worth asserting
+       is that it is not the web page a filter answers with. */
+    if ($magic === null && !$htmlIsFine && $looksLikeHtml) {
+        return 'expected ' . $label . ', got a web page';
+    }
+    return '';
+}
+
 function fetch_cached(string $url, string $cacheDir): string
 {
     /* The URL hash is part of the cache key on purpose. WHO ships different
@@ -341,7 +415,17 @@ function fetch_cached(string $url, string $cacheDir): string
     $base = preg_replace('~[^A-Za-z0-9._-]~', '_', basename(parse_url($url, PHP_URL_PATH)));
     $path = $cacheDir . '/' . substr(sha1($url), 0, 8) . '-' . $base;
     if (is_file($path) && filesize($path) > 0) {
-        return $path;
+        /* Held to the same standard as a fresh download. A file cached before
+           this check existed, or left truncated by an interrupted build, would
+           otherwise be the one way past it - and the cache is exactly where a
+           bad download goes to be believed on the next run. */
+        $complaint = growth_download_complaint(
+            $url, (string)file_get_contents($path, false, null, 0, 4096), (int)filesize($path));
+        if ($complaint === '') {
+            return $path;
+        }
+        growth_build_log('    the cached ' . basename($path) . " is not usable ($complaint); downloading it again\n");
+        @unlink($path);
     }
     growth_build_log('    downloading ' . basename($url) . "\n");
 
@@ -386,6 +470,14 @@ function fetch_cached(string $url, string $cacheDir): string
         if (!function_exists('shell_exec') || in_array('shell_exec', array_map('trim', explode(',', (string)ini_get('disable_functions'))), true)) {
             growth_build_log("       (shell_exec is disabled here, so the curl fallback never ran)\n");
         }
+        exit(1);
+    }
+    $complaint = growth_download_complaint($url, substr((string)$body, 0, 4096), strlen((string)$body));
+    if ($complaint !== '') {
+        growth_build_log("FATAL: the download is not what it should be: $url\n");
+        growth_build_log('       ' . $complaint . "\n");
+        growth_build_log("       Nothing was cached. Open the URL in a browser: if it asks\n");
+        growth_build_log("       something, or has moved, this build cannot answer it.\n");
         exit(1);
     }
     file_put_contents($path, $body);

@@ -15,6 +15,13 @@ src/data/who.php
 storage/growth.json
 storage/growth.sqlite
 
+# Source files the reference build downloads before parsing them: a few
+# megabytes of other people's PDFs and spreadsheets, kept so that an
+# interrupted install resumes rather than starts again. The installer puts
+# them in the first of these it can write to.
+storage/reference-cache/
+src/data/.cache/
+
 # Basic Auth credentials for local/deployed instances
 .htpasswd*
 

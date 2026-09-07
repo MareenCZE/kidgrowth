@@ -18,12 +18,17 @@ return array(
     'nav_export_all_csv' => 'Export everything as CSV',
     'nav_import_csv' => 'Import CSV',
     'nav_trash' => 'Trash',
+    'nav_manage' => 'Add a child, import, trash',
+    'page_title_manage' => 'Manage',
+    'heading_manage' => 'Manage',
+    'manage_data_heading' => 'All the data',
+    'manage_export_note' => 'every child in one file — worth taking before an upgrade or a move',
 
     /* --------------------------------------------------------------- home */
     'brand_tagline' => 'child growth',
     'page_title_home' => 'Children',
     'flash_moved_to_trash' => '{name} moved to the <a href="trash.php">trash</a>, where you can restore it.',
-    'intro_no_children' => 'No children yet. Add the first one below, bring existing measurements in through <a href="import.php">CSV import</a>, or <a href="import_rustcz.php">import a RůstCZ backup</a>.',
+    'intro_no_children' => 'No children yet. <a href="manage.php">Add the first one</a>, bring existing measurements in through <a href="import.php">CSV import</a>, or <a href="import_rustcz.php">import a RůstCZ backup</a>.',
     'no_measurements_yet' => 'no measurements yet',
     'count_measurements' => '({n} measurements)',
     'add_child_summary' => 'Add a child',

@@ -277,16 +277,6 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
                 . ' tabindex="0" role="img"><title>%s</title></circle>',
                 $x, $sy($projection['mid']), growth_h($label)
             );
-            /* a dashed run from the last measurement to the predicted adult
-               height, so the projection reads as a continuation of the child's
-               own line rather than a mark floating at the edge */
-            if ($points) {
-                $last = $points[count($points) - 1];
-                $svg[] = sprintf(
-                    '<path class="growth-projection-line" d="M%.1f %.1f L%.1f %.1f"/>',
-                    $sx($last['age']), $sy($last['value']), $x, $sy($projection['mid'])
-                );
-            }
         }
 
         if (!empty($options['target'])) {

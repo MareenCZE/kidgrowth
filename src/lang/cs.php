@@ -19,12 +19,17 @@ return array(
     'nav_export_all_csv' => 'Export všeho do CSV',
     'nav_import_csv' => 'Import CSV',
     'nav_trash' => 'Koš',
+    'nav_manage' => 'Přidat dítě, import, koš',
+    'page_title_manage' => 'Správa',
+    'heading_manage' => 'Správa',
+    'manage_data_heading' => 'Všechna data',
+    'manage_export_note' => 'všechny děti v jednom souboru – stojí za to před aktualizací nebo stěhováním',
 
     /* --------------------------------------------------------------- home */
     'brand_tagline' => 'růst dětí',
     'page_title_home' => 'Růst dětí',
     'flash_moved_to_trash' => '{name} přesunuto do <a href="trash.php">koše</a>, odkud jde obnovit.',
-    'intro_no_children' => 'Zatím tu není žádné dítě. Přidejte první níže, načtěte existující měření přes <a href="import.php">import CSV</a>, nebo <a href="import_rustcz.php">importujte zálohu z RůstCZ</a>.',
+    'intro_no_children' => 'Zatím tu není žádné dítě. <a href="manage.php">Přidejte první</a>, načtěte existující měření přes <a href="import.php">import CSV</a>, nebo <a href="import_rustcz.php">importujte zálohu z RůstCZ</a>.',
     'no_measurements_yet' => 'zatím bez měření',
     'count_measurements' => '({n} měření)',
     'add_child_summary' => 'Přidat dítě',

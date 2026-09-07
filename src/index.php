@@ -1,35 +1,15 @@
 <?php
 /*
- * Growth tracker - list of children.
+ * Growth tracker - list of children, and nothing else.
  *
- * Also the place a new child is added, since with a handful of children a
- * separate management page would be a page you visit twice.
+ * Adding a child, importing, exporting and the trash all moved to manage.php.
+ * They used to be here, which meant a permanent form taking most of the first
+ * screen for something a family does once or twice ever, above the list it
+ * pushed down. What this page is for is opening a child.
  */
 require_once __DIR__ . '/shell.inc';
 
-$error = '';
 $reference = growth_selected_reference();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'new_child') {
-    growth_csrf_check();
-    $name = trim((string)$_POST['name']);
-    $sex = ($_POST['sex'] === 'f') ? 'f' : 'm';
-    $born = trim((string)$_POST['born']);
-    $father = growth_parse_length_input($_POST['father']);
-    $mother = growth_parse_length_input($_POST['mother']);
-    $breastfed = !empty($_POST['breastfed']);
-
-    if ($name === '' || !growth_valid_date($born)) {
-        $error = t('error_name_and_birth_required');
-    } elseif (strtotime($born) > time()) {
-        $error = t('error_birth_in_future');
-    } else {
-        $id = growth_child_upsert($name, $sex, $born, $father, $mother, $breastfed);
-        header('Location: child.php?id=' . (int)$id);
-        exit;
-    }
-}
-
 $children = growth_children();
 
 growth_head('');
@@ -41,10 +21,6 @@ growth_head('');
   <p class="growth-note">
     <?php echo t('flash_moved_to_trash', array('name' => growth_h((string)$_GET['deleted_at']))); ?>
   </p>
-<?php endif; ?>
-
-<?php if ($error !== ''): ?>
-  <p class="growth-error"><?php echo growth_h($error); ?></p>
 <?php endif; ?>
 
 <?php if (!$children): ?>
@@ -88,49 +64,6 @@ growth_head('');
   </ul>
 <?php endif; ?>
 
-<details class="growth-panel"<?php echo $children ? '' : ' open'; ?>>
-  <summary><?php echo th('add_child_summary'); ?></summary>
-  <form method="post" class="growth-form">
-    <?php echo growth_csrf_field(); ?>
-    <input type="hidden" name="action" value="new_child">
-    <label><?php echo th('label_name'); ?>
-      <input type="text" name="name" required maxlength="60">
-    </label>
-    <label><?php echo th('label_sex'); ?>
-      <select name="sex">
-        <option value="m"><?php echo th('sex_boy'); ?></option>
-        <option value="f"><?php echo th('sex_girl'); ?></option>
-      </select>
-    </label>
-    <label><?php echo th('label_birth_date'); ?>
-      <input type="date" name="born" required max="<?php echo date('Y-m-d'); ?>">
-    </label>
-    <?php $heightPlaceholder = (growth_units() === 'imperial') ? th('placeholder_optional_height_imperial') : th('placeholder_optional'); ?>
-    <label><?php echo th('label_father_height'); ?> (<?php echo growth_length_unit(); ?>)
-      <input type="text" inputmode="text" name="father" placeholder="<?php echo $heightPlaceholder; ?>">
-    </label>
-    <label><?php echo th('label_mother_height'); ?> (<?php echo growth_length_unit(); ?>)
-      <input type="text" inputmode="text" name="mother" placeholder="<?php echo $heightPlaceholder; ?>">
-    </label>
-    <label class="growth-checkbox">
-      <input type="checkbox" name="breastfed" value="1">
-      <?php echo th('label_breastfed'); ?>
-    </label>
-    <button type="submit"><?php echo th('button_add'); ?></button>
-  </form>
-  <p class="growth-note">
-    <?php echo th('note_parent_heights'); ?>
-  </p>
-</details>
-
-<p class="growth-links">
-  <?php if ($children): ?>
-    <a href="export.php"><?php echo th('nav_export_all_csv'); ?></a>
-    &middot;
-  <?php endif; ?>
-  <a href="import.php"><?php echo th('nav_import_csv'); ?></a>
-  &middot;
-  <a href="trash.php"><?php echo th('nav_trash'); ?></a>
-</p>
+<p class="growth-links"><a href="manage.php"><?php echo th('nav_manage'); ?></a></p>
 
 <?php growth_foot(); ?>

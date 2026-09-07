@@ -191,7 +191,7 @@ growth_head(t('page_title_import'));
   </p>
   <h2><?php echo th('import_from_rustcz_heading'); ?></h2>
   <p><?php echo th('import_from_rustcz_intro'); ?></p>
-  <pre>php tools/import_rustcz.php meda.rcz export-child1.txt export-child2.txt &gt; rust.csv</pre>
+  <pre>php tools/import_rustcz.php database.rcz export-child1.txt export-child2.txt &gt; measurements.csv</pre>
 </div>
 
 <p class="growth-links"><a href="index.php"><?php echo th('nav_back'); ?></a></p>

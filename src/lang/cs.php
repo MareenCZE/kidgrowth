@@ -23,7 +23,7 @@ return array(
     'brand_tagline' => 'růst dětí',
     'page_title_home' => 'Růst dětí',
     'flash_moved_to_trash' => '{name} přesunuto do <a href="trash.php">koše</a>, odkud jde obnovit.',
-    'intro_no_children' => 'Zatím tu není žádné dítě. Přidejte první níže, nebo naimportujte data z RůstCZ přes <a href="import.php">import CSV</a>.',
+    'intro_no_children' => 'Zatím tu není žádné dítě. Přidejte první níže, nebo načtěte existující měření přes <a href="import.php">import CSV</a>.',
     'no_measurements_yet' => 'zatím bez měření',
     'count_measurements' => '({n} měření)',
     'add_child_summary' => 'Přidat dítě',
@@ -174,9 +174,9 @@ return array(
     'button_import' => 'Importovat',
     'import_format_heading' => 'Formát',
     'import_format_intro' => 'První řádek je hlavička, oddělovač je čárka:',
-    'import_format_note' => 'Povinné jsou <code>dite</code>, <code>pohlavi</code> (m/z), <code>narozeni</code> a <code>datum</code>, obojí ve tvaru RRRR-MM-DD. Výška i hmotnost mohou být prázdné &ndash; prázdná buňka znamená &bdquo;neměřeno&ldquo;, ne nulu. Opakovaný import stejného data zápis přepíše, neduplikuje.',
+    'import_format_note' => 'Povinné jsou <code>child</code>, <code>sex</code> (m nebo f), <code>birth_date</code> a <code>date</code>, obě data ve tvaru RRRR-MM-DD. Volitelné: <code>height_cm</code>, <code>weight_kg</code>, <code>note</code>, <code>father_cm</code>, <code>mother_cm</code>. Výška i hmotnost mohou být prázdné &ndash; prázdná buňka znamená &bdquo;neměřeno&ldquo;, ne nulu. Jiná hodnota pohlaví než m nebo f se odmítne s číslem řádku, neuhodne se. Opakovaný import stejného data zápis přepíše, neduplikuje.',
     'import_from_rustcz_heading' => 'Z RůstCZ',
-    'import_from_rustcz_intro' => 'Převod staré databáze na toto CSV:',
+    'import_from_rustcz_intro' => 'Tohle je jediná věc, která tu ještě potřebuje příkazovou řádku, a může za to formát RůstCZ: databáze <code>.rcz</code> obsahuje jen datovaná měření &ndash; žádná jména, data narození ani pohlaví &ndash; ty jsou v samostatném textovém exportu, jednom pro každé dítě. Převod znamená spárovat obojí, tedy odhadnout, která měření patří kterému dítěti, a takový odhad si zaslouží kontrolu, ne slepé spuštění. Nejdřív převeďte, prohlédněte si CSV, a pak ho nahrajte výše.',
 
     /* ------------------------------------------------------------------ demo */
     'demo_banner' => 'Ukázková instance – vymyšlená data, po restartu Codespace zmizí. Nic, co sem zadáte, se nikam trvale neukládá.',

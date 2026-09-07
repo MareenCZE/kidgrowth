@@ -163,7 +163,6 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
     $pad = max(($yMax - $yMin) * 0.06, 0.5);
     $yMin -= $pad;
     $yMax += $pad;
-
     /* --- geometry ------------------------------------------------------- */
     $width = 760;
     $height = 460;
@@ -171,6 +170,23 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
     $right = 34;
     $top = 14;
     $bottom = 34;
+
+    /* The two adult-height marks belong on the 18-year line, which is this
+       plot's own right edge, and the percentile labels sit just beyond it -
+       so on the one chart that has both, they want the same few pixels.
+       Moving the marks inward was tried and reads as a prediction for a
+       17-year-old, which is worse than the collision. The labels give way
+       instead: a wider right margin on that chart only, and the numbers
+       placed at the far side of it. Every other chart keeps the geometry it
+       had. */
+    $hasPredictions = ($meta['index'] === 'age') && ($xMax >= 17.5)
+        && (!empty($options['projection']) || !empty($options['target']));
+    $labelGap = 3;
+    if ($hasPredictions) {
+        $right = 52;
+        $labelGap = 15;
+    }
+
     $plotW = $width - $left - $right;
     $plotH = $height - $top - $bottom;
 
@@ -245,7 +261,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
         $last = $curve[count($curve) - 1];
         $svg[] = sprintf(
             '<text class="growth-plabel" x="%.1f" y="%.1f">%d</text>',
-            $sx($last[0]) + 3, $sy($last[1]) + 3, $percentile
+            $sx($last[0]) + $labelGap, $sy($last[1]) + 3, $percentile
         );
     }
 
@@ -260,7 +276,7 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
        place, neither readable. The gutter is the labels'; these are the
        chart's. */
     if ($meta['index'] === 'age' && $xMax >= 17.5) {
-        $x18 = $sx(min(18.0, $xMax)) - 11;
+        $x18 = $sx(min(18.0, $xMax));
 
         if (!empty($options['projection'])) {
             $projection = $options['projection'];

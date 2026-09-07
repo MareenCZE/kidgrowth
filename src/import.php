@@ -81,6 +81,6 @@ growth_head(t('page_title_import'));
   </p>
 </div>
 
-<p class="growth-links"><a href="index.php"><?php echo th('nav_back'); ?></a></p>
+<p class="growth-links"><a href="manage.php"><?php echo th('nav_back_to_manage'); ?></a></p>
 
 <?php growth_foot(); ?>

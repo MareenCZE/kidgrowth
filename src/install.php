@@ -285,6 +285,52 @@ if ($action === 'saveconfig') {
         install_json(['ok' => false, 'error' => 'config.php already exists. Tick the overwrite box to replace it.'], 409);
     }
 
+    /* Saving a MySQL configuration creates the tables if they are not there.
+       Leaving that to a separate button was a trap somebody fell into on the
+       first real install: they connected, saved, and got a working
+       configuration pointing at a database with no tables in it -- which then
+       failed much later, at the import, as a blank page. There is no reason
+       for "save" to be able to produce an installation that cannot work. */
+    $tableNote = '';
+    if ($backend === 'mysql') {
+        mysqli_report(MYSQLI_REPORT_OFF);
+        $link = @mysqli_connect(
+            (string)($_POST['host'] ?? 'localhost'),
+            (string)($_POST['user'] ?? ''),
+            (string)($_POST['pass'] ?? ''),
+            (string)($_POST['name'] ?? ''),
+            (int)($_POST['port'] ?? 3306)
+        );
+        if (!$link) {
+            install_json([
+                'ok' => false,
+                'error' => 'Not saved — the database would not accept those details. MySQL said: '
+                         . mysqli_connect_error(),
+            ]);
+        }
+        $missing = [];
+        foreach (growth_mysql_tables() as $table) {
+            $res = @mysqli_query($link, "SHOW TABLES LIKE '" . mysqli_real_escape_string($link, $table) . "'");
+            if (!$res || mysqli_num_rows($res) === 0) {
+                $missing[] = $table;
+            }
+        }
+        if ($missing) {
+            foreach (growth_mysql_schema_statements() as $statement) {
+                if (!@mysqli_query($link, $statement)) {
+                    install_json([
+                        'ok' => false,
+                        'error' => 'Not saved — the tables are missing and could not be created: '
+                                 . mysqli_error($link),
+                    ]);
+                }
+            }
+            $tableNote = ' Created ' . implode(' and ', $missing) . '.';
+        } else {
+            $tableNote = ' The tables were already there.';
+        }
+    }
+
     $lines = [
         '<?php',
         '',
@@ -311,7 +357,7 @@ if ($action === 'saveconfig') {
         ], 500);
     }
     @chmod(INSTALL_CONFIG, 0640);
-    install_json(['ok' => true, 'backend' => $backend]);
+    install_json(['ok' => true, 'backend' => $backend, 'note' => $tableNote]);
 }
 
 /* ------------------------------------------------------------------ the page */
@@ -466,7 +512,8 @@ function h($s)
       </label>
       <label class="ref">
         <input type="radio" name="backend" value="mysql"><b>MySQL</b>
-        <span class="meta">For a host that already runs one. The tables can be created for you.</span>
+        <span class="meta">For a host that already runs one. Saving creates the tables if they
+          are not there yet — you do not have to do it separately.</span>
       </label>
     </fieldset>
     <div id="mysql-fields" hidden>
@@ -623,7 +670,10 @@ window.INSTALL_REQUIRES = <?php
     if (overwrite && overwrite.checked) { data.overwrite = '1'; }
     logTo(storageLog, 'Writing config.php…');
     post('saveconfig', data).then(function (r) {
-      if (r.ok) { logTo(storageLog, 'Saved. Storage backend is now ' + r.backend + '.'); return; }
+      if (r.ok) {
+        logTo(storageLog, 'Saved. Storage backend is now ' + r.backend + '.' + (r.note || ''));
+        return;
+      }
       logTo(storageLog, r.error);
       if (r.body) { logTo(storageLog, '\n' + r.body); }
     });

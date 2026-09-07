@@ -29,7 +29,8 @@
   --growth-p50: #6f7679;         /* 4.62:1 - the emphasised median */
   --growth-measurement: #dc3e1f;      /* 4.42:1 - the child's measured line */
   --growth-smooth: #8259d6;   /* 4.83:1 - the smoothed trend */
-  --growth-target: #0f9b7d;         /* 3.50:1 - adult-height prediction */
+  --growth-target: #0f9b7d;         /* 3.50:1 - the mid-parental target */
+  --growth-projection: #2b7bb8;   /* 4.54:1 - the projection from the child's own channel */
   --growth-sds-1: #2f85d1;       /* 3.89:1 - height on the SDS chart */
   --growth-sds-2: #d66d16;       /* 3.47:1 - weight */
   --growth-sds-3: #9560cc;       /* 4.35:1 - BMI */
@@ -192,6 +193,15 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--growth-muted); font-weight: 
 .growth-age { color: var(--growth-muted); font-size: 14px; margin-left: 8px; }
 .growth-latest { display: block; color: var(--growth-muted); font-size: 14px; margin-top: 4px; }
 .growth-count { margin-left: 4px; }
+
+
+/* Inside a panel, where the card treatment of .growth-list would be a box in
+   a box. One line per thing, and each line is its own tap target on a phone. */
+.growth-list-plain { list-style: none; padding: 0; margin: 0; }
+.growth-list-plain li { padding: 10px 0; border-bottom: 1px solid var(--growth-rule); }
+.growth-list-plain li:last-child { border-bottom: none; }
+.growth-list-plain li:first-child { padding-top: 0; }
+.growth-list-plain .growth-count { display: block; margin: 2px 0 0; color: var(--growth-muted); font-size: 14px; }
 
 /* ------------------------------------------------------------ the picker */
 
@@ -425,6 +435,7 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--growth-muted); font-weight: 
     --growth-measurement: #e05f42;      /* 4.22:1 */
     --growth-smooth: #9b74e0;   /* 4.28:1 */
     --growth-target: #1fa98a;         /* 5.09:1 */
+    --growth-projection: #4d9fe0;   /* 5.27:1 */
     --growth-sds-1: #3d99e0;       /* 4.90:1 */
     --growth-sds-2: #d47a20;       /* 4.73:1 */
     --growth-sds-3: #a86ce0;       /* 4.22:1 */
@@ -452,18 +463,21 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--growth-muted); font-weight: 
 }
 .growth-checkbox input { width: auto; }
 
-/* Adult-height predictions, drawn side by side at 18 years. The projection
-   continues the child's own measured channel, so it wears the measurement
-   colour; the mid-parental target is a different claim and keeps its own. */
-.growth-projection { stroke: var(--growth-measurement); stroke-width: 3; stroke-linecap: round; opacity: .55; }
-.growth-projection-dot { fill: var(--growth-measurement); }
-.growth-projection-line {
-  fill: none;
-  stroke: var(--growth-measurement);
-  stroke-width: 1.4;
-  stroke-dasharray: 5 4;
-  opacity: .5;
-}
+/* Adult-height predictions, drawn side by side at 18 years.
+
+   Both used to be told apart from the child's own line by position alone: the
+   projection wore the measurement colour, on the reasoning that it continues
+   the measured channel. On the chart that reads as one more measurement
+   rather than as a prediction, which is the opposite of what it is - so it
+   now has a colour of its own, and the three claims on the chart (measured,
+   projected, mid-parental) are three colours.
+
+   Both new values clear the 3:1 WCAG 1.4.11 floor for non-text graphics
+   against their own panel, and each is further from every other colour on
+   this chart - in OKLab, and under a protanopia simulation - than the closest
+   existing pair on it already was. */
+.growth-projection { stroke: var(--growth-projection); stroke-width: 3; stroke-linecap: round; opacity: .6; }
+.growth-projection-dot { fill: var(--growth-projection); }
 
 /* Anything with a readable value: measurement dots and the two predictions. */
 .growth-marker { cursor: pointer; }
@@ -474,7 +488,7 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--growth-muted); font-weight: 
 .growth-projection-dot,
 .growth-target-dot { stroke: transparent; stroke-width: 14; }
 
-.growth-projection-dot.growth-selected { stroke: var(--growth-measurement); stroke-width: 3; stroke-opacity: .35; }
+.growth-projection-dot.growth-selected { stroke: var(--growth-projection); stroke-width: 3; stroke-opacity: .35; }
 .growth-target-dot.growth-selected { stroke: var(--growth-target); stroke-width: 3; stroke-opacity: .35; }
 .growth-projection.growth-selected,
 .growth-target.growth-selected { opacity: 1; }
@@ -506,7 +520,7 @@ h3 { font-size: 15px; margin: 0 0 6px; color: var(--growth-muted); font-weight: 
 .growth-legend-smooth { color: var(--growth-smooth); }
 .growth-legend-measured { color: var(--growth-measurement); }
 .growth-legend-measured::before { height: 1px; opacity: .55; }
-.growth-legend-prediction { color: var(--growth-measurement); }
+.growth-legend-prediction { color: var(--growth-projection); }
 .growth-legend-prediction::before { height: 3px; opacity: .55; }
 .growth-legend-target { color: var(--growth-target); }
 .growth-legend-target::before { height: 3px; opacity: .55; }

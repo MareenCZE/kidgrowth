@@ -55,20 +55,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  */
 function growth_rustcz_upload()
 {
-    if (empty($_FILES['soubory']['name'][0])) {
+    if (empty($_FILES['files']['name'][0])) {
         return array(null, t('import_error_upload_failed'));
     }
 
     $bodies = array();
-    foreach ($_FILES['soubory']['error'] as $i => $code) {
+    foreach ($_FILES['files']['error'] as $i => $code) {
         if ($code !== UPLOAD_ERR_OK) {
             return array(null, t('import_error_upload_failed'));
         }
-        if ($_FILES['soubory']['size'][$i] > GROWTH_RCZ_MAX_BYTES) {
+        if ($_FILES['files']['size'][$i] > GROWTH_RCZ_MAX_BYTES) {
             return array(null, t('import_error_too_large',
                 array('mb' => GROWTH_RCZ_MAX_BYTES / 1024 / 1024)));
         }
-        $bodies[] = (string)file_get_contents($_FILES['soubory']['tmp_name'][$i]);
+        $bodies[] = (string)file_get_contents($_FILES['files']['tmp_name'][$i]);
     }
 
     if (count($bodies) !== 2) {
@@ -275,7 +275,7 @@ growth_head(t('page_title_import_rustcz'));
   <form method="post" enctype="multipart/form-data" class="growth-form">
     <?php echo growth_csrf_field(); ?>
     <label><?php echo th('rcz_label_files'); ?>
-      <input type="file" name="soubory[]" accept=".rcz" multiple required>
+      <input type="file" name="files[]" accept=".rcz" multiple required>
     </label>
     <button type="submit"><?php echo th('rcz_button_read'); ?></button>
   </form>

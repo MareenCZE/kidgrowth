@@ -21,8 +21,8 @@ if (!in_array($referenceId, $availableRefs, true)) {
     $referenceId = reset($availableRefs) ?: 'cdc';
 }
 $reference = growth_reference($referenceId);
-$fullRange = isset($_GET['rozsah']) && $_GET['rozsah'] === 'vse';
-$smoothing = isset($_GET['vyhlazeni']) && $_GET['vyhlazeni'] === '1';
+$fullRange = isset($_GET['range']) && $_GET['range'] === 'full';
+$smoothing = isset($_GET['smoothing']) && $_GET['smoothing'] === '1';
 
 $sex = $child['sex'];
 $born = $child['birth_date'];
@@ -67,10 +67,10 @@ $currentAge = growth_decimal_age($born, date('Y-m-d'));
 
 $linkParams = array('id' => $childId);
 if ($fullRange) {
-    $linkParams['rozsah'] = 'vse';
+    $linkParams['range'] = 'full';
 }
 if ($smoothing) {
-    $linkParams['vyhlazeni'] = '1';
+    $linkParams['smoothing'] = '1';
 }
 
 /* Smooth each metric once, up front: the charts need the curve, the notes need
@@ -105,10 +105,10 @@ growth_head($child['name'], $childId);
 
 <?php
   $baseLink = array('id' => $childId, 'ref' => $referenceId);
-  $rangeLink = $baseLink; if (!$fullRange) { $rangeLink['rozsah'] = 'vse'; }
-  if ($smoothing) { $rangeLink['vyhlazeni'] = '1'; }
-  $smoothLink = $baseLink; if ($fullRange) { $smoothLink['rozsah'] = 'vse'; }
-  if (!$smoothing) { $smoothLink['vyhlazeni'] = '1'; }
+  $rangeLink = $baseLink; if (!$fullRange) { $rangeLink['range'] = 'full'; }
+  if ($smoothing) { $rangeLink['smoothing'] = '1'; }
+  $smoothLink = $baseLink; if ($fullRange) { $smoothLink['range'] = 'full'; }
+  if (!$smoothing) { $smoothLink['smoothing'] = '1'; }
 ?>
 <p class="growth-range">
   <a href="?<?php echo growth_h(http_build_query($rangeLink)); ?>"><?php

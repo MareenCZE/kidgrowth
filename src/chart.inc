@@ -252,9 +252,15 @@ function growth_chart_svg($referenceId, $metric, $sex, $points, $options = array
     /* --- the two adult-height predictions -------------------------------
        Drawn side by side at 18 years so they can be compared at a glance:
        where a child tracks well below their mid-parental band, the two
-       disagree, and that disagreement is the whole point of showing both. */
+       disagree, and that disagreement is the whole point of showing both.
+
+       Both sit just inside the plot rather than astride its right edge. The
+       percentile labels (97, 90, 75 ...) live in the gutter out there, and
+       the target mark used to be drawn straight over them - two things in one
+       place, neither readable. The gutter is the labels'; these are the
+       chart's. */
     if ($meta['index'] === 'age' && $xMax >= 17.5) {
-        $x18 = $sx(min(18.0, $xMax));
+        $x18 = $sx(min(18.0, $xMax)) - 11;
 
         if (!empty($options['projection'])) {
             $projection = $options['projection'];

@@ -22,7 +22,7 @@ return array(
     'brand_tagline' => 'child growth',
     'page_title_home' => 'Children',
     'flash_moved_to_trash' => '{name} moved to the <a href="trash.php">trash</a>, where you can restore it.',
-    'intro_no_children' => 'No children yet. Add the first one below, or import from RůstCZ via <a href="import.php">CSV import</a>.',
+    'intro_no_children' => 'No children yet. Add the first one below, or bring existing measurements in through <a href="import.php">CSV import</a>.',
     'no_measurements_yet' => 'no measurements yet',
     'count_measurements' => '({n} measurements)',
     'add_child_summary' => 'Add a child',
@@ -173,9 +173,9 @@ return array(
     'button_import' => 'Import',
     'import_format_heading' => 'Format',
     'import_format_intro' => 'The first row is the header, comma-separated:',
-    'import_format_note' => 'Required are <code>dite</code>, <code>pohlavi</code> (m/z), <code>narozeni</code> and <code>datum</code>, both in the form YYYY-MM-DD. Height and weight may be blank – a blank cell means "not measured", not zero. Importing the same date again overwrites rather than duplicating it.',
+    'import_format_note' => 'Required are <code>child</code>, <code>sex</code> (m or f), <code>birth_date</code> and <code>date</code>, the two dates in the form YYYY-MM-DD. Optional: <code>height_cm</code>, <code>weight_kg</code>, <code>note</code>, <code>father_cm</code>, <code>mother_cm</code>. Height and weight may be blank – a blank cell means "not measured", not zero. Any sex other than m or f is refused with the line number rather than guessed at. Importing the same date again overwrites rather than duplicating it.',
     'import_from_rustcz_heading' => 'From RůstCZ',
-    'import_from_rustcz_intro' => "Converting the old database to this CSV:",
+    'import_from_rustcz_intro' => "This is the one thing here that still needs a command line, and the reason is RůstCZ's own file layout: the <code>.rcz</code> database holds dated measurements and nothing else — no names, no dates of birth, no sex — while those live in a separate text export, one per child. Converting means pairing the two by working out which measurements belong to which child, and that pairing is a guess that wants checking rather than a step to run blind. Convert first, look at the CSV, then upload it above.",
 
     /* ------------------------------------------------------------------ demo */
     'demo_banner' => "Demo instance - invented data, resets when this Codespace does. Nothing you enter here is saved anywhere permanent.",

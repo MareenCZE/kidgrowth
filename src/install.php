@@ -116,12 +116,23 @@ function install_checks(): array
         'soft' => true,
     ];
 
+    /* Usually missing rather than unwritable, and for a good reason: the
+       install instructions say to upload src/, and storage/ is its sibling, so
+       an FTP install never creates it. Saying "missing" and stopping there was
+       alarming and unhelpful -- it is created on demand when a backend that
+       needs it is saved, as long as the directory above can be written to. */
+    $storageParentWritable = is_writable(dirname(INSTALL_STORAGE_DIR));
+    $storageReady = is_dir(INSTALL_STORAGE_DIR) && is_writable(INSTALL_STORAGE_DIR);
     $checks[] = [
-        'label' => 'storage/ is writable',
-        'ok' => is_dir(INSTALL_STORAGE_DIR) && is_writable(INSTALL_STORAGE_DIR),
-        'detail' => is_dir(INSTALL_STORAGE_DIR) ? (is_writable(INSTALL_STORAGE_DIR) ? 'yes' : 'not writable') : 'missing',
-        'why' => 'Only needed for the JSON and SQLite backends, which keep their file there. '
-               . 'MySQL does not use it.',
+        'label' => 'somewhere to keep a data file',
+        'ok' => $storageReady || $storageParentWritable,
+        'detail' => $storageReady
+            ? 'storage/ is ready'
+            : ($storageParentWritable
+                ? 'storage/ does not exist yet — it will be created if you choose a file backend'
+                : 'storage/ is missing and cannot be created'),
+        'why' => 'Only the JSON and SQLite backends keep a file there; MySQL does not use it at '
+               . 'all. If neither this nor MySQL is available, nothing can be stored.',
         'soft' => true,
     ];
 
@@ -276,6 +287,38 @@ if ($action === 'testdb') {
     ]);
 }
 
+if ($action === 'cleanup') {
+    /* Deliberately a button rather than something that happens on its own.
+       The cache is worth keeping until somebody says they are finished with
+       it: rebuilding a reference reuses it, and a download interrupted
+       half way through resumes from it. Tying its removal to a successful
+       import would be tying together two things that have nothing to do with
+       each other -- the cache holds SZU and WHO source files, not anybody's
+       measurements. */
+    $removed = [];
+
+    $cacheDir = install_cache_dir();
+    if (is_dir($cacheDir)) {
+        foreach (glob($cacheDir . '/*') ?: [] as $file) {
+            @unlink($file);
+        }
+        if (@rmdir($cacheDir)) {
+            $removed[] = 'the download cache';
+        }
+    }
+
+    /* Last, because it is this file: nothing after this line runs. */
+    if (!empty($_POST['self']) && @unlink(__FILE__)) {
+        $removed[] = 'install.php';
+    }
+
+    install_json([
+        'ok' => true,
+        'removed' => $removed,
+        'gone' => !is_file(__FILE__),
+    ]);
+}
+
 if ($action === 'saveconfig') {
     $backend = (string)($_POST['backend'] ?? 'json');
     if (!in_array($backend, ['json', 'sqlite', 'mysql'], true)) {
@@ -292,6 +335,37 @@ if ($action === 'saveconfig') {
        failed much later, at the import, as a blank page. There is no reason
        for "save" to be able to produce an installation that cannot work. */
     $tableNote = '';
+
+    /* Same principle as the tables below: saving must not be able to produce
+       an installation that cannot work. An FTP install has no storage/ at all,
+       because the instructions say to upload src/ and storage/ is its sibling
+       -- so choosing the default backend would otherwise write a config
+       pointing at a directory that does not exist. */
+    if ($backend === 'json' || $backend === 'sqlite') {
+        if (!is_dir(INSTALL_STORAGE_DIR) && !@mkdir(INSTALL_STORAGE_DIR, 0755, true)) {
+            install_json([
+                'ok' => false,
+                'error' => 'Not saved — there is nowhere to keep the data file. Create a directory '
+                         . 'named storage/ beside this one and make it writable, or choose MySQL.',
+            ]);
+        }
+        if (!is_writable(INSTALL_STORAGE_DIR)) {
+            install_json([
+                'ok' => false,
+                'error' => 'Not saved — storage/ exists but cannot be written to. Give it write '
+                         . 'permission for the web server, or choose MySQL.',
+            ]);
+        }
+        /* The repository ships storage/.htaccess for exactly this; a directory
+           created here needs its own copy, since the data file would otherwise
+           be fetchable when storage/ sits inside the document root. */
+        $deny = INSTALL_STORAGE_DIR . '/.htaccess';
+        if (!is_file($deny)) {
+            @file_put_contents($deny, "Require all denied\n");
+        }
+        $tableNote = ' Data will be kept in storage/.';
+    }
+
     if ($backend === 'mysql') {
         mysqli_report(MYSQLI_REPORT_OFF);
         $link = @mysqli_connect(
@@ -579,12 +653,24 @@ function h($s)
       Open <a href="index.php">the application</a>. If it shows children and charts, the
       install is finished.
     </p>
-    <p style="margin:0">
-      Then <strong>delete <code>install.php</code></strong>. It is protected by the same
-      password as the rest of the application, so leaving it is not an emergency — but it
-      writes configuration files, and nothing that writes configuration files should stay
-      on a server longer than it is useful.
+    <p style="margin:0 0 .8rem">
+      Then clear up after it. The download cache holds a few megabytes of SZÚ, WHO and CDC
+      source files, kept so that rebuilding a reference — or resuming an interrupted
+      download — does not fetch them again. Once you are done installing it is dead weight.
+      This page is protected by the same password as everything else, so leaving it is not
+      an emergency, but nothing that writes configuration files should outlive its
+      usefulness.
     </p>
+    <form id="cleanup-form">
+      <input type="hidden" name="csrf" value="<?php echo h($csrfToken); ?>">
+      <div class="row" style="margin:0">
+        <button type="button" id="do-cleanup">Delete the cache</button>
+        <label style="font-size:.88rem;color:var(--muted)">
+          <input type="checkbox" id="cleanup-self" checked>and this page too
+        </label>
+      </div>
+    </form>
+    <pre class="log" id="cleanup-log" hidden></pre>
   </div>
 </section>
 
@@ -761,6 +847,23 @@ window.INSTALL_REQUIRES = <?php
     }
 
     nextReference();
+  });
+
+  /* ---- cleanup ---- */
+  var cleanupLog = document.getElementById('cleanup-log');
+  document.getElementById('do-cleanup').addEventListener('click', function () {
+    var self = document.getElementById('cleanup-self').checked;
+    logTo(cleanupLog, 'Cleaning up…');
+    post('cleanup', self ? { self: '1' } : {}).then(function (r) {
+      if (!r.ok) { logTo(cleanupLog, r.error || 'Something went wrong.'); return; }
+      logTo(cleanupLog, r.removed.length
+        ? 'Removed ' + r.removed.join(' and ') + '.'
+        : 'There was nothing left to remove.');
+      if (r.gone) {
+        logTo(cleanupLog, 'This page is gone — reloading it will now 404, which is the point.');
+        document.getElementById('do-cleanup').disabled = true;
+      }
+    });
   });
 })();
 </script>

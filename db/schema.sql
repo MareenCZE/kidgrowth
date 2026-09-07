@@ -25,7 +25,6 @@ CREATE TABLE `growth_children` (
   `birth_date` date NOT NULL,
   `father_height_cm` decimal(4,1) DEFAULT NULL,
   `mother_height_cm` decimal(4,1) DEFAULT NULL,
-  `position` int(11) NOT NULL DEFAULT 0,
   `breastfed` tinyint(1) NOT NULL DEFAULT 0,
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)

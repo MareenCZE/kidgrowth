@@ -71,6 +71,33 @@ function test_sqlite_measurement_update_ignores_a_deleted_row()
     assert_equals(1, count(growth_storage_measurements_deleted($id)), 'it is still in the trash');
 }
 
+
+function test_sqlite_accepts_a_girl()
+{
+    /* The table's CHECK constraint still named the retired Czech value,
+       `sex IN ('m', 'z')`, long after every other trace of it was renamed. On
+       SQLite that is not a cosmetic leftover: storing a girl raises an
+       integrity-constraint violation and the child is never created. It
+       survived because nothing here had ever inserted an 'f'. */
+    $id = growth_storage_child_upsert('Jana Divka', 'f', '2018-01-01', null, null, 0);
+    assert_true($id > 0, 'a girl can be stored');
+    assert_equals('f', growth_storage_child($id)['sex'], 'and reads back as f');
+}
+
+function test_sqlite_children_are_ordered_oldest_first()
+{
+    /* growth_children.position is gone; birth_date carries the order, with
+       the id as a tiebreaker so twins do not swap places between reads. */
+    $younger = growth_storage_child_upsert('Order Younger', 'm', '2020-05-05', null, null, 0);
+    $older = growth_storage_child_upsert('Order Older', 'f', '2016-02-02', null, null, 0);
+    $names = array();
+    foreach (growth_storage_children() as $child) {
+        if ((int)$child['id'] === $younger || (int)$child['id'] === $older) {
+            $names[] = $child['name'];
+        }
+    }
+    assert_equals(array('Order Older', 'Order Younger'), $names, 'oldest first');
+}
 /* Its own miniature runner, since run.php only collects test_*() functions
    from files it can require into its own process. */
 $passed = 0;

@@ -24,11 +24,10 @@ function growth_sqlite_pdo()
         $pdo->exec('CREATE TABLE IF NOT EXISTS growth_children (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            sex TEXT NOT NULL CHECK (sex IN (\'m\', \'z\')),
+            sex TEXT NOT NULL CHECK (sex IN (\'m\', \'f\')),
             birth_date TEXT NOT NULL,
             father_height_cm REAL,
             mother_height_cm REAL,
-            position INTEGER NOT NULL DEFAULT 0,
             breastfed INTEGER NOT NULL DEFAULT 0,
             deleted_at TEXT
         )');
@@ -52,15 +51,15 @@ function growth_sqlite_pdo()
 function growth_storage_children()
 {
     $stmt = growth_sqlite_pdo()->query(
-        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, position, breastfed
-         FROM growth_children WHERE deleted_at IS NULL ORDER BY position, birth_date');
+        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, breastfed
+         FROM growth_children WHERE deleted_at IS NULL ORDER BY birth_date, id');
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function growth_storage_children_deleted()
 {
     $stmt = growth_sqlite_pdo()->query(
-        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, position, breastfed, deleted_at
+        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, breastfed, deleted_at
          FROM growth_children WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC');
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -68,7 +67,7 @@ function growth_storage_children_deleted()
 function growth_storage_child($id)
 {
     $stmt = growth_sqlite_pdo()->prepare(
-        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, position, breastfed
+        'SELECT id, name, sex, birth_date, father_height_cm, mother_height_cm, breastfed
          FROM growth_children WHERE id = ? AND deleted_at IS NULL');
     $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);

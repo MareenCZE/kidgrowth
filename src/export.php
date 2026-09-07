@@ -34,7 +34,7 @@ header('Content-Disposition: attachment; filename="' . $filename . '"');
 $out = fopen('php://output', 'w');
 /* A UTF-8 BOM, so Excel opens Czech names correctly instead of as mojibake. */
 fwrite($out, "\xEF\xBB\xBF");
-fputcsv($out, array('child', 'sex', 'birth_date', 'father_cm', 'mother_cm',
+fputcsv($out, array('child', 'sex', 'birth_date', 'father_cm', 'mother_cm', 'breastfed',
                     'date', 'height_cm', 'weight_kg', 'note'));
 
 foreach ($children as $child) {
@@ -45,6 +45,7 @@ foreach ($children as $child) {
             $child['birth_date'],
             $child['father_height_cm'],
             $child['mother_height_cm'],
+            empty($child['breastfed']) ? 0 : 1,
             $row['date'],
             $row['height_cm'],
             $row['weight_kg'],

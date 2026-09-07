@@ -124,6 +124,10 @@ growth_head('');
 </details>
 
 <p class="growth-links">
+  <?php if ($children): ?>
+    <a href="export.php"><?php echo th('nav_export_all_csv'); ?></a>
+    &middot;
+  <?php endif; ?>
   <a href="import.php"><?php echo th('nav_import_csv'); ?></a>
   &middot;
   <a href="trash.php"><?php echo th('nav_trash'); ?></a>

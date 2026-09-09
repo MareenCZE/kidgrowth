@@ -27,3 +27,8 @@ src/data/.cache/
 
 # Local scratch
 .DS_Store
+
+# Development backlog: working notes on what is done, half-done and merely
+# considered. Kept in the working tree, deliberately not published - it is
+# detail about the project's insides that its users have no use for.
+docs/backlog.md

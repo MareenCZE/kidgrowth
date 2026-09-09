@@ -323,7 +323,7 @@ function growth_input_number($value)
  *
  * Case and surrounding space are forgiven, because a spreadsheet introduces
  * both without being asked. Nothing else is: `z` was retired when the stored
- * value became English (see docs/backlog.md), and accepting it here would
+ * value became English, and accepting it here would
  * quietly reinstate a second spelling that the rest of the code no longer
  * understands.
  */

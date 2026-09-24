@@ -39,8 +39,13 @@ self.addEventListener('install', function (event) {
 self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (names) {
-      return Promise.all(names.map(function (name) {
-        return name === CACHE ? null : caches.delete(name);
+      // The Cache Storage is shared by everything on the origin, so delete
+      // only this app's own old versions ('rust-shell-' is the pre-v2 name).
+      return Promise.all(names.filter(function (name) {
+        return name !== CACHE &&
+          (name.indexOf('growth-shell-') === 0 || name.indexOf('rust-shell-') === 0);
+      }).map(function (name) {
+        return caches.delete(name);
       }));
     }).then(function () {
       return self.clients.claim();
